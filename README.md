@@ -8,8 +8,23 @@ Sample ASP.NET Core reference application, powered by Microsoft, demonstrating a
 
 A list of Frequently Asked Questions about this repository can be found [here](https://github.com/dotnet-architecture/eShopOnWeb/wiki/Frequently-Asked-Questions).
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of Contents
+
+- [Overview Video](#overview-video)
+- [eBook](#ebook)
+- [Topics (eBook TOC)](#topics-ebook-toc)
+- [Running the sample using Azd template](#running-the-sample-using-azd-template)
+  - [Windows](#windows)
+  - [Linux/MacOS](#linuxmacos)
+- [Running the sample locally](#running-the-sample-locally)
+  - [Configuring the sample to use SQL Server](#configuring-the-sample-to-use-sql-server)
+- [Running the sample in the dev container](#running-the-sample-in-the-dev-container)
+- [Running the sample using Docker](#running-the-sample-using-docker)
+- [Community Extensions](#community-extensions)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Overview Video
 
