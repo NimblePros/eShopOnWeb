@@ -1,0 +1,20 @@
+name: Generate Table of Contents
+
+on:
+  push:
+    paths:
+      - README.md
+  workflow_dispatch:
+
+jobs:
+  toc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: TOC Generator
+        uses: technote-space/toc-generator@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          toc_max_depth: 3
+          toc_min_depth: 2
+          toc_title: "## Table of Contents"
