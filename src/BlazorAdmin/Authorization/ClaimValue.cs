@@ -1,4 +1,4 @@
-﻿namespace BlazorShared.Authorization;
+﻿namespace BlazorAdmin.Authorization;
 
 public class ClaimValue
 {
