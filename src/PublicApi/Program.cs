@@ -51,6 +51,7 @@ var baseUrlConfig = configSection.Get<BaseUrlConfiguration>();
 
 builder.Services.AddMemoryCache();
 
+// TODO: Move to extension method to wire up auth
 var key = Encoding.ASCII.GetBytes(AuthorizationConstants.JWT_SECRET_KEY);
 builder.Services.AddAuthentication(config =>
 {
@@ -69,6 +70,7 @@ builder.Services.AddAuthentication(config =>
     };
 });
 
+// TODO: Move to extension method to wire up CORS
 const string CORS_POLICY = "CorsPolicy";
 builder.Services.AddCors(options =>
 {
@@ -82,9 +84,14 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+
+// TODO: Consider removing AutoMapper dependency (FastEndpoints already has its own Mapper support)
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+// TODO: Do we need this? This should work by default
 builder.Configuration.AddEnvironmentVariables();
 
+// TODO: Update to use FastEndpoints approach to Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -126,6 +133,8 @@ var app = builder.Build();
 
 app.Logger.LogInformation("PublicApi App created...");
 
+
+// TODO: Move to extension method to seed database
 app.Logger.LogInformation("Seeding Database...");
 
 using (var scope = app.Services.CreateScope())
