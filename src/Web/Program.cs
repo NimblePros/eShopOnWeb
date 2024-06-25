@@ -44,6 +44,7 @@ else{
 
 builder.Services.AddCookieSettings();
 
+// TODO: Move to extension method to wire up auth
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -93,6 +94,7 @@ builder.Services.Configure<ServiceConfig>(config =>
     config.Path = "/allservices";
 });
 
+// TODO: Move Blazor configuration to an extension method
 // blazor configuration
 var configSection = builder.Configuration.GetRequiredSection(BaseUrlConfiguration.CONFIG_NAME);
 builder.Services.Configure<BaseUrlConfiguration>(configSection);
@@ -117,6 +119,7 @@ var app = builder.Build();
 
 app.Logger.LogInformation("App created...");
 
+// TODO: Move seeding to an extension method
 app.Logger.LogInformation("Seeding Database...");
 
 using (var scope = app.Services.CreateScope())
@@ -148,6 +151,7 @@ if (!string.IsNullOrEmpty(catalogBaseUrl))
     });
 }
 
+// TODO: Move to extension method
 app.UseHealthChecks("/health",
     new HealthCheckOptions
     {
