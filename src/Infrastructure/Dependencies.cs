@@ -8,7 +8,7 @@ namespace Microsoft.eShopWeb.Infrastructure;
 
 public static class Dependencies
 {
-    public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
+    public static void ConfigureServices(this IServiceCollection services, IConfiguration configuration)
     {
         bool useOnlyInMemoryDatabase = false;
         if (configuration["UseOnlyInMemoryDatabase"] != null)
