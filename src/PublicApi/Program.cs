@@ -20,7 +20,7 @@ builder.Services.AddEndpoints();
 // Use to force loading of appsettings.json of test project
 builder.Configuration.AddConfigurationFile("appsettings.test.json");
 
-builder.Services.ConfigureServices(builder.Configuration);
+builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddEntityFrameworkStores<AppIdentityDbContext>()
