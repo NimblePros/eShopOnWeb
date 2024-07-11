@@ -1,4 +1,5 @@
 ﻿using BlazorShared;
+using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure;
@@ -15,6 +16,8 @@ using MinimalApi.Endpoint.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//TODO: Remove
+builder.Services.AddFastEndpoints();
 builder.Services.AddEndpoints();
 
 // Use to force loading of appsettings.json of test project
@@ -77,7 +80,8 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 });
 
-app.MapControllers();
+app.UseFastEndpoints();
+// TODO: Remove
 app.MapEndpoints();
 
 app.Logger.LogInformation("LAUNCHING PublicApi");

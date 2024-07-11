@@ -1,20 +1,18 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Ardalis.ApiEndpoints;
+using FastEndpoints;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace Microsoft.eShopWeb.PublicApi.AuthEndpoints;
 
 /// <summary>
 /// Authenticates a user
 /// </summary>
-public class AuthenticateEndpoint : EndpointBaseAsync
-    .WithRequest<AuthenticateRequest>
-    .WithActionResult<AuthenticateResponse>
+public class AuthenticateEndpoint : Endpoint<AuthenticateRequest, AuthenticateResponse>
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ITokenClaimsService _tokenClaimsService;
@@ -26,14 +24,18 @@ public class AuthenticateEndpoint : EndpointBaseAsync
         _tokenClaimsService = tokenClaimsService;
     }
 
-    [HttpPost("api/authenticate")]
-    [SwaggerOperation(
-        Summary = "Authenticates a user",
-        Description = "Authenticates a user",
-        OperationId = "auth.authenticate",
-        Tags = new[] { "AuthEndpoints" })
-    ]
-    public override async Task<ActionResult<AuthenticateResponse>> HandleAsync(AuthenticateRequest request,
+    public override void Configure()
+    {
+        Post("api/authenticate");
+        AllowAnonymous();
+        Description(d =>
+            d.WithSummary("Authenticates a user")
+             .WithDescription("Authenticates a user")
+             .WithName("auth.authenticate")
+             .WithTags("AuthEndpoints"));
+    }
+
+    public override async Task<AuthenticateResponse> ExecuteAsync(AuthenticateRequest request,
         CancellationToken cancellationToken = default)
     {
         var response = new AuthenticateResponse(request.CorrelationId());
