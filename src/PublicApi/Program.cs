@@ -11,14 +11,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MinimalApi.Endpoint.Configurations.Extensions;
-using MinimalApi.Endpoint.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//TODO: Remove
 builder.Services.AddFastEndpoints();
-builder.Services.AddEndpoints();
 
 // Use to force loading of appsettings.json of test project
 builder.Configuration.AddConfigurationFile("appsettings.test.json");
@@ -81,8 +77,6 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseFastEndpoints();
-// TODO: Remove
-app.MapEndpoints();
 
 app.Logger.LogInformation("LAUNCHING PublicApi");
 app.Run();
