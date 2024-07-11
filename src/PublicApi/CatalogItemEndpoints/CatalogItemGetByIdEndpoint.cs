@@ -1,43 +1,44 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
-using MinimalApi.Endpoint;
 
 namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 
 /// <summary>
 /// Get a Catalog Item by Id
 /// </summary>
-public class CatalogItemGetByIdEndpoint : IEndpoint<IResult, GetByIdCatalogItemRequest, IRepository<CatalogItem>>
+public class CatalogItemGetByIdEndpoint
+    : Endpoint<GetByIdCatalogItemRequest, Results<Ok<GetByIdCatalogItemResponse>, NotFound>>
 {
+    private readonly IRepository<CatalogItem> _itemRepository;
     private readonly IUriComposer _uriComposer;
 
-    public CatalogItemGetByIdEndpoint(IUriComposer uriComposer)
+    public CatalogItemGetByIdEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
     {
+        _itemRepository = itemRepository;
         _uriComposer = uriComposer;
     }
 
-    public void AddRoute(IEndpointRouteBuilder app)
+    public override void Configure()
     {
-        app.MapGet("api/catalog-items/{catalogItemId}",
-            async (int catalogItemId, IRepository<CatalogItem> itemRepository) =>
-            {
-                return await HandleAsync(new GetByIdCatalogItemRequest(catalogItemId), itemRepository);
-            })
-            .Produces<GetByIdCatalogItemResponse>()
-            .WithTags("CatalogItemEndpoints");
+        Get("api/catalog-items/{catalogItemId}");
+        AllowAnonymous();
+        Description(d =>
+            d.Produces<GetByIdCatalogItemResponse>()
+            .WithTags("CatalogItemEndpoints"));
     }
 
-    public async Task<IResult> HandleAsync(GetByIdCatalogItemRequest request, IRepository<CatalogItem> itemRepository)
+    public override async Task<Results<Ok<GetByIdCatalogItemResponse>, NotFound>> ExecuteAsync(GetByIdCatalogItemRequest request, CancellationToken ct)
     {
         var response = new GetByIdCatalogItemResponse(request.CorrelationId());
 
-        var item = await itemRepository.GetByIdAsync(request.CatalogItemId);
+        var item = await _itemRepository.GetByIdAsync(request.CatalogItemId, ct);
         if (item is null)
-            return Results.NotFound();
+            return TypedResults.NotFound();
 
         response.CatalogItem = new CatalogItemDto
         {
@@ -49,6 +50,6 @@ public class CatalogItemGetByIdEndpoint : IEndpoint<IResult, GetByIdCatalogItemR
             PictureUri = _uriComposer.ComposePicUri(item.PictureUri),
             Price = item.Price
         };
-        return Results.Ok(response);
+        return TypedResults.Ok(response);
     }
 }
