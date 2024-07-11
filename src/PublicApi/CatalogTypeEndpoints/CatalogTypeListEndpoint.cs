@@ -1,46 +1,45 @@
 ﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Builder;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
-using MinimalApi.Endpoint;
 
 namespace Microsoft.eShopWeb.PublicApi.CatalogTypeEndpoints;
 
 /// <summary>
 /// List Catalog Types
 /// </summary>
-public class CatalogTypeListEndpoint : IEndpoint<IResult, IRepository<CatalogType>>
+public class CatalogTypeListEndpoint : EndpointWithoutRequest<ListCatalogTypesResponse>
 {
-    private readonly IMapper _mapper;
+    private readonly IRepository<CatalogType> _catalogTypeRepository;
+    private readonly AutoMapper.IMapper _mapper;
 
-    public CatalogTypeListEndpoint(IMapper mapper)
+    public CatalogTypeListEndpoint(IRepository<CatalogType> catalogTypeRepository, AutoMapper.IMapper mapper)
     {
+        _catalogTypeRepository = catalogTypeRepository;
         _mapper = mapper;
+
     }
 
-    public void AddRoute(IEndpointRouteBuilder app)
+    public override void Configure()
     {
-        app.MapGet("api/catalog-types",
-            async (IRepository<CatalogType> catalogTypeRepository) =>
-            {
-                return await HandleAsync(catalogTypeRepository);
-            })
-            .Produces<ListCatalogTypesResponse>()
-            .WithTags("CatalogTypeEndpoints");
+        Get("api/catalog-types");
+        AllowAnonymous();
+        Description(d =>
+            d.Produces<ListCatalogTypesResponse>()
+             .WithTags("CatalogTypeEndpoints"));
     }
 
-    public async Task<IResult> HandleAsync(IRepository<CatalogType> catalogTypeRepository)
+    public override async Task<ListCatalogTypesResponse> ExecuteAsync(CancellationToken ct)
     {
         var response = new ListCatalogTypesResponse();
 
-        var items = await catalogTypeRepository.ListAsync();
+        var items = await _catalogTypeRepository.ListAsync(ct);
 
         response.CatalogTypes.AddRange(items.Select(_mapper.Map<CatalogTypeDto>));
 
-        return Results.Ok(response);
+        return response;
     }
 }
