@@ -51,7 +51,7 @@
     <PackageVersion Include="System.Security.Claims" Version="4.3.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.3" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="7.6.2" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
     <!-- Test -->
