@@ -1,47 +1,46 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
-using MinimalApi.Endpoint;
 
 namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 
 /// <summary>
 /// Updates a Catalog Item
 /// </summary>
-public class UpdateCatalogItemEndpoint : IEndpoint<IResult, UpdateCatalogItemRequest, IRepository<CatalogItem>>
-{ 
+public class UpdateCatalogItemEndpoint : Endpoint<UpdateCatalogItemRequest, Results<Ok<UpdateCatalogItemResponse>, NotFound>>
+{
+    private readonly IRepository<CatalogItem> _itemRepository;
     private readonly IUriComposer _uriComposer;
 
-    public UpdateCatalogItemEndpoint(IUriComposer uriComposer)
+    public UpdateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
     {
+        _itemRepository = itemRepository;
         _uriComposer = uriComposer;
     }
 
-    public void AddRoute(IEndpointRouteBuilder app)
+    public override void Configure()
     {
-        app.MapPut("api/catalog-items",
-            [Authorize(Roles = BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] async
-            (UpdateCatalogItemRequest request, IRepository<CatalogItem> itemRepository) =>
-            {
-                return await HandleAsync(request, itemRepository);
-            })
-            .Produces<UpdateCatalogItemResponse>()
-            .WithTags("CatalogItemEndpoints");
+        Put("api/catalog-items");
+        Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
+        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
+        Description(d =>
+            d.Produces<UpdateCatalogItemResponse>()
+             .WithTags("CatalogItemEndpoints"));
     }
 
-    public async Task<IResult> HandleAsync(UpdateCatalogItemRequest request, IRepository<CatalogItem> itemRepository)
+    public override async Task<Results<Ok<UpdateCatalogItemResponse>, NotFound>> ExecuteAsync(UpdateCatalogItemRequest request, CancellationToken ct)
     {
         var response = new UpdateCatalogItemResponse(request.CorrelationId());
 
-        var existingItem = await itemRepository.GetByIdAsync(request.Id);
+        var existingItem = await _itemRepository.GetByIdAsync(request.Id, ct);
         if (existingItem == null)
         {
-            return Results.NotFound();
+            return TypedResults.NotFound();
         }
 
         CatalogItem.CatalogItemDetails details = new(request.Name, request.Description, request.Price);
@@ -49,7 +48,7 @@ public class UpdateCatalogItemEndpoint : IEndpoint<IResult, UpdateCatalogItemReq
         existingItem.UpdateBrand(request.CatalogBrandId);
         existingItem.UpdateType(request.CatalogTypeId);
 
-        await itemRepository.UpdateAsync(existingItem);
+        await _itemRepository.UpdateAsync(existingItem, ct);
 
         var dto = new CatalogItemDto
         {
@@ -62,6 +61,6 @@ public class UpdateCatalogItemEndpoint : IEndpoint<IResult, UpdateCatalogItemReq
             Price = existingItem.Price
         };
         response.CatalogItem = dto;
-        return Results.Ok(response);
+        return TypedResults.Ok(response);
     }
 }

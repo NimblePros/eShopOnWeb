@@ -1,42 +1,46 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
-using MinimalApi.Endpoint;
 
 namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 
 /// <summary>
 /// Deletes a Catalog Item
 /// </summary>
-public class DeleteCatalogItemEndpoint : IEndpoint<IResult, DeleteCatalogItemRequest, IRepository<CatalogItem>>
+public class DeleteCatalogItemEndpoint : Endpoint<DeleteCatalogItemRequest, Results<Ok<DeleteCatalogItemResponse>, NotFound>>
 {
-    public void AddRoute(IEndpointRouteBuilder app)
+    private readonly IRepository<CatalogItem> _itemRepository;
+
+    public DeleteCatalogItemEndpoint(IRepository<CatalogItem> itemRepository)
     {
-        app.MapDelete("api/catalog-items/{catalogItemId}",
-            [Authorize(Roles = BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] async
-            (int catalogItemId, IRepository<CatalogItem> itemRepository) =>
-            {
-                return await HandleAsync(new DeleteCatalogItemRequest(catalogItemId), itemRepository);
-            })
-            .Produces<DeleteCatalogItemResponse>()
-            .WithTags("CatalogItemEndpoints");
+        _itemRepository = itemRepository;
     }
 
-    public async Task<IResult> HandleAsync(DeleteCatalogItemRequest request, IRepository<CatalogItem> itemRepository)
+    public override void Configure()
+    {
+        Delete("api/catalog-items/{catalogItemId}");
+        Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
+        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
+        Description(d =>
+            d.Produces<DeleteCatalogItemResponse>()
+             .WithTags("CatalogItemEndpoints"));
+    }
+
+    public override async Task<Results<Ok<DeleteCatalogItemResponse>, NotFound>> ExecuteAsync(DeleteCatalogItemRequest request, CancellationToken ct)
     {
         var response = new DeleteCatalogItemResponse(request.CorrelationId());
 
-        var itemToDelete = await itemRepository.GetByIdAsync(request.CatalogItemId);
+        var itemToDelete = await _itemRepository.GetByIdAsync(request.CatalogItemId, ct);
         if (itemToDelete is null)
-            return Results.NotFound();
+            return TypedResults.NotFound();
 
-        await itemRepository.DeleteAsync(itemToDelete);
+        await _itemRepository.DeleteAsync(itemToDelete, ct);
 
-        return Results.Ok(response);
+        return TypedResults.Ok(response);
     }
 }

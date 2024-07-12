@@ -1,54 +1,52 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Exceptions;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
-using MinimalApi.Endpoint;
 
 namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 
 /// <summary>
 /// Creates a new Catalog Item
 /// </summary>
-public class CreateCatalogItemEndpoint : IEndpoint<IResult, CreateCatalogItemRequest, IRepository<CatalogItem>>
+public class CreateCatalogItemEndpoint : Endpoint<CreateCatalogItemRequest, CreateCatalogItemResponse>
 {
+    private readonly IRepository<CatalogItem> _itemRepository;
     private readonly IUriComposer _uriComposer;
 
-    public CreateCatalogItemEndpoint(IUriComposer uriComposer)
+    public CreateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
     {
+        _itemRepository = itemRepository;
         _uriComposer = uriComposer;
     }
 
-    public void AddRoute(IEndpointRouteBuilder app)
+    public override void Configure()
     {
-        app.MapPost("api/catalog-items",
-            [Authorize(Roles = BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] async
-            (CreateCatalogItemRequest request, IRepository<CatalogItem> itemRepository) =>
-            {
-                return await HandleAsync(request, itemRepository);
-            })
-            .Produces<CreateCatalogItemResponse>()
-            .WithTags("CatalogItemEndpoints");
+        Post("api/catalog-items");
+        Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
+        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
+        Description(d =>
+            d.Produces<CreateCatalogItemResponse>()
+             .WithTags("CatalogItemEndpoints"));
     }
 
-    public async Task<IResult> HandleAsync(CreateCatalogItemRequest request, IRepository<CatalogItem> itemRepository)
+    public override async Task HandleAsync(CreateCatalogItemRequest request, CancellationToken ct)
     {
         var response = new CreateCatalogItemResponse(request.CorrelationId());
 
         var catalogItemNameSpecification = new CatalogItemNameSpecification(request.Name);
-        var existingCataloogItem = await itemRepository.CountAsync(catalogItemNameSpecification);
+        var existingCataloogItem = await _itemRepository.CountAsync(catalogItemNameSpecification, ct);
         if (existingCataloogItem > 0)
         {
             throw new DuplicateException($"A catalogItem with name {request.Name} already exists");
         }
 
         var newItem = new CatalogItem(request.CatalogTypeId, request.CatalogBrandId, request.Description, request.Name, request.Price, request.PictureUri);
-        newItem = await itemRepository.AddAsync(newItem);
+        newItem = await _itemRepository.AddAsync(newItem, ct);
 
         if (newItem.Id != 0)
         {
@@ -57,7 +55,7 @@ public class CreateCatalogItemEndpoint : IEndpoint<IResult, CreateCatalogItemReq
             //  In production, we recommend uploading to a blob storage and deliver the image via CDN after a verification process.
 
             newItem.UpdatePictureUri("eCatalog-item-default.png");
-            await itemRepository.UpdateAsync(newItem);
+            await _itemRepository.UpdateAsync(newItem, ct);
         }
 
         var dto = new CatalogItemDto
@@ -71,6 +69,7 @@ public class CreateCatalogItemEndpoint : IEndpoint<IResult, CreateCatalogItemReq
             Price = newItem.Price
         };
         response.CatalogItem = dto;
-        return Results.Created($"api/catalog-items/{dto.Id}", response);
+
+        await SendCreatedAtAsync<CatalogItemGetByIdEndpoint>(new{ CatalogItemId = dto.Id }, response, cancellation: ct);
     }
 }

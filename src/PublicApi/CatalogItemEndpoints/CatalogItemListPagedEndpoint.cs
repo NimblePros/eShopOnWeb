@@ -1,49 +1,48 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Builder;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
-using MinimalApi.Endpoint;
 
 namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 
 /// <summary>
 /// List Catalog Items (paged)
 /// </summary>
-public class CatalogItemListPagedEndpoint : IEndpoint<IResult, ListPagedCatalogItemRequest, IRepository<CatalogItem>>
+public class CatalogItemListPagedEndpoint : Endpoint<ListPagedCatalogItemRequest, ListPagedCatalogItemResponse>
 {
+    private readonly IRepository<CatalogItem> _itemRepository;
     private readonly IUriComposer _uriComposer;
-    private readonly IMapper _mapper;
+    private readonly AutoMapper.IMapper _mapper;
 
-    public CatalogItemListPagedEndpoint(IUriComposer uriComposer, IMapper mapper)
+    public CatalogItemListPagedEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer, AutoMapper.IMapper mapper)
     {
+        _itemRepository = itemRepository;
         _uriComposer = uriComposer;
         _mapper = mapper;
     }
 
-    public void AddRoute(IEndpointRouteBuilder app)
+    public override void Configure()
     {
-        app.MapGet("api/catalog-items",
-            async (int? pageSize, int? pageIndex, int? catalogBrandId, int? catalogTypeId, IRepository<CatalogItem> itemRepository) =>
-            {
-                return await HandleAsync(new ListPagedCatalogItemRequest(pageSize, pageIndex, catalogBrandId, catalogTypeId), itemRepository);
-            })
-            .Produces<ListPagedCatalogItemResponse>()
-            .WithTags("CatalogItemEndpoints");
+        Get("api/catalog-items");
+        AllowAnonymous();
+        Description(d =>
+            d.Produces<ListPagedCatalogItemResponse>()
+             .WithTags("CatalogItemEndpoints"));
     }
 
-    public async Task<IResult> HandleAsync(ListPagedCatalogItemRequest request, IRepository<CatalogItem> itemRepository)
+    public override async Task<ListPagedCatalogItemResponse> ExecuteAsync(ListPagedCatalogItemRequest request, CancellationToken ct)
     {
-        await Task.Delay(1000);
+        await Task.Delay(1000, ct);
+
         var response = new ListPagedCatalogItemResponse(request.CorrelationId());
 
         var filterSpec = new CatalogFilterSpecification(request.CatalogBrandId, request.CatalogTypeId);
-        int totalItems = await itemRepository.CountAsync(filterSpec);
+        int totalItems = await _itemRepository.CountAsync(filterSpec, ct);
 
         var pagedSpec = new CatalogFilterPaginatedSpecification(
             skip: request.PageIndex * request.PageSize,
@@ -51,7 +50,7 @@ public class CatalogItemListPagedEndpoint : IEndpoint<IResult, ListPagedCatalogI
             brandId: request.CatalogBrandId,
             typeId: request.CatalogTypeId);
 
-        var items = await itemRepository.ListAsync(pagedSpec);
+        var items = await _itemRepository.ListAsync(pagedSpec, ct);
 
         response.CatalogItems.AddRange(items.Select(_mapper.Map<CatalogItemDto>));
         foreach (CatalogItemDto item in response.CatalogItems)
@@ -68,6 +67,6 @@ public class CatalogItemListPagedEndpoint : IEndpoint<IResult, ListPagedCatalogI
             response.PageCount = totalItems > 0 ? 1 : 0;
         }
 
-        return Results.Ok(response);
+        return response;
     }
 }

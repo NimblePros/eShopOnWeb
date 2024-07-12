@@ -1,4 +1,5 @@
 ﻿using BlazorShared;
+using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure;
@@ -10,12 +11,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MinimalApi.Endpoint.Configurations.Extensions;
-using MinimalApi.Endpoint.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpoints();
+builder.Services.AddFastEndpoints();
 
 // Use to force loading of appsettings.json of test project
 builder.Configuration.AddConfigurationFile("appsettings.test.json");
@@ -77,8 +76,7 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 });
 
-app.MapControllers();
-app.MapEndpoints();
+app.UseFastEndpoints();
 
 app.Logger.LogInformation("LAUNCHING PublicApi");
 app.Run();
