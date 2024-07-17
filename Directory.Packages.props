@@ -4,12 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <AspNetVersion>8.0.7</AspNetVersion>
     <SystemExtensionVersion>8.0.0</SystemExtensionVersion>
-    <EntityFramworkCoreVersion>8.0.6</EntityFramworkCoreVersion>
-    <VSCodeGeneratorVersion>8.0.2</VSCodeGeneratorVersion>
+    <EntityFramworkCoreVersion>8.0.7</EntityFramworkCoreVersion>
+    <VSCodeGeneratorVersion>8.0.3</VSCodeGeneratorVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Ardalis.ApiEndpoints" Version="4.1.0" />
-    <PackageVersion Include="Ardalis.GuardClauses" Version="4.0.1" />
+    <PackageVersion Include="Ardalis.GuardClauses" Version="4.6.0" />
     <PackageVersion Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
     <PackageVersion Include="Ardalis.Result" Version="9.1.0" />
     <PackageVersion Include="Ardalis.Specification" Version="8.0.0" />
@@ -50,7 +50,7 @@
     <PackageVersion Include="System.Net.Http.Json" Version="$(SystemExtensionVersion)" />
     <PackageVersion Include="System.Security.Claims" Version="4.3.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.4" />
-    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="7.6.2" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.0.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
@@ -58,7 +58,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspNetVersion)" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageVersion Include="xunit" Version="2.9.0" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.1">
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
@@ -66,8 +66,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.3.1" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.4.3" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.5.0" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.5.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
   </ItemGroup>
 </Project>
