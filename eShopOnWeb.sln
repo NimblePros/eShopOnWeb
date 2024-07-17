@@ -28,6 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.override.yml = docker-compose.override.yml
 		docker-compose.yml = docker-compose.yml
 		.github\workflows\dotnetcore.yml = .github\workflows\dotnetcore.yml
+		.github\workflows\comment-on-pr.yml = .github\workflows\comment-on-pr.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
