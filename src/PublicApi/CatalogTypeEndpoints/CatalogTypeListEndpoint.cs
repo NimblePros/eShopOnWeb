@@ -11,18 +11,9 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogTypeEndpoints;
 /// <summary>
 /// List Catalog Types
 /// </summary>
-public class CatalogTypeListEndpoint : EndpointWithoutRequest<ListCatalogTypesResponse>
+public class CatalogTypeListEndpoint(IRepository<CatalogType> catalogTypeRepository, AutoMapper.IMapper mapper)
+    : EndpointWithoutRequest<ListCatalogTypesResponse>
 {
-    private readonly IRepository<CatalogType> _catalogTypeRepository;
-    private readonly AutoMapper.IMapper _mapper;
-
-    public CatalogTypeListEndpoint(IRepository<CatalogType> catalogTypeRepository, AutoMapper.IMapper mapper)
-    {
-        _catalogTypeRepository = catalogTypeRepository;
-        _mapper = mapper;
-
-    }
-
     public override void Configure()
     {
         Get("api/catalog-types");
@@ -36,9 +27,9 @@ public class CatalogTypeListEndpoint : EndpointWithoutRequest<ListCatalogTypesRe
     {
         var response = new ListCatalogTypesResponse();
 
-        var items = await _catalogTypeRepository.ListAsync(ct);
+        var items = await catalogTypeRepository.ListAsync(ct);
 
-        response.CatalogTypes.AddRange(items.Select(_mapper.Map<CatalogTypeDto>));
+        response.CatalogTypes.AddRange(items.Select(mapper.Map<CatalogTypeDto>));
 
         return response;
     }

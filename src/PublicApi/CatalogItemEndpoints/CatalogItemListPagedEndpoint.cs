@@ -13,19 +13,10 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// <summary>
 /// List Catalog Items (paged)
 /// </summary>
-public class CatalogItemListPagedEndpoint : Endpoint<ListPagedCatalogItemRequest, ListPagedCatalogItemResponse>
+public class CatalogItemListPagedEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer,
+        AutoMapper.IMapper mapper)
+    : Endpoint<ListPagedCatalogItemRequest, ListPagedCatalogItemResponse>
 {
-    private readonly IRepository<CatalogItem> _itemRepository;
-    private readonly IUriComposer _uriComposer;
-    private readonly AutoMapper.IMapper _mapper;
-
-    public CatalogItemListPagedEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer, AutoMapper.IMapper mapper)
-    {
-        _itemRepository = itemRepository;
-        _uriComposer = uriComposer;
-        _mapper = mapper;
-    }
-
     public override void Configure()
     {
         Get("api/catalog-items");
@@ -42,7 +33,7 @@ public class CatalogItemListPagedEndpoint : Endpoint<ListPagedCatalogItemRequest
         var response = new ListPagedCatalogItemResponse(request.CorrelationId());
 
         var filterSpec = new CatalogFilterSpecification(request.CatalogBrandId, request.CatalogTypeId);
-        int totalItems = await _itemRepository.CountAsync(filterSpec, ct);
+        int totalItems = await itemRepository.CountAsync(filterSpec, ct);
 
         var pagedSpec = new CatalogFilterPaginatedSpecification(
             skip: request.PageIndex * request.PageSize,
@@ -50,12 +41,12 @@ public class CatalogItemListPagedEndpoint : Endpoint<ListPagedCatalogItemRequest
             brandId: request.CatalogBrandId,
             typeId: request.CatalogTypeId);
 
-        var items = await _itemRepository.ListAsync(pagedSpec, ct);
+        var items = await itemRepository.ListAsync(pagedSpec, ct);
 
-        response.CatalogItems.AddRange(items.Select(_mapper.Map<CatalogItemDto>));
+        response.CatalogItems.AddRange(items.Select(mapper.Map<CatalogItemDto>));
         foreach (CatalogItemDto item in response.CatalogItems)
         {
-            item.PictureUri = _uriComposer.ComposePicUri(item.PictureUri);
+            item.PictureUri = uriComposer.ComposePicUri(item.PictureUri);
         }
 
         if (request.PageSize > 0)
