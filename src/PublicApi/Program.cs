@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
-builder.AddServiceDefaults();
+builder.AddAspireServiceDefaults();
 
 builder.Services.AddFastEndpoints();
 
