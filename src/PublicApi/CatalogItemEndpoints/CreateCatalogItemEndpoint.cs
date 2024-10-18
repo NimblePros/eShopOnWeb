@@ -13,17 +13,9 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// <summary>
 /// Creates a new Catalog Item
 /// </summary>
-public class CreateCatalogItemEndpoint : Endpoint<CreateCatalogItemRequest, CreateCatalogItemResponse>
+public class CreateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
+    : Endpoint<CreateCatalogItemRequest, CreateCatalogItemResponse>
 {
-    private readonly IRepository<CatalogItem> _itemRepository;
-    private readonly IUriComposer _uriComposer;
-
-    public CreateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
-    {
-        _itemRepository = itemRepository;
-        _uriComposer = uriComposer;
-    }
-
     public override void Configure()
     {
         Post("api/catalog-items");
@@ -39,14 +31,14 @@ public class CreateCatalogItemEndpoint : Endpoint<CreateCatalogItemRequest, Crea
         var response = new CreateCatalogItemResponse(request.CorrelationId());
 
         var catalogItemNameSpecification = new CatalogItemNameSpecification(request.Name);
-        var existingCataloogItem = await _itemRepository.CountAsync(catalogItemNameSpecification, ct);
+        var existingCataloogItem = await itemRepository.CountAsync(catalogItemNameSpecification, ct);
         if (existingCataloogItem > 0)
         {
             throw new DuplicateException($"A catalogItem with name {request.Name} already exists");
         }
 
         var newItem = new CatalogItem(request.CatalogTypeId, request.CatalogBrandId, request.Description, request.Name, request.Price, request.PictureUri);
-        newItem = await _itemRepository.AddAsync(newItem, ct);
+        newItem = await itemRepository.AddAsync(newItem, ct);
 
         if (newItem.Id != 0)
         {
@@ -55,7 +47,7 @@ public class CreateCatalogItemEndpoint : Endpoint<CreateCatalogItemRequest, Crea
             //  In production, we recommend uploading to a blob storage and deliver the image via CDN after a verification process.
 
             newItem.UpdatePictureUri("eCatalog-item-default.png");
-            await _itemRepository.UpdateAsync(newItem, ct);
+            await itemRepository.UpdateAsync(newItem, ct);
         }
 
         var dto = new CatalogItemDto
@@ -65,7 +57,7 @@ public class CreateCatalogItemEndpoint : Endpoint<CreateCatalogItemRequest, Crea
             CatalogTypeId = newItem.CatalogTypeId,
             Description = newItem.Description,
             Name = newItem.Name,
-            PictureUri = _uriComposer.ComposePicUri(newItem.PictureUri),
+            PictureUri = uriComposer.ComposePicUri(newItem.PictureUri),
             Price = newItem.Price
         };
         response.CatalogItem = dto;

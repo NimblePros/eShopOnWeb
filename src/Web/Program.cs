@@ -10,6 +10,9 @@ using Microsoft.eShopWeb.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add service defaults & Aspire components.
+builder.AddAspireServiceDefaults();
+
 builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
 
 builder.Services.AddCookieSettings();

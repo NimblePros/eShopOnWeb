@@ -12,17 +12,9 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// <summary>
 /// Updates a Catalog Item
 /// </summary>
-public class UpdateCatalogItemEndpoint : Endpoint<UpdateCatalogItemRequest, Results<Ok<UpdateCatalogItemResponse>, NotFound>>
+public class UpdateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
+    : Endpoint<UpdateCatalogItemRequest, Results<Ok<UpdateCatalogItemResponse>, NotFound>>
 {
-    private readonly IRepository<CatalogItem> _itemRepository;
-    private readonly IUriComposer _uriComposer;
-
-    public UpdateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
-    {
-        _itemRepository = itemRepository;
-        _uriComposer = uriComposer;
-    }
-
     public override void Configure()
     {
         Put("api/catalog-items");
@@ -37,7 +29,7 @@ public class UpdateCatalogItemEndpoint : Endpoint<UpdateCatalogItemRequest, Resu
     {
         var response = new UpdateCatalogItemResponse(request.CorrelationId());
 
-        var existingItem = await _itemRepository.GetByIdAsync(request.Id, ct);
+        var existingItem = await itemRepository.GetByIdAsync(request.Id, ct);
         if (existingItem == null)
         {
             return TypedResults.NotFound();
@@ -48,7 +40,7 @@ public class UpdateCatalogItemEndpoint : Endpoint<UpdateCatalogItemRequest, Resu
         existingItem.UpdateBrand(request.CatalogBrandId);
         existingItem.UpdateType(request.CatalogTypeId);
 
-        await _itemRepository.UpdateAsync(existingItem, ct);
+        await itemRepository.UpdateAsync(existingItem, ct);
 
         var dto = new CatalogItemDto
         {
@@ -57,7 +49,7 @@ public class UpdateCatalogItemEndpoint : Endpoint<UpdateCatalogItemRequest, Resu
             CatalogTypeId = existingItem.CatalogTypeId,
             Description = existingItem.Description,
             Name = existingItem.Name,
-            PictureUri = _uriComposer.ComposePicUri(existingItem.PictureUri),
+            PictureUri = uriComposer.ComposePicUri(existingItem.PictureUri),
             Price = existingItem.Price
         };
         response.CatalogItem = dto;

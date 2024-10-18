@@ -29,8 +29,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "tests\UnitTest
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7EFE7D65-5C2D-4D83-B034-D06B2D37564E}"
 	ProjectSection(SolutionItems) = preProject
+		Directory.Packages.props = Directory.Packages.props
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eShopWeb.AppHost", "src\eShopWeb.AppHost\eShopWeb.AppHost.csproj", "{E3079820-FF6C-4CC7-9CBB-8DF68237299F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eShopWeb.AspireServiceDefaults", "src\eShopWeb.AspireServiceDefaults\eShopWeb.AspireServiceDefaults.csproj", "{7DB219F4-4ABC-45D6-A5F7-B938769D5319}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +83,14 @@ Global
 		{EAD6CF0B-2979-462C-BBB9-AF723B1EB570}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAD6CF0B-2979-462C-BBB9-AF723B1EB570}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAD6CF0B-2979-462C-BBB9-AF723B1EB570}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3079820-FF6C-4CC7-9CBB-8DF68237299F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3079820-FF6C-4CC7-9CBB-8DF68237299F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3079820-FF6C-4CC7-9CBB-8DF68237299F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3079820-FF6C-4CC7-9CBB-8DF68237299F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DB219F4-4ABC-45D6-A5F7-B938769D5319}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DB219F4-4ABC-45D6-A5F7-B938769D5319}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DB219F4-4ABC-45D6-A5F7-B938769D5319}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DB219F4-4ABC-45D6-A5F7-B938769D5319}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,5 +106,10 @@ Global
 		{D6829485-DD9C-42CE-BEDE-4EB0E81021AC} = {BAA5312D-B54C-42D6-A3B9-504DD12F8250}
 		{698594AE-78D3-429F-B5CC-3A6F6BCE397A} = {BAA5312D-B54C-42D6-A3B9-504DD12F8250}
 		{EAD6CF0B-2979-462C-BBB9-AF723B1EB570} = {BAA5312D-B54C-42D6-A3B9-504DD12F8250}
+		{E3079820-FF6C-4CC7-9CBB-8DF68237299F} = {8FF16BDB-352E-42A2-A25F-0B5BC3A17FD7}
+		{7DB219F4-4ABC-45D6-A5F7-B938769D5319} = {8FF16BDB-352E-42A2-A25F-0B5BC3A17FD7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CC66E299-A176-4667-95E3-CCDA89AAC6D0}
 	EndGlobalSection
 EndGlobal

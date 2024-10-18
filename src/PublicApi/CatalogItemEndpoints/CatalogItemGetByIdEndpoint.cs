@@ -11,18 +11,9 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// <summary>
 /// Get a Catalog Item by Id
 /// </summary>
-public class CatalogItemGetByIdEndpoint
+public class CatalogItemGetByIdEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
     : Endpoint<GetByIdCatalogItemRequest, Results<Ok<GetByIdCatalogItemResponse>, NotFound>>
 {
-    private readonly IRepository<CatalogItem> _itemRepository;
-    private readonly IUriComposer _uriComposer;
-
-    public CatalogItemGetByIdEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
-    {
-        _itemRepository = itemRepository;
-        _uriComposer = uriComposer;
-    }
-
     public override void Configure()
     {
         Get("api/catalog-items/{catalogItemId}");
@@ -36,7 +27,7 @@ public class CatalogItemGetByIdEndpoint
     {
         var response = new GetByIdCatalogItemResponse(request.CorrelationId());
 
-        var item = await _itemRepository.GetByIdAsync(request.CatalogItemId, ct);
+        var item = await itemRepository.GetByIdAsync(request.CatalogItemId, ct);
         if (item is null)
             return TypedResults.NotFound();
 
@@ -47,7 +38,7 @@ public class CatalogItemGetByIdEndpoint
             CatalogTypeId = item.CatalogTypeId,
             Description = item.Description,
             Name = item.Name,
-            PictureUri = _uriComposer.ComposePicUri(item.PictureUri),
+            PictureUri = uriComposer.ComposePicUri(item.PictureUri),
             Price = item.Price
         };
         return TypedResults.Ok(response);

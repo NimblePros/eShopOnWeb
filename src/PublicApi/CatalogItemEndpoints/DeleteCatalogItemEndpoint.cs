@@ -12,15 +12,8 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// <summary>
 /// Deletes a Catalog Item
 /// </summary>
-public class DeleteCatalogItemEndpoint : Endpoint<DeleteCatalogItemRequest, Results<Ok<DeleteCatalogItemResponse>, NotFound>>
+public class DeleteCatalogItemEndpoint(IRepository<CatalogItem> itemRepository) : Endpoint<DeleteCatalogItemRequest, Results<Ok<DeleteCatalogItemResponse>, NotFound>>
 {
-    private readonly IRepository<CatalogItem> _itemRepository;
-
-    public DeleteCatalogItemEndpoint(IRepository<CatalogItem> itemRepository)
-    {
-        _itemRepository = itemRepository;
-    }
-
     public override void Configure()
     {
         Delete("api/catalog-items/{catalogItemId}");
@@ -35,11 +28,11 @@ public class DeleteCatalogItemEndpoint : Endpoint<DeleteCatalogItemRequest, Resu
     {
         var response = new DeleteCatalogItemResponse(request.CorrelationId());
 
-        var itemToDelete = await _itemRepository.GetByIdAsync(request.CatalogItemId, ct);
+        var itemToDelete = await itemRepository.GetByIdAsync(request.CatalogItemId, ct);
         if (itemToDelete is null)
             return TypedResults.NotFound();
 
-        await _itemRepository.DeleteAsync(itemToDelete, ct);
+        await itemRepository.DeleteAsync(itemToDelete, ct);
 
         return TypedResults.Ok(response);
     }

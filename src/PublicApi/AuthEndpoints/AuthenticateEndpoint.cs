@@ -12,18 +12,10 @@ namespace Microsoft.eShopWeb.PublicApi.AuthEndpoints;
 /// <summary>
 /// Authenticates a user
 /// </summary>
-public class AuthenticateEndpoint : Endpoint<AuthenticateRequest, AuthenticateResponse>
-{
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly ITokenClaimsService _tokenClaimsService;
-
-    public AuthenticateEndpoint(SignInManager<ApplicationUser> signInManager,
+public class AuthenticateEndpoint(SignInManager<ApplicationUser> signInManager,
         ITokenClaimsService tokenClaimsService)
-    {
-        _signInManager = signInManager;
-        _tokenClaimsService = tokenClaimsService;
-    }
-
+    : Endpoint<AuthenticateRequest, AuthenticateResponse>
+{
     public override void Configure()
     {
         Post("api/authenticate");
@@ -43,7 +35,7 @@ public class AuthenticateEndpoint : Endpoint<AuthenticateRequest, AuthenticateRe
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
         //var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
-        var result = await _signInManager.PasswordSignInAsync(request.Username, request.Password, false, true);
+        var result = await signInManager.PasswordSignInAsync(request.Username, request.Password, false, true);
 
         response.Result = result.Succeeded;
         response.IsLockedOut = result.IsLockedOut;
@@ -53,7 +45,7 @@ public class AuthenticateEndpoint : Endpoint<AuthenticateRequest, AuthenticateRe
 
         if (result.Succeeded)
         {
-            response.Token = await _tokenClaimsService.GetTokenAsync(request.Username);
+            response.Token = await tokenClaimsService.GetTokenAsync(request.Username);
         }
 
         return response;

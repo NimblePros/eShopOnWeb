@@ -63,12 +63,11 @@ public static class ServiceCollectionExtensions
     {
         var configSection = configuration.GetRequiredSection(BaseUrlConfiguration.CONFIG_NAME);
         services.Configure<BaseUrlConfiguration>(configSection);
-        var baseUrlConfig = configSection.Get<BaseUrlConfiguration>();
 
         // Blazor Admin Required Services for Prerendering
         services.AddScoped<HttpClient>(s => new HttpClient
         {
-            BaseAddress = new Uri(baseUrlConfig!.WebBase)
+            BaseAddress = new Uri("https+http://blazoradmin")
         });
 
         // add blazor services
