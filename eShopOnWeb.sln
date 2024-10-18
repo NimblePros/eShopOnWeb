@@ -24,11 +24,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0BD72BEA-EF42-4B72-8B69-12A39EC76FBA}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.github\workflows\comment-on-pr.yml = .github\workflows\comment-on-pr.yml
 		Directory.Packages.props = Directory.Packages.props
 		docker-compose.override.yml = docker-compose.override.yml
 		docker-compose.yml = docker-compose.yml
 		.github\workflows\dotnetcore.yml = .github\workflows\dotnetcore.yml
-		.github\workflows\comment-on-pr.yml = .github\workflows\comment-on-pr.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -41,6 +41,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorShared", "src\BlazorShared\BlazorShared.csproj", "{715CF7AF-A1EE-40A6-94A0-8DA3F3B2CAE9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PublicApiIntegrationTests", "tests\PublicApiIntegrationTests\PublicApiIntegrationTests.csproj", "{D53EF010-8F8C-4337-A059-456E19D8AE63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eShopWeb.AppHost", "src\eShopWeb.AppHost\eShopWeb.AppHost.csproj", "{9269A0CE-2596-4215-8ACA-765724A1630C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eShopWeb.AspireServiceDefaults", "src\eShopWeb.AspireServiceDefaults\eShopWeb.AspireServiceDefaults.csproj", "{DC649B65-3762-44ED-9DF8-54F450CEA311}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,6 +96,14 @@ Global
 		{D53EF010-8F8C-4337-A059-456E19D8AE63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D53EF010-8F8C-4337-A059-456E19D8AE63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D53EF010-8F8C-4337-A059-456E19D8AE63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9269A0CE-2596-4215-8ACA-765724A1630C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9269A0CE-2596-4215-8ACA-765724A1630C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9269A0CE-2596-4215-8ACA-765724A1630C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9269A0CE-2596-4215-8ACA-765724A1630C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC649B65-3762-44ED-9DF8-54F450CEA311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC649B65-3762-44ED-9DF8-54F450CEA311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC649B65-3762-44ED-9DF8-54F450CEA311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC649B65-3762-44ED-9DF8-54F450CEA311}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,6 +119,7 @@ Global
 		{71368733-80A4-4869-B215-3A7001878577} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
 		{715CF7AF-A1EE-40A6-94A0-8DA3F3B2CAE9} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
 		{D53EF010-8F8C-4337-A059-456E19D8AE63} = {15EA4737-125B-4E6E-A806-E13B7EBCDCCF}
+		{9269A0CE-2596-4215-8ACA-765724A1630C} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {49813262-5DA3-4D61-ABD3-493C74CE8C2B}
