@@ -53,7 +53,7 @@
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.2.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.0.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.0.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="7.0.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="7.1.0" />
     <!-- Aspire -->
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
