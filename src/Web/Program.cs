@@ -7,6 +7,7 @@ using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
+using NimblePros.Metronome;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +59,8 @@ builder.Services.Configure<ServiceConfig>(config =>
 });
 
 builder.Services.AddBlazor(builder.Configuration);
+
+builder.Services.AddMetronome();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

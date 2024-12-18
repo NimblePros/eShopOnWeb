@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using NimblePros.Metronome;
 
 namespace Microsoft.eShopWeb.Web.Extensions;
 
@@ -63,6 +64,7 @@ public static class WebApplicationExtensions
             app.UseShowAllServicesMiddleware();
             app.UseMigrationsEndPoint();
             app.UseWebAssemblyDebugging();
+            app.UseMetronomeLoggingMiddleware();
         }
         else
         {
