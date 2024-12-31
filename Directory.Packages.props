@@ -78,6 +78,6 @@
     </PackageVersion>
     <PackageVersion Include="MSTest.TestAdapter" Version="3.6.4" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.6.4" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.3" />
   </ItemGroup>
 </Project>
