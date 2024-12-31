@@ -20,7 +20,7 @@
     <PackageVersion Include="BlazorInputFile" Version="0.2.0" />
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageVersion Include="BuildBundlerMinifier" Version="3.2.449" PrivateAssets="All" />
-    <PackageVersion Include="FastEndpoints" Version="5.32.0" />
+    <PackageVersion Include="FastEndpoints" Version="5.33.0" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="MediatR" Version="12.4.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0" />
@@ -77,7 +77,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="MSTest.TestAdapter" Version="3.7.0" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.6.4" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.7.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.3" />
   </ItemGroup>
 </Project>
