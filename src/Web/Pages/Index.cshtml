@@ -10,7 +10,10 @@
 </section>
 <section class="esh-catalog-filters">
     <div class="container">
-        <form method="get">
+        <form method="get" 
+              hx-boost="true"
+              hx-push-url="true"
+              >
             <label class="esh-catalog-label" data-title="brand">
                 <select asp-for="@Model.CatalogModel.BrandFilterApplied" asp-items="@Model.CatalogModel.Brands" class="esh-catalog-filter"></select>
             </label>
@@ -21,7 +24,7 @@
         </form>
     </div>
 </section>
-<div class="container">
+<div id="catalog-items" class="container">
     @if (Model.CatalogModel.CatalogItems.Any())
     {
         <partial name="_pagination" for="CatalogModel.PaginationInfo" />

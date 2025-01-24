@@ -17,6 +17,8 @@
                     <a class="esh-pager-item-left esh-pager-item--navigable esh-pager-item @Model.Previous"
                        id="Previous"
                        asp-all-route-data="prevRouteData"
+                       hx-boost="true"
+                       hx-push-url="true"
                        aria-label="Previous">
                         Previous
                     </a>
@@ -32,6 +34,8 @@
                     <a class="esh-pager-item-right esh-pager-item--navigable esh-pager-item @Model.Next"
                        id="Next"
                        asp-all-route-data="nextRouteData"
+                       hx-boost="true"
+                       hx-push-url="true"
                        aria-label="Next">
                         Next
                     </a>
