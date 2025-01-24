@@ -24,7 +24,9 @@
         </form>
     </div>
 </section>
-<div id="catalog-items" class="container">
+<div class="container" 
+     hx-boost="true"
+     hx-push-url="true">
     @if (Model.CatalogModel.CatalogItems.Any())
     {
         <partial name="_pagination" for="CatalogModel.PaginationInfo" />
