@@ -71,9 +71,15 @@ public class IndexModel : PageModel
         
         if (Request.IsHtmx())
         {
+            Response.Htmx(x => x.WithTrigger("basket-count"));
             return Partial("_Index", this);
         }
         return Page();
+    }
+
+    public IActionResult OnGetCount()
+    {
+        return ViewComponent("Basket");
     }
 
     private string GetOrSetBasketCookieAndUserName()
