@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using Htmx;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
@@ -52,17 +53,27 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public async Task OnPostUpdate(IEnumerable<BasketItemViewModel> items)
+    public async Task<IActionResult> OnPostUpdate(IEnumerable<BasketItemViewModel> items)
     {
         if (!ModelState.IsValid)
         {
-            return;
+            if (Request.IsHtmx())
+            {
+                return Partial("_Index", this);
+            }
+            return Page();
         }
 
         var basketView = await _basketViewModelService.GetOrCreateBasketForUser(GetOrSetBasketCookieAndUserName());
         var updateModel = items.ToDictionary(b => b.Id.ToString(), b => b.Quantity);
         var basket = await _basketService.SetQuantities(basketView.Id, updateModel);
         BasketModel = await _basketViewModelService.Map(basket);
+        
+        if (Request.IsHtmx())
+        {
+            return Partial("_Index", this);
+        }
+        return Page();
     }
 
     private string GetOrSetBasketCookieAndUserName()
