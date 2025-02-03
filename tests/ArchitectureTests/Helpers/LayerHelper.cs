@@ -1,5 +1,11 @@
 ﻿using ArchUnitNET.Domain;
 using ArchUnitNET.Loader;
+using BlazorAdmin.Services;
+using BlazorShared.Interfaces;
+using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+using Microsoft.eShopWeb.Infrastructure.Data;
+using Microsoft.eShopWeb.PublicApi;
+using Microsoft.eShopWeb.Web.Features.OrderDetails;
 using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 internal class LayerHelper
