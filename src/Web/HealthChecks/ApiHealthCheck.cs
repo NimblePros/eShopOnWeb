@@ -1,7 +1,4 @@
-﻿using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.eShopWeb.Web.Configuration;
+﻿using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
