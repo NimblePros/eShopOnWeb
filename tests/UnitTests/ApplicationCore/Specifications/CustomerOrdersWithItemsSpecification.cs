@@ -17,7 +17,7 @@ public class CustomerOrdersWithItemsSpecification
 
         Assert.NotNull(result);
         Assert.NotNull(result.OrderItems);
-        Assert.Equal(1, result.OrderItems.Count);
+        Assert.Single(result.OrderItems);
         Assert.NotNull(result.OrderItems.FirstOrDefault()?.ItemOrdered);
     }
 
@@ -30,7 +30,7 @@ public class CustomerOrdersWithItemsSpecification
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
-        Assert.Equal(1, result[0].OrderItems.Count);
+        Assert.Single(result[0].OrderItems);
         Assert.NotNull(result[0].OrderItems.FirstOrDefault()?.ItemOrdered);
         Assert.Equal(2, result[1].OrderItems.Count);
         Assert.NotNull(result[1].OrderItems.ToList()[0].ItemOrdered);
