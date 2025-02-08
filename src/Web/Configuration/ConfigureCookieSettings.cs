@@ -1,9 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Microsoft.eShopWeb.Web.Configuration;
+﻿namespace Microsoft.eShopWeb.Web.Configuration;
 
 public static class ConfigureCookieSettings
 {
