@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.eShopWeb.Web.ViewModels.Manage;
 
@@ -282,14 +283,23 @@ public class ManageController : Controller
         {
             throw new ApplicationException($"Unexpected error occurred adding external login for user with ID '{user.Id}'.");
         }
-
-        // Clear the existing external cookie to ensure a clean login process
-        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        if (info.Principal.Claims.Any())
+        {
+            var claimsToSync = new Dictionary<string, string>();
+            foreach (var claim in info.Principal.Claims)
+            {
+                claimsToSync.Add(claim.Type, claim.Value);
+            }
+            var refreshSignIn = await GitHubClaimsHelper.SaveClaimsAsync(claimsToSync, info, user, _userManager);
+            if (refreshSignIn)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+            }
+        }
 
         StatusMessage = "The external login was added.";
         return RedirectToAction(nameof(ExternalLogins));
     }
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveLogin(RemoveLoginViewModel model)
