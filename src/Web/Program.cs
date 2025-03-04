@@ -24,24 +24,28 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
            .AddEntityFrameworkStores<AppIdentityDbContext>()
            .AddDefaultTokenProviders();
 
+var gitHubClientId = builder.Configuration["GitHub:ClientId"] ?? string.Empty;
 
-builder.Services.AddAuthentication()
-    .AddOAuth("GitHub", "GitHub", options =>
-    {
-        options.ClientId = builder.Configuration["GitHub:ClientId"] ?? string.Empty;
-        options.ClientSecret = builder.Configuration["GitHub:ClientSecret"] ?? string.Empty;
-        options.CallbackPath = "/signin-github";
-        options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-        options.TokenEndpoint = "https://github.com/login/oauth/access_token";
-        options.UserInformationEndpoint = "https://api.github.com/user";
-        options.UsePkce = false; // PKCE not supported by GitHub       
-        options.SaveTokens = true;
-        options.ClaimsIssuer = "GitHub";
-        options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
+if (!string.IsNullOrEmpty(gitHubClientId))
+{
+    builder.Services.AddAuthentication()
+        .AddOAuth("GitHub", "GitHub", options =>
         {
-            OnCreatingTicket = GitHubClaimsHelper.OnOAuthCreatingTicket
-        };
-    });
+            options.ClientId = gitHubClientId;
+            options.ClientSecret = builder.Configuration["GitHub:ClientSecret"] ?? string.Empty;
+            options.CallbackPath = "/signin-github";
+            options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
+            options.TokenEndpoint = "https://github.com/login/oauth/access_token";
+            options.UserInformationEndpoint = "https://api.github.com/user";
+            options.UsePkce = false; // PKCE not supported by GitHub       
+            options.SaveTokens = true;
+            options.ClaimsIssuer = "GitHub";
+            options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
+            {
+                OnCreatingTicket = GitHubClaimsHelper.OnOAuthCreatingTicket
+            };
+        });
+}
 
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 builder.Services.AddCoreServices(builder.Configuration);
