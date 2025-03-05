@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Ardalis.GuardClauses;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Identity;
@@ -15,6 +16,7 @@ public class GitHubClaimsHelper
         // No JWT coming back from GitHub
         // Need to call the UserInformationEndpoint manually
         // And then build the claims from there.
+        Guard.Against.Null(context.Identity);
         if (context.Identity.IsAuthenticated)
         {
             // Store the tokens
@@ -34,6 +36,7 @@ public class GitHubClaimsHelper
     }
     private static void AddClaims(OAuthCreatingTicketContext context, JObject user)
     {
+        Guard.Against.Null(context.Identity);
         var identifier = user.Value<string>("id");
         if (!string.IsNullOrEmpty(identifier))
         {
@@ -78,7 +81,7 @@ public class GitHubClaimsHelper
                 .FirstOrDefault(c => c.Type == addedClaim.Key);
 
             var externalClaim = info.Principal.FindFirst(addedClaim.Key);
-
+            Guard.Against.Null(externalClaim);
             if (userClaim == null)
             {
                 await userManager.AddClaimAsync(user,
