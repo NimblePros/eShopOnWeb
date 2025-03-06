@@ -181,6 +181,14 @@ You should be able to make requests to localhost:5106 for the Web project, and l
 
 You can also run the applications by using the instructions located in their `Dockerfile` file in the root of each project. Again, run these commands from the root of the solution (where the .sln file is located).
 
+## Getting the GitHub Single Sign-On Working
+
+We include GitHub as our external provider for single sign-on.
+
+To get it running locally, you'll want to register an application in GitHub and store values in user secrets for the client ID and client secret.
+
+We explain the code in detail in our course on [ASP.NET Identity in Action: Implementing Individual Accounts](https://academy.nimblepros.com/p/applying-identity-to-asp-net).
+
 ## Community Extensions
 
 We have some great contributions from the community, and while these aren't maintained by Microsoft we still want to highlight them.
