@@ -22,6 +22,7 @@ A list of Frequently Asked Questions about this repository can be found [here](h
   - [Configuring the sample to use SQL Server](#configuring-the-sample-to-use-sql-server)
 - [Running the sample in the dev container](#running-the-sample-in-the-dev-container)
 - [Running the sample using Docker](#running-the-sample-using-docker)
+- [Getting the GitHub Single Sign-On Working](#getting-the-github-single-sign-on-working)
 - [Community Extensions](#community-extensions)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->

@@ -1,11 +1,9 @@
-﻿using Ardalis.GuardClauses;
+﻿using System.Net.Http.Headers;
+using System.Security.Claims;
+using Ardalis.GuardClauses;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.eShopWeb.Infrastructure.Identity;
 using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
-using System.Security.Claims;
 
 namespace Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 
@@ -16,6 +14,7 @@ public class GitHubClaimsHelper
         // No JWT coming back from GitHub
         // Need to call the UserInformationEndpoint manually
         // And then build the claims from there.
+        Guard.Against.Null(context);
         Guard.Against.Null(context.Identity);
         if (context.Identity.IsAuthenticated)
         {
@@ -34,6 +33,7 @@ public class GitHubClaimsHelper
             AddClaims(context, user);
         }
     }
+
     private static void AddClaims(OAuthCreatingTicketContext context, JObject user)
     {
         Guard.Against.Null(context.Identity);
@@ -68,34 +68,5 @@ public class GitHubClaimsHelper
                 "urn:github:url", link,
                 ClaimValueTypes.String, context.Options.ClaimsIssuer));
         }
-    }
-
-    public static async Task<bool> SaveClaimsAsync(Dictionary<string, string> claimsToSync, ExternalLoginInfo info, ApplicationUser user, UserManager<ApplicationUser> userManager)
-    {
-        var refreshSignIn = false;
-        var userClaims = await userManager.GetClaimsAsync(user);
-
-        foreach (var addedClaim in claimsToSync)
-        {
-            var userClaim = userClaims
-                .FirstOrDefault(c => c.Type == addedClaim.Key);
-
-            var externalClaim = info.Principal.FindFirst(addedClaim.Key);
-            Guard.Against.Null(externalClaim);
-            if (userClaim == null)
-            {
-                await userManager.AddClaimAsync(user,
-                    new Claim(addedClaim.Key, externalClaim.Value));
-                refreshSignIn = true;
-            }
-            else if (userClaim.Value != externalClaim.Value)
-            {
-                await userManager
-                    .ReplaceClaimAsync(user, userClaim, externalClaim);
-                refreshSignIn = true;
-            }
-
-        }
-        return refreshSignIn;
     }
 }

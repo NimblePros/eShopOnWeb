@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
-using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
+using Microsoft.eShopWeb.Web.Extensions;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.eShopWeb.Web.ViewModels.Manage;
 
@@ -290,7 +290,7 @@ public class ManageController : Controller
             {
                 claimsToSync.Add(claim.Type, claim.Value);
             }
-            var refreshSignIn = await GitHubClaimsHelper.SaveClaimsAsync(claimsToSync, info, user, _userManager);
+            var refreshSignIn = await _userManager.SaveClaimsAsync(claimsToSync, info, user);
             if (refreshSignIn)
             {
                 await _signInManager.RefreshSignInAsync(user);
