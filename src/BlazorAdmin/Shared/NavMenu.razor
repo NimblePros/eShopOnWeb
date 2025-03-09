@@ -21,6 +21,14 @@
 
                     </NavLink>
                 </li>
+                <AuthorizeView Context="RolesManagement" Roles=@BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS>
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="roles">
+                            <span class="oi oi-person" aria-hidden="true"></span> Roles
+                        </NavLink>
+                    </li>
+                </AuthorizeView>
+
                 <li class="nav-item px-3">
                         <NavLink class="nav-link" href="logout">
                             <span class="oi oi-account-logout" aria-hidden="true"></span> Logout

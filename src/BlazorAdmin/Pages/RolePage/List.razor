@@ -1,0 +1,8 @@
+﻿@page "/roles"
+@attribute [Authorize(Roles = BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS)]
+@inherits BlazorAdmin.Helpers.BlazorComponent
+@namespace BlazorAdmin.Pages.RolePage
+
+<PageTitle>eShopOnWeb Admin: Manage Roles</PageTitle>
+
+<h1>Manage Roles</h1>
