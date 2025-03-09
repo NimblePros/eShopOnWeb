@@ -22,6 +22,7 @@
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageVersion Include="BuildBundlerMinifier" Version="3.2.449" PrivateAssets="All" />
     <PackageVersion Include="FastEndpoints" Version="5.34.0" />
+    <PackageVersion Include="FastEndpoints.Swagger" Version="5.34.0" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="MediatR" Version="12.4.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.1" />
@@ -52,9 +53,6 @@
     <PackageVersion Include="System.Security.Claims" Version="4.3.0" />
     <PackageVersion Include="System.Text.Json" Version="9.0.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.2.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
     <!-- Aspire -->
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.1.0" />
