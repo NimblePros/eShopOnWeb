@@ -22,6 +22,7 @@ A list of Frequently Asked Questions about this repository can be found [here](h
   - [Configuring the sample to use SQL Server](#configuring-the-sample-to-use-sql-server)
 - [Running the sample in the dev container](#running-the-sample-in-the-dev-container)
 - [Running the sample using Docker](#running-the-sample-using-docker)
+- [Getting the GitHub Single Sign-On Working](#getting-the-github-single-sign-on-working)
 - [Community Extensions](#community-extensions)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -180,6 +181,14 @@ docker-compose up
 You should be able to make requests to localhost:5106 for the Web project, and localhost:5200 for the Public API project once these commands complete. If you have any problems, especially with login, try from a new guest or incognito browser instance.
 
 You can also run the applications by using the instructions located in their `Dockerfile` file in the root of each project. Again, run these commands from the root of the solution (where the .sln file is located).
+
+## Getting the GitHub Single Sign-On Working
+
+We include GitHub as our external provider for single sign-on.
+
+To get it running locally, you'll want to register an application in GitHub and store values in user secrets for the client ID and client secret.
+
+We explain the code in detail in our course on [ASP.NET Identity in Action: Implementing Individual Accounts](https://academy.nimblepros.com/p/applying-identity-to-asp-net).
 
 ## Community Extensions
 
