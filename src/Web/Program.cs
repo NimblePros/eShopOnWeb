@@ -61,6 +61,7 @@ builder.Services.Configure<ServiceConfig>(config =>
 builder.Services.AddBlazor(builder.Configuration);
 
 builder.Services.AddMetronome();
+builder.AddSeqEndpoint(connectionName: "seq");
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -80,6 +81,7 @@ if (!string.IsNullOrEmpty(catalogBaseUrl))
     });
 }
 
+
 app.UseCustomHealthChecks();
 
 app.UseTroubleshootingMiddlewares();
@@ -92,7 +94,7 @@ app.UseRouting();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<UserContextEnrichmentMiddleware>();
 app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
 app.MapRazorPages();
 app.MapHealthChecks("home_page_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("homePageHealthCheck") });
