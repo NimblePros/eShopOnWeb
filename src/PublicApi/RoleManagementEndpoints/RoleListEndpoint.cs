@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
-public class RoleListEndpoint(RoleManager<IdentityRole> roleManager):EndpointWithoutRequest<RoleListEndpointResponse>
+public class RoleListEndpoint(RoleManager<IdentityRole> roleManager):EndpointWithoutRequest<RoleListResponse>
 {
 
     public override void Configure()
@@ -16,14 +16,14 @@ public class RoleListEndpoint(RoleManager<IdentityRole> roleManager):EndpointWit
         Get("api/roles");
         Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
-        Description(d => d.Produces<RoleListEndpointResponse>()
+        Description(d => d.Produces<RoleListResponse>()
         .WithTags("RoleManagementEndpoints"));
     }
 
-    public override async Task<RoleListEndpointResponse> ExecuteAsync(CancellationToken ct)
+    public override async Task<RoleListResponse> ExecuteAsync(CancellationToken ct)
     {
         await Task.Delay(1000, ct);
-        var response = new RoleListEndpointResponse();
+        var response = new RoleListResponse();
         response.Roles = roleManager.Roles.ToList();
         return response;
     }

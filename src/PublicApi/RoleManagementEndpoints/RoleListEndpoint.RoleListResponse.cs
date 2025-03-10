@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
-public class RoleListEndpointResponse : BaseResponse
+public class RoleListResponse : BaseResponse
 {
-    public RoleListEndpointResponse(Guid correlationId) : base(correlationId)
+    public RoleListResponse(Guid correlationId) : base(correlationId)
     {
     }
 
-    public RoleListEndpointResponse()
+    public RoleListResponse()
     {
     }
 
