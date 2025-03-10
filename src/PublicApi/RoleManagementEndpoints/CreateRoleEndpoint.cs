@@ -26,7 +26,7 @@ public class CreateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoin
         var response = new CreateRoleResponse(request.CorrelationId());
         var existingRole = await roleManager.FindByNameAsync(request.Name);
         if (existingRole != null) {
-            throw new DuplicateException($"A role with name {request.Name} already exists.");
+            await SendResultAsync(TypedResults.Conflict());
         }
         var newRole = new IdentityRole(request.Name);
         var createRole = await roleManager.CreateAsync(newRole);
@@ -35,6 +35,6 @@ public class CreateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoin
             var responseRole = await roleManager.FindByNameAsync(request.Name);
             response.Role = responseRole;
         }
-        await SendOkAsync(response);
+        await SendCreatedAtAsync<RoleGetByIdEndpoint>(new { RoleId = response.Role.Id }, response, cancellation: ct);
     }
 }
