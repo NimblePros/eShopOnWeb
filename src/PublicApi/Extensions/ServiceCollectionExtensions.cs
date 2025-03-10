@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using BlazorShared;
+using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.eShopWeb.ApplicationCore.Constants;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
@@ -11,7 +11,7 @@ using Microsoft.eShopWeb.Infrastructure.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using NSwag;
 
 namespace Microsoft.eShopWeb.PublicApi.Extensions;
 
@@ -67,41 +67,27 @@ public static class ServiceCollectionExtensions
 
     public static void AddSwagger(this IServiceCollection services)
     {
-        // TODO: Update to use FastEndpoints approach to Swagger
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(c =>
+        services.SwaggerDocument(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-            c.EnableAnnotations();
-            c.SchemaFilter<CustomSchemaFilters>();
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            c.DocumentSettings = s =>
             {
-                Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n
+                s.Title = "My API";
+                s.Version = "v1";
+                s.AddAuth("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n
                       Enter 'Bearer' [space] and then your token in the text input below.
                       \r\n\r\nExample: 'Bearer 12345abcdef'",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        },
-                        Scheme = "oauth2",
-                        Name = "Bearer",
-                        In = ParameterLocation.Header,
-                    },
-                    new List<string>()
-                }
-            });
+                    Name = "Authorization",
+                    In = OpenApiSecurityApiKeyLocation.Header,
+                    Type = OpenApiSecuritySchemeType.ApiKey,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme
+                });
+            };
+            c.EnableJWTBearerAuth = false;
+            c.AutoTagPathSegmentIndex = 0;
+            c.ShortSchemaNames = true;
         });
     }
 }
