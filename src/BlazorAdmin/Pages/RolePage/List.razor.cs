@@ -14,7 +14,8 @@ public partial class List : BlazorComponent
     private List<IdentityRole> roles = new List<IdentityRole>();
     private Create CreateComponent { get; set; }
     private Delete DeleteComponent { get; set; }
-
+    private Edit EditComponent { get; set; }
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -31,6 +32,12 @@ public partial class List : BlazorComponent
     {
         await CreateComponent.Open();
     }
+
+    private async Task EditClick(string id)
+    {
+        await EditComponent.Open(id);
+    }
+
     private async Task DeleteClick(string id)
     {
         await DeleteComponent.Open(id);

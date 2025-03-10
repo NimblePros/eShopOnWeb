@@ -29,7 +29,10 @@ else
             @foreach (var role in roles){
                     <tr>
                         <td>@role.Name</td>
-                        <td>                            
+                        <td>
+                            <button @onclick="@(() => EditClick(role.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
+                                Edit
+                            </button>
                             <button @onclick="@(() => DeleteClick(role.Id))" @onclick:stopPropagation="true" class="btn btn-danger">
                                 Delete
                             </button>
@@ -42,4 +45,5 @@ else
 
     <Create OnSaveClick="ReloadRoles" @ref="CreateComponent"></Create>
     <Delete OnSaveClick="ReloadRoles" @ref="DeleteComponent"></Delete>
+    <Edit OnSaveClick="ReloadRoles" @ref="EditComponent"></Edit>
 }

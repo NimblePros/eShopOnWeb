@@ -33,6 +33,11 @@ public class DeleteRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManag
             return TypedResults.NotFound();
         }
 
+        if (string.IsNullOrEmpty(roleToDelete.Name))
+        {
+            throw new System.Exception("Unknown role to delete");
+        }
+
         // Without this, the RoleManager will delete the role and treat it as a cascading delete.
         // If we accidentally deleted an important role, that would not be a good day.
         var usersWithRole = await userManager.GetUsersInRoleAsync(roleToDelete.Name);
