@@ -33,10 +33,10 @@ public class CreateCatalogItemEndpointTest
     }
 
     [TestMethod]
-    public async Task ReturnsSuccessGivenValidNewItemAndAdminUserToken()
+    public async Task ReturnsSuccessGivenValidNewItemAndProductManagerUserToken()
     {
         var jsonContent = GetValidNewItemJson();
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
+        var adminToken = ApiTokenHelper.GetProductManagerUserToken();
         var client = ProgramTest.NewClient;
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await client.PostAsync("api/catalog-items", jsonContent);
