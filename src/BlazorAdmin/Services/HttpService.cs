@@ -46,6 +46,18 @@ public class HttpService
         return await FromHttpResponseMessage<T>(result);
     }
 
+    public async Task<T> HttpDelete<T>(string uri, string id)
+    where T : class
+    {
+        var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}/{id}");
+        if (!result.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        return await FromHttpResponseMessage<T>(result);
+    }
+
     public async Task<T> HttpPost<T>(string uri, object dataToSend)
         where T : class
     {

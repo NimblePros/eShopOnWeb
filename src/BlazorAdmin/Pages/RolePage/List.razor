@@ -22,16 +22,24 @@ else
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
         <tbody class="cursor-pointer">
             @foreach (var role in roles){
                     <tr>
                         <td>@role.Name</td>
+                        <td>                            
+                            <button @onclick="@(() => DeleteClick(role.Id))" @onclick:stopPropagation="true" class="btn btn-danger">
+                                Delete
+                            </button>
+                        </td>
                     </tr>
+
                 }
         </tbody>
     </table>
 
     <Create OnSaveClick="ReloadRoles" @ref="CreateComponent"></Create>
+    <Delete OnSaveClick="ReloadRoles" @ref="DeleteComponent"></Delete>
 }

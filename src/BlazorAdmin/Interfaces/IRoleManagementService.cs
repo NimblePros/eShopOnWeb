@@ -10,6 +10,6 @@ public interface IRoleManagementService
     Task<CreateRoleResponse> Create(CreateRoleRequest role);
     Task<IdentityRole> Edit(IdentityRole role);
     Task<string> Delete(string id);
-    Task<IdentityRole> GetById(string id);
+    Task<GetByIdRoleResponse> GetById(string id);
     Task<RoleListResponse> List();
 }

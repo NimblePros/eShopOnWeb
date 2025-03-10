@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using BlazorAdmin.Interfaces;
 using BlazorAdmin.Models;
+using BlazorShared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
@@ -25,7 +26,6 @@ public class RoleManagementService : IRoleManagementService
 
     public async Task<CreateRoleResponse> Create(CreateRoleRequest newRole)
     {
-        _logger.LogInformation("Creating role");
         var response = await _httpService.HttpPost<CreateRoleResponse>($"roles", newRole);
         return response;
     }
@@ -35,13 +35,14 @@ public class RoleManagementService : IRoleManagementService
         throw new System.NotImplementedException();
     }
 
-    public Task<string> Delete(string id)
+    public async Task<string> Delete(string id)
     {
-        throw new System.NotImplementedException();
+        return (await _httpService.HttpDelete<DeleteRoleResponse>($"roles", id)).Status;
     }
 
-    public Task<IdentityRole> GetById(string id)
+    public async Task<GetByIdRoleResponse> GetById(string id)
     {
-        throw new System.NotImplementedException();
+        var roleById = await _httpService.HttpGet<GetByIdRoleResponse>($"roles/{id}");
+        return roleById;
     }
 }

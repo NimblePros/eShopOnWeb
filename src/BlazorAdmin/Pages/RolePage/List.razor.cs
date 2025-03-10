@@ -13,6 +13,7 @@ public partial class List : BlazorComponent
 
     private List<IdentityRole> roles = new List<IdentityRole>();
     private Create CreateComponent { get; set; }
+    private Delete DeleteComponent { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -29,6 +30,10 @@ public partial class List : BlazorComponent
     private async Task CreateClick()
     {
         await CreateComponent.Open();
+    }
+    private async Task DeleteClick(string id)
+    {
+        await DeleteComponent.Open(id);
     }
 
     private async Task ReloadRoles()

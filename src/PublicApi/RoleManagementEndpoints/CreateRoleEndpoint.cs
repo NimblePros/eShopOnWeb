@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,7 +27,7 @@ public class CreateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoin
         var response = new CreateRoleResponse(request.CorrelationId());
         var existingRole = await roleManager.FindByNameAsync(request.Name);
         if (existingRole != null) {
-            await SendResultAsync(TypedResults.Conflict());
+            throw new DuplicateException($"A role with name {request.Name} already exists");
         }
         var newRole = new IdentityRole(request.Name);
         var createRole = await roleManager.CreateAsync(newRole);
@@ -34,7 +35,7 @@ public class CreateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoin
         {
             var responseRole = await roleManager.FindByNameAsync(request.Name);
             response.Role = responseRole;
+            await SendCreatedAtAsync<RoleGetByIdEndpoint>(new { RoleId = response.Role.Id }, response, cancellation: ct);
         }
-        await SendCreatedAtAsync<RoleGetByIdEndpoint>(new { RoleId = response.Role.Id }, response, cancellation: ct);
     }
 }
