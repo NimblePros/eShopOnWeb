@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using BlazorAdmin;
+using BlazorAdmin.Interfaces;
 using BlazorAdmin.Services;
 using Blazored.LocalStorage;
 using BlazorShared;
@@ -25,8 +26,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<HttpService>();
-builder.Services.AddScoped<RoleManagementService>();
-
+builder.Services.AddScoped<IRoleManagementService, RoleManagementService>();
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddAuthorizationCore();

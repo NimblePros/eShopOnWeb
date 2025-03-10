@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
+using BlazorAdmin.Interfaces;
 using BlazorAdmin.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace BlazorAdmin.Services;
 
-public class RoleManagementService
+public class RoleManagementService : IRoleManagementService
 {
     private readonly HttpService _httpService;
     private readonly ILogger<RoleManagementService> _logger;
@@ -26,5 +28,20 @@ public class RoleManagementService
         _logger.LogInformation("Creating role");
         var response = await _httpService.HttpPost<CreateRoleResponse>($"roles", newRole);
         return response;
+    }
+
+    public Task<IdentityRole> Edit(IdentityRole role)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task<string> Delete(string id)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task<IdentityRole> GetById(string id)
+    {
+        throw new System.NotImplementedException();
     }
 }

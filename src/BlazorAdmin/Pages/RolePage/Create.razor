@@ -1,7 +1,8 @@
-﻿@using BlazorAdmin.Models
+﻿@using BlazorAdmin.Interfaces
+@using BlazorAdmin.Models
 @inject ILogger<Create> Logger
 @inject IJSRuntime JSRuntime
-@inject RoleManagementService RoleService
+@inject IRoleManagementService RoleManagementService
 
 @namespace BlazorAdmin.Pages.RolePage
 
@@ -67,7 +68,7 @@
 
     private async Task CreateClick()
     {
-        var result = await RoleService.Create(_item);
+        var result = await RoleManagementService.Create(_item);
         if (result != null)
         {
             await OnSaveClick.InvokeAsync(null);
