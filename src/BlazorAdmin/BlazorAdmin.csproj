@@ -13,6 +13,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\BlazorShared\BlazorShared.csproj" />
+		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

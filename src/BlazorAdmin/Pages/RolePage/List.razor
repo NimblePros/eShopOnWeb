@@ -6,3 +6,25 @@
 <PageTitle>eShopOnWeb Admin: Manage Roles</PageTitle>
 
 <h1>Manage Roles</h1>
+
+@if (roles == null)
+{
+    <Spinner></Spinner>
+} 
+else 
+{
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                </tr>
+            </thead>
+        <tbody class="cursor-pointer">
+            @foreach (var role in roles){
+                    <tr>
+                        <td>@role.Name</td>
+                    </tr>
+                }
+        </tbody>
+    </table>
+}
