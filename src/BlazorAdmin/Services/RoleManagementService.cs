@@ -20,4 +20,11 @@ public class RoleManagementService
         var response = await _httpService.HttpGet<RoleListResponse>($"roles");
         return response;
     }
+
+    public async Task<CreateRoleResponse> Create(CreateRoleRequest newRole)
+    {
+        _logger.LogInformation("Creating role");
+        var response = await _httpService.HttpPost<CreateRoleResponse>($"roles", newRole);
+        return response;
+    }
 }

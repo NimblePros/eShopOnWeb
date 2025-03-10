@@ -13,6 +13,8 @@ public partial class List : BlazorComponent
     public RoleManagementService RoleService { get; set; }
 
     private List<IdentityRole> roles = new List<IdentityRole>();
+    private Create CreateComponent { get; set; }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -24,6 +26,17 @@ public partial class List : BlazorComponent
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+    private async Task CreateClick()
+    {
+        await CreateComponent.Open();
+    }
+
+    private async Task ReloadRoles()
+    {
+        var roleCall = await RoleService.List();
+        roles = roleCall.Roles;
+        StateHasChanged();
     }
 
 }

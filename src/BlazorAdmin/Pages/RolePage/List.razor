@@ -13,6 +13,11 @@
 } 
 else 
 {
+        <p class="esh-link-wrapper">
+            <button class="btn btn-primary" @onclick="@(CreateClick)">
+                Create New
+            </button>
+        </p>
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
@@ -27,4 +32,6 @@ else
                 }
         </tbody>
     </table>
+
+    <Create OnSaveClick="ReloadRoles" @ref="CreateComponent"></Create>
 }
