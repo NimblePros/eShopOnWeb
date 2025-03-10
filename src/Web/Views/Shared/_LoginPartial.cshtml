@@ -8,7 +8,8 @@
                     <img class="esh-identity-image" src="~/images/arrow-down.png">
                 </section>
                 <section class="esh-identity-drop">
-                    @if (User.IsInRole("Administrators"))
+                    @if (User.IsInRole(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS) 
+                        || User.IsInRole(BlazorShared.Authorization.Constants.Roles.PRODUCT_MANAGERS))
                     {
                         <a class="esh-identity-item"
                            asp-page="/Admin/Index">

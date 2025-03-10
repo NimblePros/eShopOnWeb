@@ -18,7 +18,7 @@ public class UpdateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, 
     public override void Configure()
     {
         Put("api/catalog-items");
-        Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
+        Roles(BlazorShared.Authorization.Constants.Roles.PRODUCT_MANAGERS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Description(d =>
             d.Produces<UpdateCatalogItemResponse>()
