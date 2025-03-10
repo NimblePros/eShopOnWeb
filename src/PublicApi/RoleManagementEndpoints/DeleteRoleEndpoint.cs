@@ -43,7 +43,7 @@ public class DeleteRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManag
         var usersWithRole = await userManager.GetUsersInRoleAsync(roleToDelete.Name);
         if (usersWithRole.Any())
         {
-            throw new RoleStillAssignedException("This role is in use and cannot be deleted.");
+            throw new RoleStillAssignedException($"The {roleToDelete.Name} role is in use and cannot be deleted.");
         }
 
         await roleManager.DeleteAsync(roleToDelete);

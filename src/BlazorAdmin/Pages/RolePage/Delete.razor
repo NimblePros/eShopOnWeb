@@ -41,7 +41,7 @@
                         Delete
                     </button>
                 </div>
-            }            
+            }
         </div>
     </div>
 </div>
@@ -52,6 +52,7 @@
 }
 
 @code {
+
     [Parameter]
     public EventCallback<string> OnSaveClick { get; set; }
 
@@ -64,8 +65,11 @@
     {
         var deleteResult = await RoleManagementService.Delete(id);
 
-        await OnSaveClick.InvokeAsync(null);
-        await Close();
+        if (deleteResult != null)
+        {
+            await OnSaveClick.InvokeAsync(null);
+            await Close();
+        }
     }
 
     public async Task Open(string id)

@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -52,8 +53,14 @@ public class HttpService
         var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}/{id}");
         if (!result.IsSuccessStatusCode)
         {
+            var exception = JsonSerializer.Deserialize<ErrorDetails>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            _toastService.ShowToast($"Error : {exception.Message}", ToastLevel.Error);
             return null;
         }
+        _toastService.ShowToast($"Deleted successfully!", ToastLevel.Success);
 
         return await FromHttpResponseMessage<T>(result);
     }
@@ -74,6 +81,7 @@ public class HttpService
 
             return null;
         }
+        _toastService.ShowToast($"Created successfully!", ToastLevel.Success);
 
         return await FromHttpResponseMessage<T>(result);
     }
@@ -89,6 +97,7 @@ public class HttpService
             _toastService.ShowToast("Error", ToastLevel.Error);
             return null;
         }
+        _toastService.ShowToast($"Updated successfully!", ToastLevel.Success);
 
         return await FromHttpResponseMessage<T>(result);
     }
