@@ -1,14 +1,13 @@
-﻿using BlazorAdmin.Models;
-using BlazorShared.Authorization;
-using BlazorShared.Models;
-using Microsoft.eShopWeb;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using BlazorAdmin.Models;
+using BlazorShared.Authorization;
+using Microsoft.eShopWeb;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PublicApiIntegrationTests.RoleManagementEndpoints;
 
