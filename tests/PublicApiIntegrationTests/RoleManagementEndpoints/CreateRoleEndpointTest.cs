@@ -40,7 +40,8 @@ public class CreateRoleEndpointTest
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync();
         var model = stringResponse.FromJson<CreateRoleResponse>();
-
+        Assert.IsNotNull(model);
+        Assert.IsNotNull(model.Role);
         Assert.AreEqual(_testName, model.Role.Name);
     }
 
