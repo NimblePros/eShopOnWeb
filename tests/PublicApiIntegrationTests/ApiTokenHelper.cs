@@ -18,6 +18,14 @@ namespace PublicApiIntegrationTests
             return CreateToken(userName, roles);
         }
 
+        public static string GetProductManagerUserToken()
+        {
+            string userName = "productmgr@microsoft.com";
+            string[] roles = { "Product Managers" };
+
+            return CreateToken(userName, roles);
+        }
+
         public static string GetNormalUserToken()
         {
             string userName = "demouser@microsoft.com";
