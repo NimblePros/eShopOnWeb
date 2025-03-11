@@ -16,9 +16,18 @@ public class AppIdentityDbContextSeed
         }
 
         await roleManager.CreateAsync(new IdentityRole(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS));
+        await roleManager.CreateAsync(new IdentityRole(BlazorShared.Authorization.Constants.Roles.PRODUCT_MANAGERS));
 
         var defaultUser = new ApplicationUser { UserName = "demouser@microsoft.com", Email = "demouser@microsoft.com" };
         await userManager.CreateAsync(defaultUser, AuthorizationConstants.DEFAULT_PASSWORD);
+
+        var productManager = new ApplicationUser { UserName = "productmgr@microsoft.com", Email = "productmgr@microsoft.com" };
+        await userManager.CreateAsync(productManager, AuthorizationConstants.DEFAULT_PASSWORD);
+        productManager = await userManager.FindByNameAsync(productManager.UserName);
+        if (productManager != null)
+        {
+            await userManager.AddToRoleAsync(productManager, BlazorShared.Authorization.Constants.Roles.PRODUCT_MANAGERS);
+        }
 
         string adminUserName = "admin@microsoft.com";
         var adminUser = new ApplicationUser { UserName = adminUserName, Email = adminUserName };

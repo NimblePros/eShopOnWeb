@@ -11,9 +11,9 @@ namespace PublicApiIntegrationTests.CatalogItemEndpoints;
 public class DeleteCatalogItemEndpointTest
 {
     [TestMethod]
-    public async Task ReturnsSuccessGivenValidIdAndAdminUserToken()
+    public async Task ReturnsSuccessGivenValidIdAndProductManagerUserToken()
     {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
+        var adminToken = ApiTokenHelper.GetProductManagerUserToken();
         var client = ProgramTest.NewClient;
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await client.DeleteAsync("api/catalog-items/12");
@@ -25,9 +25,9 @@ public class DeleteCatalogItemEndpointTest
     }
 
     [TestMethod]
-    public async Task ReturnsNotFoundGivenInvalidIdAndAdminUserToken()
+    public async Task ReturnsNotFoundGivenInvalidIdAndProductManagerUserToken()
     {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
+        var adminToken = ApiTokenHelper.GetProductManagerUserToken();
         var client = ProgramTest.NewClient;
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await client.DeleteAsync("api/catalog-items/0");
