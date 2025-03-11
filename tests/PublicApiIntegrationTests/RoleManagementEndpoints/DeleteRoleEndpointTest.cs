@@ -24,7 +24,7 @@ public class DeleteRoleEndpointTest
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync();
         var model = stringResponse.FromJson<DeleteCatalogItemResponse>();
-
+        Assert.IsNotNull(model);
         Assert.AreEqual("Deleted", model!.Status);
     }
 
@@ -50,6 +50,8 @@ public class DeleteRoleEndpointTest
         var roleList = await client.GetAsync("/api/roles");
         var stringResponse = await roleList.Content.ReadAsStringAsync();
         var model = stringResponse.FromJson<RoleListResponse>();
+        Assert.IsNotNull(model);
+        Assert.IsNotNull(model.Roles);
         var productManager = model.Roles.FirstOrDefault(x => x.Name == Constants.Roles.PRODUCT_MANAGERS);
         Assert.IsNotNull(productManager);
         // Try to delete it with it already assigned

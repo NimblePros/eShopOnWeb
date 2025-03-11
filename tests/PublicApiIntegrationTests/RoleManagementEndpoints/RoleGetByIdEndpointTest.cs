@@ -23,6 +23,8 @@ public class RoleGetByIdEndpointTest
         var roleList = await client.GetAsync("/api/roles");
         var stringResponse = await roleList.Content.ReadAsStringAsync();
         var model = stringResponse.FromJson<RoleListResponse>();
+        Assert.IsNotNull(model);
+        Assert.IsNotNull(model.Roles);
         var adminRole = model.Roles.FirstOrDefault(x => x.Name == Constants.Roles.ADMINISTRATORS);
         Assert.IsNotNull(adminRole);
 
@@ -31,7 +33,8 @@ public class RoleGetByIdEndpointTest
         
         var adminStringResponse = await response.Content.ReadAsStringAsync();
         var adminModel = adminStringResponse.FromJson<GetByIdRoleResponse>();
-
+        Assert.IsNotNull(adminModel);
+        Assert.IsNotNull(adminModel.Role);
         Assert.AreEqual(Constants.Roles.ADMINISTRATORS, adminModel.Role.Name);
     }
 
