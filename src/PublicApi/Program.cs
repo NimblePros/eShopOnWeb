@@ -26,6 +26,7 @@ builder.Configuration.AddConfigurationFile("appsettings.test.json");
 builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<AppIdentityDbContext>()
         .AddDefaultTokenProviders();
 
