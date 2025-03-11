@@ -62,7 +62,9 @@
 }
 
 @code {
-    
+
+
+
     [Parameter]
     public EventCallback<string> OnSaveClick { get; set; }
 
@@ -74,6 +76,8 @@
     private async Task SaveClick()
     {
         await RoleManagementService.Edit(_item);
+
+        Logger.LogInformation($"Updated Role Id: {_item.Id} with name {_item.Name}");
         await OnSaveClick.InvokeAsync(null);
         await Close();
     }

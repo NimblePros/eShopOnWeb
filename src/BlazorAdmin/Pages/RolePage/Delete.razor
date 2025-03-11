@@ -52,7 +52,6 @@
 }
 
 @code {
-
     [Parameter]
     public EventCallback<string> OnSaveClick { get; set; }
 
@@ -67,6 +66,8 @@
 
         if (deleteResult != null)
         {
+
+            Logger.LogInformation($"Deleted Role Id: {id}");
             await OnSaveClick.InvokeAsync(null);
             await Close();
         }

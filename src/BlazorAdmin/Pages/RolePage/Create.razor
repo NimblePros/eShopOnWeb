@@ -58,6 +58,7 @@
 }
 
 @code {
+
     [Parameter]
     public EventCallback<string> OnSaveClick { get; set; }
 
@@ -71,6 +72,7 @@
         var result = await RoleManagementService.Create(_item);
         if (result != null)
         {
+            Logger.LogInformation($"Created {result.Role.Name} Role ({result.Role.Id})");
             await OnSaveClick.InvokeAsync(null);
             await Close();
         }
