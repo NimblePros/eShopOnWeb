@@ -52,7 +52,12 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddSwagger();
 
 builder.Services.AddMetronome();
-builder.AddSeqEndpoint(connectionName: "seq");
+string seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
+
+builder.AddSeqEndpoint(connectionName: "seq", options =>
+{
+    options.ServerUrl = seqUrl;
+});
 
 var app = builder.Build();
 
