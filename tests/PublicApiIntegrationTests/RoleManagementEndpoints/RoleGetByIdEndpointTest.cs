@@ -21,8 +21,8 @@ public class RoleGetByIdEndpointTest
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var roleList = await client.GetAsync("/api/roles");
-        var stringResponse = await roleList.Content.ReadAsStringAsync();
-        var model = stringResponse.FromJson<RoleListResponse>();
+        var getAllRolesResponse = await roleList.Content.ReadAsStringAsync();
+        var model = getAllRolesResponse.FromJson<RoleListResponse>();
         Assert.IsNotNull(model);
         Assert.IsNotNull(model.Roles);
         var adminRole = model.Roles.FirstOrDefault(x => x.Name == Constants.Roles.ADMINISTRATORS);
@@ -31,8 +31,8 @@ public class RoleGetByIdEndpointTest
         var response = await client.GetAsync($"api/roles/{adminRole.Id}");
         response.EnsureSuccessStatusCode();
         
-        var adminStringResponse = await response.Content.ReadAsStringAsync();
-        var adminModel = adminStringResponse.FromJson<GetByIdRoleResponse>();
+        var adminRoleResponse = await response.Content.ReadAsStringAsync();
+        var adminModel = adminRoleResponse.FromJson<GetByIdRoleResponse>();
         Assert.IsNotNull(adminModel);
         Assert.IsNotNull(adminModel.Role);
         Assert.AreEqual(Constants.Roles.ADMINISTRATORS, adminModel.Role.Name);

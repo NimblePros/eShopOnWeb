@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using BlazorAdmin.Interfaces;
 using BlazorAdmin.Models;
-using BlazorShared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
@@ -36,5 +35,11 @@ public class RoleManagementService(HttpService httpService, ILogger<RoleManageme
     {
         var roleById = await httpService.HttpGet<GetByIdRoleResponse>($"roles/{id}");
         return roleById;
+    }
+
+    public async Task<GetRoleMembershipResponse> GetMembershipByName(string name)
+    {
+        var roleMembershipByName = await httpService.HttpGet<GetRoleMembershipResponse>($"roles/{name}/members");
+        return roleMembershipByName;
     }
 }
