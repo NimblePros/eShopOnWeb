@@ -3,6 +3,7 @@ using BlazorAdmin;
 using BlazorAdmin.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.Infrastructure;
 using Microsoft.eShopWeb.Infrastructure.Data;
@@ -27,15 +28,17 @@ public static class ServiceCollectionExtensions
             var credential = new ChainedTokenCredential(new AzureDeveloperCliCredential(), new DefaultAzureCredential());
             configuration.AddAzureKeyVault(new Uri(configuration["AZURE_KEY_VAULT_ENDPOINT"] ?? ""), credential);
 
-            services.AddDbContext<CatalogContext>(c =>
+            services.AddDbContext<CatalogContext>((provider, options) =>
             {
                 var connectionString = configuration[configuration["AZURE_SQL_CATALOG_CONNECTION_STRING_KEY"] ?? ""];
-                c.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure());
+                options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure())
+                .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
             });
-            services.AddDbContext<AppIdentityDbContext>(options =>
+            services.AddDbContext<AppIdentityDbContext>((provider,options) =>
             {
                 var connectionString = configuration[configuration["AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY"] ?? ""];
-                options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure());
+                options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure())
+                                .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
             });
         }
     }

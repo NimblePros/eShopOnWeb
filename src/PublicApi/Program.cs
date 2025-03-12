@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NimblePros.Metronome;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,14 @@ builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 builder.Services.AddSwagger();
+
+builder.Services.AddMetronome();
+string seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
+
+builder.AddSeqEndpoint(connectionName: "seq", options =>
+{
+    options.ServerUrl = seqUrl;
+});
 
 var app = builder.Build();
 

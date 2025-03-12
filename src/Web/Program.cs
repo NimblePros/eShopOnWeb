@@ -8,6 +8,7 @@ using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
+using NimblePros.Metronome;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +84,9 @@ builder.Services.Configure<ServiceConfig>(config =>
 
 builder.Services.AddBlazor(builder.Configuration);
 
+builder.Services.AddMetronome();
+builder.AddSeqEndpoint(connectionName: "seq");
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 var app = builder.Build();
@@ -101,6 +105,7 @@ if (!string.IsNullOrEmpty(catalogBaseUrl))
     });
 }
 
+
 app.UseCustomHealthChecks();
 
 app.UseTroubleshootingMiddlewares();
@@ -113,7 +118,7 @@ app.UseRouting();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<UserContextEnrichmentMiddleware>();
 app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
 app.MapRazorPages();
 app.MapHealthChecks("home_page_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("homePageHealthCheck") });
