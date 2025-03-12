@@ -6,7 +6,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" />		
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" />		
-		<PackageReference Include="Microsoft.AspNetCore.Identity" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Core" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Stores" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Configuration" />
