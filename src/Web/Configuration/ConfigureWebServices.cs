@@ -1,5 +1,4 @@
-﻿using MediatR;
-using Microsoft.eShopWeb.Web.Interfaces;
+﻿using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.Services;
 
 namespace Microsoft.eShopWeb.Web.Configuration;

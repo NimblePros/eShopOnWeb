@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web;
+using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
 using NimblePros.Metronome;
@@ -23,6 +24,29 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
            .AddDefaultUI()
            .AddEntityFrameworkStores<AppIdentityDbContext>()
            .AddDefaultTokenProviders();
+
+var gitHubClientId = builder.Configuration["GitHub:ClientId"] ?? string.Empty;
+
+if (!string.IsNullOrEmpty(gitHubClientId))
+{
+    builder.Services.AddAuthentication()
+        .AddOAuth("GitHub", "GitHub", options =>
+        {
+            options.ClientId = gitHubClientId;
+            options.ClientSecret = builder.Configuration["GitHub:ClientSecret"] ?? string.Empty;
+            options.CallbackPath = "/signin-github";
+            options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
+            options.TokenEndpoint = "https://github.com/login/oauth/access_token";
+            options.UserInformationEndpoint = "https://api.github.com/user";
+            options.UsePkce = false; // PKCE not supported by GitHub       
+            options.SaveTokens = true;
+            options.ClaimsIssuer = "GitHub";
+            options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
+            {
+                OnCreatingTicket = GitHubClaimsHelper.OnOAuthCreatingTicket
+            };
+        });
+}
 
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 builder.Services.AddCoreServices(builder.Configuration);

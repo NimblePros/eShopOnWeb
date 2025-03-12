@@ -21,7 +21,7 @@ public class CreateCatalogItemEndpointTest
 
 
     [TestMethod]
-    public async Task ReturnsNotAuthorizedGivenNormalUserToken()
+    public async Task ReturnsForbiddenGivenNormalUserToken()
     {
         var jsonContent = GetValidNewItemJson();
         var token = ApiTokenHelper.GetNormalUserToken();
@@ -32,11 +32,24 @@ public class CreateCatalogItemEndpointTest
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
+
     [TestMethod]
-    public async Task ReturnsSuccessGivenValidNewItemAndAdminUserToken()
+    public async Task ReturnsForbiddenGivenAdminUserToken()
     {
         var jsonContent = GetValidNewItemJson();
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
+        var token = ApiTokenHelper.GetAdminUserToken();
+        var client = ProgramTest.NewClient;
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var response = await client.PostAsync("api/catalog-items", jsonContent);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task ReturnsSuccessGivenValidNewItemAndProductManagerUserToken()
+    {
+        var jsonContent = GetValidNewItemJson();
+        var adminToken = ApiTokenHelper.GetProductManagerUserToken();
         var client = ProgramTest.NewClient;
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await client.PostAsync("api/catalog-items", jsonContent);

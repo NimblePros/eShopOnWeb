@@ -1,5 +1,6 @@
 ﻿using BlazorShared;
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure;
@@ -25,6 +26,7 @@ builder.Configuration.AddConfigurationFile("appsettings.test.json");
 builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<AppIdentityDbContext>()
         .AddDefaultTokenProviders();
 
@@ -69,17 +71,9 @@ app.UseCors(CORS_POLICY);
 
 app.UseAuthorization();
 
-// Enable middleware to serve generated Swagger as a JSON endpoint.
-app.UseSwagger();
-
-// Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
-// specifying the Swagger JSON endpoint.
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-});
-
 app.UseFastEndpoints();
+
+app.UseSwaggerGen();
 
 app.Logger.LogInformation("LAUNCHING PublicApi");
 app.Run();
