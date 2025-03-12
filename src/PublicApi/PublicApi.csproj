@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
+    <PackageReference Include="Aspire.Seq" />
     <PackageReference Include="FastEndpoints" />
     <PackageReference Include="FastEndpoints.Swagger" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
@@ -24,7 +25,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" />
-
+    <PackageReference Include="NimblePros.Metronome" />     
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
   </ItemGroup>
 
