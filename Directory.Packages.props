@@ -34,7 +34,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="9.0.2" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
-    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Extensions.Identity.Core" Version="9.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="9.0.3" />
