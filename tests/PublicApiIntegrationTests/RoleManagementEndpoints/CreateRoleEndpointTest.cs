@@ -17,7 +17,7 @@ public class CreateRoleEndpointTest
     private string _testName = "test role";
 
     [TestMethod]
-    public async Task ReturnsNotAuthorizedGivenNormalUserToken()
+    public async Task ReturnsForbiddenGivenNormalUserToken()
     {
         var jsonContent = GetValidNewItemJson();
         var token = ApiTokenHelper.GetNormalUserToken();
