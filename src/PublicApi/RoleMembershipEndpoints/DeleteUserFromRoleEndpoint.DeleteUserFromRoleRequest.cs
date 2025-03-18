@@ -3,11 +3,11 @@
 public class DeleteUserFromRoleRequest : BaseRequest
 {
     public string UserId { get; init; }
-    public string RoleName { get; init; }
+    public string RoleId { get; init; }
 
-    public DeleteUserFromRoleRequest(string userId, string roleName)
+    public DeleteUserFromRoleRequest(string userId, string roleId)
     {
         UserId = userId;
-        RoleName = roleName;
+        RoleId = roleId;
     }
 }
