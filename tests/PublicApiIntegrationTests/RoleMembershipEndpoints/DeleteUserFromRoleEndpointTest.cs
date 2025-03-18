@@ -41,7 +41,7 @@ public class DeleteUserFromRoleEndpointTest : PublicApiTestBase
     }
 
     [TestMethod]
-    public async Task ReturnsOkWhenDeletingUserFromRoleSuccessfully()
+    public async Task ReturnsNoContentWhenDeletingUserFromRoleSuccessfully()
     {
         var client = GetAdminClient();
 
@@ -56,7 +56,7 @@ public class DeleteUserFromRoleEndpointTest : PublicApiTestBase
 
         var response = await client.DeleteAsync($"api/roles/{validRoleId}/members/{validUserId}");
 
-        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     private async Task<string> GetValidRoleId(HttpClient client, string roleName)

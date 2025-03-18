@@ -9,7 +9,7 @@ using Microsoft.eShopWeb.Infrastructure.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 
-public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager) : Endpoint<DeleteUserFromRoleRequest, Results<Ok, NotFound>>
+public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager) : Endpoint<DeleteUserFromRoleRequest, Results<NoContent, NotFound>>
 {
     public override void Configure()
     {
@@ -25,7 +25,7 @@ public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, U
         );
     }
 
-    public override async Task<Results<Ok, NotFound>> ExecuteAsync(DeleteUserFromRoleRequest request, CancellationToken ct)
+    public override async Task<Results<NoContent, NotFound>> ExecuteAsync(DeleteUserFromRoleRequest request, CancellationToken ct)
     {
         var userToUpdate = await userManager.FindByIdAsync(request.UserId);
         if (userToUpdate is null)
@@ -41,7 +41,7 @@ public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, U
         
         await userManager.RemoveFromRoleAsync(userToUpdate, roleToUpdate.Name);
         
-        return TypedResults.Ok();
+        return TypedResults.NoContent();
 
     }
 }
