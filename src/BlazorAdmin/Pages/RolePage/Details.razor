@@ -43,9 +43,12 @@
                                     <tr>
                                         <td>@member.UserName</td>
                                         <td>
-                                            <button @onclick="@(() => DeleteClick(member.Id,member.UserName))" @onclick:stopPropagation="true" class="btn btn-danger">
-                                                Remove from Role
-                                            </button>
+                                            @if (member.UserName != "admin@microsoft.com")
+                                            {
+                                                <button @onclick="@(() => DeleteClick(member.Id,member.UserName))" @onclick:stopPropagation="true" class="btn btn-danger">
+                                                    Remove from Role
+                                                </button>
+                                            }
                                         </td>
                                     </tr>
                                 }
