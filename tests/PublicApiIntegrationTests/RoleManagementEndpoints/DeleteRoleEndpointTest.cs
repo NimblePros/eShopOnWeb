@@ -6,6 +6,7 @@ using BlazorAdmin.Models;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PublicApiIntegrationTests.Helpers;
 
 namespace PublicApiIntegrationTests.RoleManagementEndpoints;
 
@@ -15,9 +16,7 @@ public class DeleteRoleEndpointTest
     [TestMethod]
     public async Task ReturnsNotFoundGivenInvalidIdAndAdminUserToken()
     {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var client = HttpClientHelper.GetAdminClient();
         var response = await client.DeleteAsync("api/roles/0");
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
@@ -26,9 +25,7 @@ public class DeleteRoleEndpointTest
     [TestMethod]
     public async Task ReturnsConflictWhenDeletingAnAssignedRole()
     {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var client = HttpClientHelper.GetAdminClient();
 
         // Get the role id for Product Manager
         var roleList = await client.GetAsync("/api/roles");

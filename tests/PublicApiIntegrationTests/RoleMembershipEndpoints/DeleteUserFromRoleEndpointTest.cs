@@ -1,22 +1,22 @@
 ﻿using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using BlazorAdmin.Models;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PublicApiIntegrationTests.Helpers;
 
 namespace PublicApiIntegrationTests.RoleMembershipEndpoints;
 
 [TestClass]
-public class DeleteUserFromRoleEndpointTest : PublicApiTestBase
+public class DeleteUserFromRoleEndpointTest
 {
     [TestMethod]
     public async Task ReturnsNotFoundGivenValidRoleIdAndInvalidUserIdAndAdminUserToken()
     {                
-        var client = GetAdminClient();        
+        var client = HttpClientHelper.GetAdminClient();
         
         var validRoleId = await GetValidRoleId(client, Constants.Roles.ADMINISTRATORS);
         var response = await client.DeleteAsync($"api/roles/{validRoleId}/members/0");
@@ -27,7 +27,7 @@ public class DeleteUserFromRoleEndpointTest : PublicApiTestBase
     [TestMethod]
     public async Task ReturnsNotFoundGivenInvalidRoleIdAndValidUserIdAndAdminUserToken()
     {
-        var client = GetAdminClient();
+        var client = HttpClientHelper.GetAdminClient();
 
         var roleList = await client.GetAsync($"/api/roles/{Constants.Roles.ADMINISTRATORS}/members");
         var roleMembersResponse = await roleList.Content.ReadAsStringAsync();
@@ -43,7 +43,7 @@ public class DeleteUserFromRoleEndpointTest : PublicApiTestBase
     [TestMethod]
     public async Task ReturnsNoContentWhenDeletingUserFromRoleSuccessfully()
     {
-        var client = GetAdminClient();
+        var client = HttpClientHelper.GetAdminClient();
 
         var roleName = Constants.Roles.PRODUCT_MANAGERS;
         var validRoleId = await GetValidRoleId(client, Constants.Roles.PRODUCT_MANAGERS);

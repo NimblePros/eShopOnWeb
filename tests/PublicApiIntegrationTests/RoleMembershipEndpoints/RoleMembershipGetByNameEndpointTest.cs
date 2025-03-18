@@ -1,18 +1,18 @@
-﻿using System.Net.Http.Headers;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BlazorAdmin.Models;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PublicApiIntegrationTests.Helpers;
 
 namespace PublicApiIntegrationTests.RoleMembershipEndpoints;
 [TestClass]
-public class RoleMembershipGetByNameEndpointTest : PublicApiTestBase
+public class RoleMembershipGetByNameEndpointTest
 {
     [TestMethod]
     public async Task ReturnsMembersWithValidRoleName()
     {
-        var client = GetAdminClient();
+        var client = HttpClientHelper.GetAdminClient();
 
         var roleList = await client.GetAsync($"/api/roles/{Constants.Roles.ADMINISTRATORS}/members");
         var roleMembersResponse = await roleList.Content.ReadAsStringAsync();
@@ -24,7 +24,7 @@ public class RoleMembershipGetByNameEndpointTest : PublicApiTestBase
     [TestMethod]
     public async Task ReturnsEmptyListGivenInvalidName()
     {
-        var client = GetAdminClient();
+        var client = HttpClientHelper.GetAdminClient();
 
         var invalidName = "invalidName";
         var getInvalidRoleNameMembership = await client.GetAsync($"api/roles/{invalidName}/members");
