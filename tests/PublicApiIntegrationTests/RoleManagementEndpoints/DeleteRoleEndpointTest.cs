@@ -36,11 +36,11 @@ public class DeleteRoleEndpointTest
         var model = stringResponse.FromJson<RoleListResponse>();
         Assert.IsNotNull(model);
         Assert.IsNotNull(model.Roles);
-        var productManager = model.Roles.FirstOrDefault(x => x.Name == Constants.Roles.PRODUCT_MANAGERS);
-        Assert.IsNotNull(productManager);
+        var administrator = model.Roles.FirstOrDefault(x => x.Name == Constants.Roles.ADMINISTRATORS);
+        Assert.IsNotNull(administrator);
         // Try to delete it with it already assigned
 
-        var response = await client.DeleteAsync($"api/roles/{productManager.Id}");
+        var response = await client.DeleteAsync($"api/roles/{administrator.Id}");
 
         Assert.AreEqual(HttpStatusCode.Conflict, response.StatusCode);
     }
