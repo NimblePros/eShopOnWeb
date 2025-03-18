@@ -9,7 +9,7 @@ using Microsoft.eShopWeb.Infrastructure.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 
-public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager) : Endpoint<DeleteUserFromRoleRequest, Results<Ok<DeleteUserFromRoleResponse>, NotFound>>
+public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager) : Endpoint<DeleteUserFromRoleRequest, Results<Ok, NotFound>>
 {
     public override void Configure()
     {
@@ -17,14 +17,16 @@ public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, U
         Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Description(d =>
-            d.Produces<DeleteUserFromRoleResponse>()
-            .WithTags("RoleManagementEndpoints")
+            {
+                d.Produces(StatusCodes.Status204NoContent);
+                d.Produces(StatusCodes.Status404NotFound);
+                d.WithTags("RoleManagementEndpoints");
+            }
         );
     }
 
-    public override async Task<Results<Ok<DeleteUserFromRoleResponse>, NotFound>> ExecuteAsync(DeleteUserFromRoleRequest request, CancellationToken ct)
+    public override async Task<Results<Ok, NotFound>> ExecuteAsync(DeleteUserFromRoleRequest request, CancellationToken ct)
     {
-        var response = new DeleteUserFromRoleResponse(request.CorrelationId());
         var userToUpdate = await userManager.FindByIdAsync(request.UserId);
         if (userToUpdate is null)
         {
@@ -39,7 +41,7 @@ public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, U
         
         await userManager.RemoveFromRoleAsync(userToUpdate, roleToUpdate.Name);
         
-        return TypedResults.Ok(response);
+        return TypedResults.Ok();
 
     }
 }

@@ -61,14 +61,12 @@
     private async Task DeleteClick()
     {
         Logger.LogInformation($"Removing User {_userId} from Role {_roleName}");
-        var deleteResult = await RoleManagementService.DeleteUserFromRole(_userId, _roleId);
+        await RoleManagementService.DeleteUserFromRole(_userId, _roleId);
 
-        if (deleteResult != null)
-        {
-            Logger.LogInformation($"Removed User {_userId} from {_roleName}");
-            await OnSaveClick.InvokeAsync(null);
-            await Close();
-        }
+        Logger.LogInformation($"Removed User {_userId} from {_roleName}");
+        await OnSaveClick.InvokeAsync(null);
+        await Close();
+
     }
 
     public async Task Open(string userId, string userName, string roleName, string roleId)
