@@ -14,6 +14,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\BlazorShared\BlazorShared.csproj" />
+		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -26,6 +27,12 @@
 		<Compile Update="Services\CatalogItem\Edit.CreateCatalogItemResult.cs">
 			<DependentUpon>Edit.cs</DependentUpon>
 		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="Pages\RolePage\DeleteUserFromRole.razor">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	  </Content>
 	</ItemGroup>
 
 </Project>

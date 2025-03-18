@@ -11,7 +11,7 @@ using Microsoft.eShopWeb.ApplicationCore.Exceptions;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
-public class DeleteRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager) : Endpoint <DeleteRoleRequest, Results<Ok<DeleteRoleResponse>, NotFound>>
+public class DeleteRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager) : Endpoint<DeleteRoleRequest, Results<NoContent, NotFound>>
 {
     public override void Configure()
     {
@@ -19,14 +19,16 @@ public class DeleteRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManag
         Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Description(d =>
-            d.Produces<DeleteRoleResponse>()
-            .WithTags("RoleManagementEndpoints")
+        {
+            d.Produces(StatusCodes.Status204NoContent);
+            d.Produces(StatusCodes.Status404NotFound);
+            d.WithTags("RoleManagementEndpoints");
+        }
         );
     }
 
-    public override async Task<Results<Ok<DeleteRoleResponse>,NotFound>> ExecuteAsync(DeleteRoleRequest request, CancellationToken ct)
+    public override async Task<Results<NoContent, NotFound>> ExecuteAsync(DeleteRoleRequest request, CancellationToken ct)
     {
-        var response = new DeleteRoleResponse(request.CorrelationId());
         var roleToDelete = await roleManager.FindByIdAsync(request.RoleId);
         if (roleToDelete is null)
         {
@@ -48,7 +50,7 @@ public class DeleteRoleEndpoint(RoleManager<IdentityRole> roleManager, UserManag
 
         await roleManager.DeleteAsync(roleToDelete);
 
-        return TypedResults.Ok(response);
+        return TypedResults.NoContent();
 
     }
 }

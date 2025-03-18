@@ -12,7 +12,7 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// <summary>
 /// Deletes a Catalog Item
 /// </summary>
-public class DeleteCatalogItemEndpoint(IRepository<CatalogItem> itemRepository) : Endpoint<DeleteCatalogItemRequest, Results<Ok<DeleteCatalogItemResponse>, NotFound>>
+public class DeleteCatalogItemEndpoint(IRepository<CatalogItem> itemRepository) : Endpoint<DeleteCatalogItemRequest, Results<NoContent, NotFound>>
 {
     public override void Configure()
     {
@@ -20,13 +20,16 @@ public class DeleteCatalogItemEndpoint(IRepository<CatalogItem> itemRepository) 
         Roles(BlazorShared.Authorization.Constants.Roles.PRODUCT_MANAGERS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Description(d =>
-            d.Produces<DeleteCatalogItemResponse>()
-             .WithTags("CatalogItemEndpoints"));
+        {
+            d.Produces(StatusCodes.Status204NoContent);
+            d.Produces(StatusCodes.Status404NotFound);
+            d.WithTags("CatalogItemEndpoints");
+        }
+        );
     }
 
-    public override async Task<Results<Ok<DeleteCatalogItemResponse>, NotFound>> ExecuteAsync(DeleteCatalogItemRequest request, CancellationToken ct)
+    public override async Task<Results<NoContent, NotFound>> ExecuteAsync(DeleteCatalogItemRequest request, CancellationToken ct)
     {
-        var response = new DeleteCatalogItemResponse(request.CorrelationId());
 
         var itemToDelete = await itemRepository.GetByIdAsync(request.CatalogItemId, ct);
         if (itemToDelete is null)
@@ -34,6 +37,6 @@ public class DeleteCatalogItemEndpoint(IRepository<CatalogItem> itemRepository) 
 
         await itemRepository.DeleteAsync(itemToDelete, ct);
 
-        return TypedResults.Ok(response);
+        return TypedResults.NoContent();
     }
 }

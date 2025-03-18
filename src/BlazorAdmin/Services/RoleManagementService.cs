@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using BlazorAdmin.Interfaces;
 using BlazorAdmin.Models;
-using BlazorShared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
@@ -26,15 +25,25 @@ public class RoleManagementService(HttpService httpService, ILogger<RoleManageme
         return await httpService.HttpPut<IdentityRole>($"roles", role);
     }
 
-    public async Task<string> Delete(string id)
+    public async Task Delete(string id)
     {
-        var response = await httpService.HttpDelete<DeleteRoleResponse>($"roles", id);
-        return response.Status;
+        await httpService.HttpDelete($"roles/{id}");        
     }
 
     public async Task<GetByIdRoleResponse> GetById(string id)
     {
         var roleById = await httpService.HttpGet<GetByIdRoleResponse>($"roles/{id}");
         return roleById;
+    }
+
+    public async Task<GetRoleMembershipResponse> GetMembershipByName(string name)
+    {
+        var roleMembershipByName = await httpService.HttpGet<GetRoleMembershipResponse>($"roles/{name}/members");
+        return roleMembershipByName;
+    }
+
+    public async Task DeleteUserFromRole(string userId, string roleId)
+    {
+        await httpService.HttpDelete($"roles/{roleId}/members/{userId}");        
     }
 }

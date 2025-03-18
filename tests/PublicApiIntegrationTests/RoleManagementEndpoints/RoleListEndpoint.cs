@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BlazorAdmin.Models;
 using Microsoft.eShopWeb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PublicApiIntegrationTests.Helpers;
 
 namespace PublicApiIntegrationTests.RoleManagementEndpoints;
 
@@ -22,10 +23,7 @@ public class RoleListEndpoint
     [TestMethod]
     public async Task ReturnsForbiddenForGeneralAuthorizedAccess()
     {
-        var token = ApiTokenHelper.GetNormalUserToken();
-
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = HttpClientHelper.GetNormalUserClient();
 
         var response = await client.GetAsync("/api/roles");
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
@@ -34,10 +32,7 @@ public class RoleListEndpoint
     [TestMethod]
     public async Task ReturnsSuccessAndRolesForAdministratorAccess()
     {
-        var token = ApiTokenHelper.GetAdminUserToken();
-
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = HttpClientHelper.GetAdminClient();
 
         var response = await client.GetAsync("/api/roles");
         response.EnsureSuccessStatusCode();

@@ -11,23 +11,30 @@ public partial class List : BlazorComponent
     [Microsoft.AspNetCore.Components.Inject]
     public IRoleManagementService RoleManagementService { get; set; }
 
-    private List<IdentityRole> roles = new List<IdentityRole>();
+    private List<IdentityRole> _roles = [];
     private Create CreateComponent { get; set; }
     private Delete DeleteComponent { get; set; }
     private Edit EditComponent { get; set; }
+    private Details DetailsComponent { get; set; }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             var response = await RoleManagementService.List();
-            roles = response.Roles;
+            _roles = response.Roles;
 
             CallRequestRefresh();
         }
 
         await base.OnAfterRenderAsync(firstRender);
     }
+
+    private async void DetailsClick(string id, string name)
+    {
+        await DetailsComponent.Open(id, name);
+    }
+
     private async Task CreateClick()
     {
         await CreateComponent.Open();
@@ -46,7 +53,7 @@ public partial class List : BlazorComponent
     private async Task ReloadRoles()
     {
         var roleCall = await RoleManagementService.List();
-        roles = roleCall.Roles;
+        _roles = roleCall.Roles;
         StateHasChanged();
     }
 

@@ -1,12 +1,12 @@
-﻿using BlazorShared.Models;
-using Microsoft.eShopWeb;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using BlazorShared.Models;
+using Microsoft.eShopWeb;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PublicApiIntegrationTests.Helpers;
 
 namespace PublicApiIntegrationTests.AuthEndpoints;
 
@@ -24,9 +24,7 @@ public class CreateCatalogItemEndpointTest
     public async Task ReturnsForbiddenGivenNormalUserToken()
     {
         var jsonContent = GetValidNewItemJson();
-        var token = ApiTokenHelper.GetNormalUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = HttpClientHelper.GetNormalUserClient();
         var response = await client.PostAsync("api/catalog-items", jsonContent);
 
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
@@ -37,9 +35,7 @@ public class CreateCatalogItemEndpointTest
     public async Task ReturnsForbiddenGivenAdminUserToken()
     {
         var jsonContent = GetValidNewItemJson();
-        var token = ApiTokenHelper.GetAdminUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = HttpClientHelper.GetAdminClient();
         var response = await client.PostAsync("api/catalog-items", jsonContent);
 
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
@@ -49,9 +45,7 @@ public class CreateCatalogItemEndpointTest
     public async Task ReturnsSuccessGivenValidNewItemAndProductManagerUserToken()
     {
         var jsonContent = GetValidNewItemJson();
-        var adminToken = ApiTokenHelper.GetProductManagerUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var client = HttpClientHelper.GetProductManagerClient();
         var response = await client.PostAsync("api/catalog-items", jsonContent);
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync();

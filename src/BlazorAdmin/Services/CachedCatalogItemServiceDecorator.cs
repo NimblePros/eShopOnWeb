@@ -93,12 +93,10 @@ public class CachedCatalogItemServiceDecorator : ICatalogItemService
         return result;
     }
 
-    public async Task<string> Delete(int id)
+    public async Task Delete(int id)
     {
-        var result = await _catalogItemService.Delete(id);
+        await _catalogItemService.Delete(id);
         await RefreshLocalStorageList();
-
-        return result;
     }
 
     private async Task RefreshLocalStorageList()

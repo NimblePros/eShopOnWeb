@@ -16,7 +16,7 @@ public class RoleGetByIdEndpoint (RoleManager<IdentityRole> roleManager) : Endpo
         Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Description(d =>
-            d.Produces<DeleteRoleResponse>()
+            d.Produces<GetByIdRoleResponse>()
             .WithTags("RoleManagementEndpoints"));
     }
 

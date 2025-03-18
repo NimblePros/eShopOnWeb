@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -51,6 +52,41 @@ public class HttpService
     where T : class
     {
         var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}/{id}");
+        if (!result.IsSuccessStatusCode)
+        {
+            var exception = JsonSerializer.Deserialize<ErrorDetails>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            _toastService.ShowToast($"Error : {exception.Message}", ToastLevel.Error);
+            return null;
+        }
+        _toastService.ShowToast($"Deleted successfully!", ToastLevel.Success);
+
+        return await FromHttpResponseMessage<T>(result);
+    }
+
+    public async Task<HttpStatusCode> HttpDelete(string uri)
+    {
+        var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}");
+        if (!result.IsSuccessStatusCode)
+        {
+            var exception = JsonSerializer.Deserialize<ErrorDetails>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            _toastService.ShowToast($"Error : {exception.Message}", ToastLevel.Error);
+            return result.StatusCode;
+        }
+        _toastService.ShowToast($"Deleted successfully!", ToastLevel.Success);
+
+        return result.StatusCode;
+    }
+
+    public async Task<T> HttpDelete<T>(string uri)
+    where T : class
+    {
+        var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}");
         if (!result.IsSuccessStatusCode)
         {
             var exception = JsonSerializer.Deserialize<ErrorDetails>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
