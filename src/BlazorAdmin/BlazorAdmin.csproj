@@ -29,4 +29,10 @@
 		</Compile>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Content Update="Pages\RolePage\DeleteUserFromRole.razor">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	  </Content>
+	</ItemGroup>
+
 </Project>

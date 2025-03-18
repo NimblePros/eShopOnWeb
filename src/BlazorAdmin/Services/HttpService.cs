@@ -65,6 +65,24 @@ public class HttpService
         return await FromHttpResponseMessage<T>(result);
     }
 
+    public async Task<T> HttpDelete<T>(string uri)
+    where T : class
+    {
+        var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}");
+        if (!result.IsSuccessStatusCode)
+        {
+            var exception = JsonSerializer.Deserialize<ErrorDetails>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            _toastService.ShowToast($"Error : {exception.Message}", ToastLevel.Error);
+            return null;
+        }
+        _toastService.ShowToast($"Deleted successfully!", ToastLevel.Success);
+
+        return await FromHttpResponseMessage<T>(result);
+    }
+
     public async Task<T> HttpPost<T>(string uri, object dataToSend)
         where T : class
     {

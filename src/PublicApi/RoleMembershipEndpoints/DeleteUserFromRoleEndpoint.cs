@@ -1,13 +1,11 @@
-﻿using FastEndpoints;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.eShopWeb.ApplicationCore.Exceptions;
-using Microsoft.eShopWeb.Infrastructure.Identity;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Threading;
-using System.Net;
+using FastEndpoints;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.eShopWeb.Infrastructure.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 
@@ -15,11 +13,11 @@ public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, U
 {
     public override void Configure()
     {
-        Delete("api/roles/{roleId}/members/{userId}");
+        Delete("api/roles/{RoleId}/members/{UserId}");
         Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Description(d =>
-            d.Produces<DeleteUserFromRoleRequest>()
+            d.Produces<DeleteUserFromRoleResponse>()
             .WithTags("RoleManagementEndpoints")
         );
     }
@@ -38,7 +36,7 @@ public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, U
         {
             return TypedResults.NotFound();
         }
-
+        
         await userManager.RemoveFromRoleAsync(userToUpdate, roleToUpdate.Name);
         
         return TypedResults.Ok(response);

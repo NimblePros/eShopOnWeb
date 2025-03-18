@@ -42,4 +42,10 @@ public class RoleManagementService(HttpService httpService, ILogger<RoleManageme
         var roleMembershipByName = await httpService.HttpGet<GetRoleMembershipResponse>($"roles/{name}/members");
         return roleMembershipByName;
     }
+
+    public async Task<string> DeleteUserFromRole(string userId, string roleId)
+    {
+        var response = await httpService.HttpDelete<DeleteUserFromRoleResponse>($"roles/{roleId}/members/{userId}");
+        return response.Status;
+    }
 }
