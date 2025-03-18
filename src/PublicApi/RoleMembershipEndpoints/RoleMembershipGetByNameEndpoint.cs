@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 
-namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
+namespace Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 
-public class RoleMembershipGetByNameEndpoint (UserManager<ApplicationUser> userManager) : Endpoint <GetRoleMembershipRequest, Results<Ok<GetRoleMembershipResponse>,NotFound>>
+public class RoleMembershipGetByNameEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<GetRoleMembershipRequest, Results<Ok<GetRoleMembershipResponse>, NotFound>>
 {
     public override void Configure()
     {
@@ -24,10 +24,9 @@ public class RoleMembershipGetByNameEndpoint (UserManager<ApplicationUser> userM
 
     public override async Task<Results<Ok<GetRoleMembershipResponse>, NotFound>> ExecuteAsync(GetRoleMembershipRequest request, CancellationToken ct)
     {
-        var response = new GetRoleMembershipResponse(request.CorrelationId());        
-        
-        var members = await userManager.GetUsersInRoleAsync(request.RoleName);
+        var response = new GetRoleMembershipResponse(request.CorrelationId());
 
+        var members = await userManager.GetUsersInRoleAsync(request.RoleName);
 
         if (members is null)
         {

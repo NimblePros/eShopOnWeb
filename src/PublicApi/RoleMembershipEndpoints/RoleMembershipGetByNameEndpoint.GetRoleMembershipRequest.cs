@@ -1,4 +1,4 @@
-﻿namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
+﻿namespace Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 
 public class GetRoleMembershipRequest : BaseRequest
 {

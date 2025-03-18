@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 
-namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
+namespace Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 
 public class GetRoleMembershipResponse : BaseResponse
 {

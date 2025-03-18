@@ -1,13 +1,11 @@
-﻿using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using BlazorAdmin.Models;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PublicApiIntegrationTests.RoleManagementEndpoints;
+namespace PublicApiIntegrationTests.RoleMembershipEndpoints;
 [TestClass]
 public class RoleMembershipGetByNameEndpointTest
 {
@@ -39,6 +37,6 @@ public class RoleMembershipGetByNameEndpointTest
         var response = await getInvalidRoleNameMembership.Content.ReadAsStringAsync();
         var model = response.FromJson<GetRoleMembershipResponse>();
         Assert.IsNotNull(model);
-        Assert.AreEqual(0,model.RoleMembers.Count);
+        Assert.AreEqual(0, model.RoleMembers.Count);
     }
 }
