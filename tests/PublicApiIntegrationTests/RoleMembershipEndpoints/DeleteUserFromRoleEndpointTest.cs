@@ -11,16 +11,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace PublicApiIntegrationTests.RoleMembershipEndpoints;
 
 [TestClass]
-public class DeleteUserFromRoleEndpointTest
+public class DeleteUserFromRoleEndpointTest : PublicApiTestBase
 {
     [TestMethod]
     public async Task ReturnsNotFoundGivenValidRoleIdAndInvalidUserIdAndAdminUserToken()
-    {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+    {                
+        var client = GetAdminClient();        
+        
         var validRoleId = await GetValidRoleId(client, Constants.Roles.ADMINISTRATORS);
-
         var response = await client.DeleteAsync($"api/roles/{validRoleId}/members/0");
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
@@ -29,9 +27,7 @@ public class DeleteUserFromRoleEndpointTest
     [TestMethod]
     public async Task ReturnsNotFoundGivenInvalidRoleIdAndValidUserIdAndAdminUserToken()
     {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var client = GetAdminClient();
 
         var roleList = await client.GetAsync($"/api/roles/{Constants.Roles.ADMINISTRATORS}/members");
         var roleMembersResponse = await roleList.Content.ReadAsStringAsync();
@@ -47,9 +43,7 @@ public class DeleteUserFromRoleEndpointTest
     [TestMethod]
     public async Task ReturnsOkWhenDeletingUserFromRoleSuccessfully()
     {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var client = GetAdminClient();
 
         var roleName = Constants.Roles.PRODUCT_MANAGERS;
         var validRoleId = await GetValidRoleId(client, Constants.Roles.PRODUCT_MANAGERS);

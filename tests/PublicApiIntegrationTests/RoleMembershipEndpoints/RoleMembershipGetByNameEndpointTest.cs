@@ -7,15 +7,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PublicApiIntegrationTests.RoleMembershipEndpoints;
 [TestClass]
-public class RoleMembershipGetByNameEndpointTest
+public class RoleMembershipGetByNameEndpointTest : PublicApiTestBase
 {
     [TestMethod]
     public async Task ReturnsMembersWithValidRoleName()
     {
-        var token = ApiTokenHelper.GetAdminUserToken();
-
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = GetAdminClient();
 
         var roleList = await client.GetAsync($"/api/roles/{Constants.Roles.ADMINISTRATORS}/members");
         var roleMembersResponse = await roleList.Content.ReadAsStringAsync();
@@ -27,10 +24,7 @@ public class RoleMembershipGetByNameEndpointTest
     [TestMethod]
     public async Task ReturnsEmptyListGivenInvalidName()
     {
-        var token = ApiTokenHelper.GetAdminUserToken();
-
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var client = GetAdminClient();
 
         var invalidName = "invalidName";
         var getInvalidRoleNameMembership = await client.GetAsync($"api/roles/{invalidName}/members");
