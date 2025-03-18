@@ -37,9 +37,9 @@ public class CatalogItemService : ICatalogItemService
         return (await _httpService.HttpPut<EditCatalogItemResult>("catalog-items", catalogItem)).CatalogItem;
     }
 
-    public async Task<string> Delete(int catalogItemId)
+    public async Task Delete(int catalogItemId)
     {
-        return (await _httpService.HttpDelete<DeleteCatalogItemResponse>("catalog-items", catalogItemId)).Status;
+        await _httpService.HttpDelete($"catalog-items/{catalogItemId}");
     }
 
     public async Task<CatalogItem> GetById(int id)

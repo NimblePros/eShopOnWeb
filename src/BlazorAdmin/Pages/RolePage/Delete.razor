@@ -62,15 +62,11 @@
 
     private async Task DeleteClick(string id)
     {
-        var deleteResult = await RoleManagementService.Delete(id);
+        await RoleManagementService.Delete(id);
 
-        if (deleteResult != null)
-        {
-
-            Logger.LogInformation($"Deleted Role Id: {id}");
-            await OnSaveClick.InvokeAsync(null);
-            await Close();
-        }
+        Logger.LogInformation($"Deleted Role Id: {id}");
+        await OnSaveClick.InvokeAsync(null);
+        await Close();
     }
 
     public async Task Open(string id)
