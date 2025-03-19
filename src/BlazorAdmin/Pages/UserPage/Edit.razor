@@ -1,6 +1,7 @@
 ﻿@inject ILogger<Edit> Logger
 @inject IJSRuntime JSRuntime
 @inject IUserManagementService UserManagementService
+@inject IRoleManagementService RoleManagementService
 
 @inherits BlazorAdmin.Helpers.BlazorComponent
 
@@ -21,12 +22,12 @@
             {
                 <EditForm Model="_item.User" OnValidSubmit="@SaveClick">
                     <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Edit @_item.User.UserName</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit @_item.User.UserName</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
                         <div class="container">
                             <div class="row">
                                 <div class="col-md-12">
@@ -68,7 +69,6 @@
                                             <label for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication Enabled</label>
                                         </div>
                                     </div>
-
                                     <div class="form-group row">
                                         <label for="LockoutEnd" class="control-label col-md-6">Lockout Until</label>
                                         <div class="col-md-6">
@@ -79,14 +79,32 @@
                                 </div>
                             </div>
                         </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        Save
-                    </button>
-                </div>
-            </EditForm>
+                        <h4>Roles</h4>
+                        @if (_roles == null || _roles.Count == 0)
+                        {
+                            <p>No roles available.</p>
+                        }
+                        else
+                        {
+                            @foreach (var role in _roles)
+                            {
+                                <div class="form-group row form-check">
+                                    <div class="col-md-6">
+                                        <input type="checkbox" class="form-check-input" checked="@_selectedRoles[role.Name]" @onchange="(e) => UpdateRoleSelectedState(role.Name, (bool)((ChangeEventArgs)e).Value)"  />
+                                        <label class="form-check-label">@role</label>
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            Save
+                        </button>
+                    </div>
+                </EditForm>
             }
         </div>
     </div>
@@ -108,11 +126,36 @@
     private bool _showEditModal = false;
     private GetUserResponse _item = new GetUserResponse();
 
+    private Dictionary<string, bool> _selectedRoles = new();
+    private Dictionary<string, bool> _startingRoles = new();
+    private List<IdentityRole> _roles;
+
     private async Task SaveClick()
     {
         await UserManagementService.Edit(_item);
 
-        Logger.LogInformation($"Updated User Id: {_item.User.Id} with name {_item.User.UserName}");
+        foreach (var entry in _selectedRoles){
+            Logger.LogInformation($"Role {entry.Key}: {entry.Value}");
+        }
+
+        var checkedRoles = _selectedRoles.Where(r => r.Value).Select(r => r.Key).ToList();
+        var startingRoles = _startingRoles.Where(r => r.Value).Select(r => r.Key).ToList();
+
+        var rolesToRemove = startingRoles.Except(checkedRoles).ToList();
+        var rolesToAdd = checkedRoles.Except(startingRoles).ToList();
+
+        Logger.LogInformation($"Total number of roles to add: {rolesToAdd.Count}");
+        Logger.LogInformation($"Total number of roles to remove: {rolesToRemove.Count}");
+
+        SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
+            UserId = _item.User.Id,
+            RolesToAdd = rolesToAdd, 
+            RolesToRemove = rolesToRemove
+        };
+
+        await UserManagementService.SaveRolesForUser(rolesForUserRequest);
+
+        Logger.LogInformation($"Updated User Id: {_item.User.Id}");
         await OnSaveClick.InvokeAsync(null);
         await Close();
     }
@@ -124,14 +167,29 @@
         await new Css(JSRuntime).HideBodyOverflow();
 
         _item = await UserManagementService.GetById(id);
+        _roles = (await RoleManagementService.List()).Roles;
+        var userRoles = await UserManagementService.GetRolesByUserId(id);
+        foreach (var role in _roles)
+        {
 
-        Logger.LogInformation($"Acquired user {_item.User.Id} - {_item.User.UserName}");
+            var checkedStatus = userRoles.Roles.Contains(role.Name);
+            _selectedRoles[role.Name] = checkedStatus;
+            _startingRoles[role.Name] = checkedStatus;
+        }
+
+        Logger.LogInformation($"Acquired user {_item.User.Id}");
+
+        Logger.LogInformation($"Total Roles assigned: {userRoles.Roles.Count}");
 
         _modalDisplay = "block;";
         _modalClass = "Show";
         _showEditModal = true;
 
         StateHasChanged();
+    }
+
+    private void UpdateRoleSelectedState(string role, bool isChecked){
+        _selectedRoles[role] = isChecked;
     }
 
     private async Task Close()
