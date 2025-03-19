@@ -26,7 +26,8 @@ public class UserGetByUserNameEndpointTest
         response.EnsureSuccessStatusCode();
 
         var adminRoleResponse = await response.Content.ReadAsStringAsync();
-        var adminModel = adminRoleResponse.FromJson<GetUserResponse>();
+        var adminModel = adminRoleResponse.FromJson<Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models.GetUserResponse>();
+        Assert.IsNotNull(adminModel);
         Assert.IsNotNull(adminModel.User);
         Assert.IsNotNull(adminModel.User.UserName);
         Assert.AreEqual(userName, adminModel.User.UserName);

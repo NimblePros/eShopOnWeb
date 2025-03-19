@@ -1,0 +1,49 @@
+﻿@page "/users"
+@attribute [Authorize(Roles = BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS)]
+@inherits BlazorAdmin.Helpers.BlazorComponent
+@namespace BlazorAdmin.Pages.UserPage
+
+<PageTitle>eShopOnWeb Admin: Manage Users</PageTitle>
+
+<h1>Manage Users</h1>
+
+@if (_users == null)
+{
+    <Spinner></Spinner>
+} 
+else 
+{
+        <p class="esh-link-wrapper">
+            <button class="btn btn-primary" @onclick="@(CreateClick)">
+                Create New
+            </button>
+        </p>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        <tbody class="cursor-pointer">
+            @foreach (var user in _users){
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>
+                            <button @onclick="@(() => EditClick(user.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
+                                Edit
+                            </button>
+                        <button @onclick="@(() => DeleteClick(user.Id,user.UserName))" @onclick:stopPropagation="true" class="btn btn-danger">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+
+                }
+        </tbody>
+    </table>
+
+    <Create OnSaveClick="ReloadUsers" @ref="CreateComponent"></Create>
+    <Delete OnSaveClick="ReloadUsers" @ref="DeleteComponent"></Delete>
+    <Edit OnSaveClick="ReloadUsers" @ref="EditComponent"></Edit>
+}

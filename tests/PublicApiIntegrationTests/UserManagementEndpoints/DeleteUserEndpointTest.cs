@@ -48,7 +48,7 @@ public class DeleteUserEndpointTest
         var response = await client.GetAsync($"api/users/name/{userName}");
 
         var adminUserResponse = await response.Content.ReadAsStringAsync();
-        var adminUser = adminUserResponse.FromJson<GetUserResponse>();
+        var adminUser = adminUserResponse.FromJson<Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models.GetUserResponse>();
         var deleteResponse = await client.DeleteAsync($"api/users/{adminUser!.User!.Id}");
 
         Assert.AreEqual(HttpStatusCode.Forbidden, deleteResponse.StatusCode);

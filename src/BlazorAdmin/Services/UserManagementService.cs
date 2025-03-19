@@ -29,6 +29,11 @@ public class UserManagementService(HttpService httpService, ILogger<IUserManagem
         return await httpService.HttpGet<ApplicationUser>($"users/{userId}");
     }
 
+    public async Task<ApplicationUser> GetByName(string userName)
+    {
+        return await httpService.HttpGet<ApplicationUser>($"users/name/{userName}");
+    }
+
     public async Task<UserListResponse> List()
     {
         logger.LogInformation("Fetching users");
