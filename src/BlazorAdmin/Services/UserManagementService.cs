@@ -29,6 +29,12 @@ public class UserManagementService(HttpService httpService, ILogger<IUserManagem
         return await httpService.HttpGet<GetUserResponse>($"users/{userId}");
     }
 
+    public async Task<GetUserRolesResponse> GetRolesByUserId(string userId)
+    {
+        return await httpService.HttpGet<GetUserRolesResponse>($"users/{userId}/roles");
+    }
+
+
     public async Task<GetUserResponse> GetByName(string userName) {
         return await httpService.HttpGet<GetUserResponse>($"users/name/{userName}");
     }

@@ -10,5 +10,6 @@ public interface IUserManagementService
     Task Delete(string id);
     Task<GetUserResponse> GetById(string id);
     Task<GetUserResponse> GetByName(string userName);
+    Task<GetUserRolesResponse> GetRolesByUserId(string userId);
     Task<UserListResponse> List();
 }
