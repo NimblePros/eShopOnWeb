@@ -30,9 +30,9 @@ else
                     <tr>
                         <td>@user.UserName</td>
                         <td>
-                            <button @onclick="@(() => EditClick(user.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
-                                Edit
-                            </button>
+                        <button @onclick="@(() => EditClick(user.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
+                            Edit
+                        </button>
                         <button @onclick="@(() => DeleteClick(user.Id,user.UserName))" @onclick:stopPropagation="true" class="btn btn-danger">
                                 Delete
                             </button>
@@ -46,4 +46,5 @@ else
     <Create OnSaveClick="ReloadUsers" @ref="CreateComponent"></Create>
     <Delete OnSaveClick="ReloadUsers" @ref="DeleteComponent"></Delete>
     <Edit OnSaveClick="ReloadUsers" @ref="EditComponent"></Edit>
+
 }

@@ -8,7 +8,7 @@ namespace BlazorAdmin.Services;
 
 public class UserManagementService(HttpService httpService, ILogger<IUserManagementService> logger) : IUserManagementService
 {
-    public async Task<CreateUserResponse> Create(ApplicationUser user)
+    public async Task<CreateUserResponse> Create(CreateUserRequest user)
     {
         var response = await httpService.HttpPost<CreateUserResponse>($"users", user);
         return response;
@@ -19,19 +19,18 @@ public class UserManagementService(HttpService httpService, ILogger<IUserManagem
         await httpService.HttpDelete($"users/{userId}");
     }
 
-    public async Task<ApplicationUser> Edit(ApplicationUser user)
+    public async Task<GetUserResponse> Edit(GetUserResponse user)
     {
-        return await httpService.HttpPut<ApplicationUser>($"users", user);
+        return await httpService.HttpPut<GetUserResponse>($"users", user);
     }
 
-    public async Task<ApplicationUser> GetById(string userId)
+    public async Task<GetUserResponse> GetById(string userId)
     {
-        return await httpService.HttpGet<ApplicationUser>($"users/{userId}");
+        return await httpService.HttpGet<GetUserResponse>($"users/{userId}");
     }
 
-    public async Task<ApplicationUser> GetByName(string userName)
-    {
-        return await httpService.HttpGet<ApplicationUser>($"users/name/{userName}");
+    public async Task<GetUserResponse> GetByName(string userName) {
+        return await httpService.HttpGet<GetUserResponse>($"users/name/{userName}");
     }
 
     public async Task<UserListResponse> List()

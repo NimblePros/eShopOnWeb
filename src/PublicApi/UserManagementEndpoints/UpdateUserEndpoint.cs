@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
@@ -25,19 +26,21 @@ public class UpdateRoleEndpoint(UserManager<ApplicationUser> userManager) : Endp
     {
         var response = new UpdateUserResponse(request.CorrelationId());
 
-        if (request is null)
+        if (request is null || request.User is null)
         {
             return TypedResults.NotFound();
         }
 
-        var existingUser = await userManager.FindByIdAsync(request.UserToUpdate.Id);
-        if (existingUser == null)
+        var existingUser = await userManager.FindByIdAsync(request.User.Id);
+        if (existingUser is null)
         {
             return TypedResults.NotFound();
         }
-        // TODO: Update fields
-
-        var result = await userManager.UpdateAsync(existingUser);
+        // TODO: Update most fields - not the full entity
+        // This is due to EFCore Tracking
+        existingUser.CopyProperties(request.User);
+        
+        await userManager.UpdateAsync(existingUser);
         response.User = (await userManager.FindByIdAsync(existingUser.Id))!;
         return TypedResults.Ok(response);
     }

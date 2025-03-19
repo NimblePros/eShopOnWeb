@@ -4,5 +4,5 @@ namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
 public class UpdateUserRequest : BaseRequest
 {
-    public ApplicationUser UserToUpdate { get; set; }
+    public ApplicationUser User { get; set; }
 }

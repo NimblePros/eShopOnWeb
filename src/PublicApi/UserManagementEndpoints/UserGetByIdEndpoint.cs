@@ -32,7 +32,7 @@ public class UserGetByIdEndpoint (UserManager<ApplicationUser> userManager) : En
             return TypedResults.NotFound();
         }
         // TODO: Make an extension method off of Identity user to convert
-        response.User = (ApplicationUser) userResponse;
+        response.User = userResponse;
         return TypedResults.Ok(response);
     }
 }

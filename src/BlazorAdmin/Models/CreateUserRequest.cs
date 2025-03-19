@@ -1,9 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.eShopWeb.Infrastructure.Identity;
 
 namespace BlazorAdmin.Models;
 
 public class CreateUserRequest
 {
-    [Required(ErrorMessage = "The Name field is required")]
-    public string Name {  get; set; }
+    public ApplicationUser User{  get; set; }
+
+    public CreateUserRequest()
+    {
+        User = new ApplicationUser();
+    }
 }
