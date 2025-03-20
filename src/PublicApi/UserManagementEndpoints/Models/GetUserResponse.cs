@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.eShopWeb.Infrastructure.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
 
@@ -14,5 +13,5 @@ public class GetUserResponse : BaseResponse
     {
     }
 
-    public ApplicationUser User { get; set; }
+    public UserDto User { get; set; }
 }

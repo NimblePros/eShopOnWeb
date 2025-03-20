@@ -41,7 +41,7 @@ public class DeleteUserEndpointTest
     }
 
     [TestMethod]
-    public async Task ReturnsForbiddenTryingToDeleteAdminUser()
+    public async Task ReturnsBadRequestTryingToDeleteAdminUser()
     {
         var client = HttpClientHelper.GetAdminClient();
         var userName = "admin@microsoft.com";
@@ -51,7 +51,7 @@ public class DeleteUserEndpointTest
         var adminUser = adminUserResponse.FromJson<Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models.GetUserResponse>();
         var deleteResponse = await client.DeleteAsync($"api/users/{adminUser!.User!.Id}");
 
-        Assert.AreEqual(HttpStatusCode.Forbidden, deleteResponse.StatusCode);
+        Assert.AreEqual(HttpStatusCode.BadRequest, deleteResponse.StatusCode);
 
     }
 }

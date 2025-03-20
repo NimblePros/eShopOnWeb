@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
@@ -31,8 +32,7 @@ public class UserGetByUserNameEndpoint (UserManager<ApplicationUser> userManager
         {
             return TypedResults.NotFound();
         }
-        // TODO: Make an extension method off of Identity user to convert
-        response.User = (ApplicationUser) userResponse;
+        response.User = userResponse.ToUserDto();
         return TypedResults.Ok(response);
     }
 }

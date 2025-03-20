@@ -13,7 +13,7 @@ public class CachedCatalogItemServiceDecorator : ICatalogItemService
 {
     private readonly ILocalStorageService _localStorageService;
     private readonly CatalogItemService _catalogItemService;
-    private ILogger<CachedCatalogItemServiceDecorator> _logger;
+    private readonly ILogger<CachedCatalogItemServiceDecorator> _logger;
 
     public CachedCatalogItemServiceDecorator(ILocalStorageService localStorageService,
         CatalogItemService catalogItemService,

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
@@ -25,7 +26,11 @@ public class UserListEndpoint(UserManager<ApplicationUser> userManager):Endpoint
     {
         await Task.Delay(1000, ct);
         var response = new UserListResponse();
-        response.Users = userManager.Users.ToList();
+        var users = userManager.Users.ToList();
+        foreach ( var user in users)
+        {
+            response.Users.Add(user.ToUserDto());
+        }
         return response;
     }
 }

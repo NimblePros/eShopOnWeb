@@ -9,6 +9,7 @@
 @using BlazorAdmin.Interfaces
 @using BlazorAdmin.Models
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.eShopWeb.ApplicationCore.Entities
 @using Microsoft.eShopWeb.Infrastructure.Identity
 
 <div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
@@ -20,9 +21,9 @@
             }
             else
             {
-                <EditForm Model="_item.User" OnValidSubmit="@SaveClick">
+                <EditForm Model="_item" OnValidSubmit="@SaveClick">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edit @_item.User.UserName</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Edit @_item.UserName</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -35,45 +36,45 @@
                                     <div class="form-group row">
                                         <label for="UserName" class="control-label col-md-6">Username</label>
                                         <div class="col-md-6">
-                                            <InputText id="UserName" class="form-control" @bind-Value="_item.User.UserName" />
-                                            <ValidationMessage For="@(() => _item.User.UserName)" class="text-danger" />
+                                            <InputText id="UserName" class="form-control" @bind-Value="_item.UserName" />
+                                            <ValidationMessage For="@(() => _item.UserName)" class="text-danger" />
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="Email" class="control-label col-md-6">Email</label>
                                         <div class="col-md-6">
-                                            <InputText id="Email" class="form-control" @bind-Value="_item.User.Email" />
-                                            <ValidationMessage For="@(() => _item.User.Email)" class="text-danger" />
+                                            <InputText id="Email" class="form-control" @bind-Value="_item.Email" />
+                                            <ValidationMessage For="@(() => _item.Email)" class="text-danger" />
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="PhoneNumber" class="control-label col-md-6">Phone Number</label>
                                         <div class="col-md-6">
-                                            <InputText id="PhoneNumber" class="form-control" @bind-Value="_item.User.PhoneNumber" />
-                                            <ValidationMessage For="@(() => _item.User.PhoneNumber)" class="text-danger" />
+                                            <InputText id="PhoneNumber" class="form-control" @bind-Value="_item.PhoneNumber" />
+                                            <ValidationMessage For="@(() => _item.PhoneNumber)" class="text-danger" />
                                         </div>
                                     </div>
 
                                     <div class="form-group row form-check">
                                         <div class="col-md-6">
-                                            <InputCheckbox id="EmailConfirmed" class="form-check-input" @bind-Value="_item.User.EmailConfirmed" />
+                                            <InputCheckbox id="EmailConfirmed" class="form-check-input" @bind-Value="_item.EmailConfirmed" />
                                             <label for="EmailConfirmed" class="form-check-label">Email Confirmed</label>
                                         </div>
                                     </div>
 
                                     <div class="form-group row form-check">
                                         <div class="col-md-6">
-                                            <InputCheckbox id="TwoFactorEnabled" class="form-check-input" @bind-Value="_item.User.TwoFactorEnabled" />
+                                            <InputCheckbox id="TwoFactorEnabled" class="form-check-input" @bind-Value="_item.TwoFactorEnabled" />
                                             <label for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication Enabled</label>
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="LockoutEnd" class="control-label col-md-6">Lockout Until</label>
                                         <div class="col-md-6">
-                                            <InputDate id="LockoutEnd" class="form-control" @bind-Value="_item.User.LockoutEnd" />
-                                            <ValidationMessage For="@(() => _item.User.LockoutEnd)" class="text-danger" />
+                                            <InputDate id="LockoutEnd" class="form-control" @bind-Value="_item.LockoutEnd" />
+                                            <ValidationMessage For="@(() => _item.LockoutEnd)" class="text-danger" />
                                         </div>
                                     </div>
                                 </div>
@@ -118,13 +119,16 @@
 }
 
 @code {
+
+
+
     [Parameter]
     public EventCallback<string> OnSaveClick { get; set; }
 
     private string _modalDisplay = "none;";
     private string _modalClass = "";
     private bool _showEditModal = false;
-    private GetUserResponse _item = new GetUserResponse();
+    private User _item = new User();
 
     private Dictionary<string, bool> _selectedRoles = new();
     private Dictionary<string, bool> _startingRoles = new();
@@ -132,7 +136,13 @@
 
     private async Task SaveClick()
     {
-        await UserManagementService.Edit(_item);
+
+        var updateRequest = new UpdateUserRequest()
+        {
+            User = _item
+        };
+
+        await UserManagementService.Update(updateRequest);
 
         var checkedRoles = _selectedRoles.Where(r => r.Value).Select(r => r.Key).ToList();
         var startingRoles = _startingRoles.Where(r => r.Value).Select(r => r.Key).ToList();
@@ -145,7 +155,7 @@
             Logger.LogInformation("Total number of roles to remove: {removedRolesCount}", rolesToRemove.Count);
 
             SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
-                UserId = _item.User.Id,
+                UserId = _item.Id,
                 RolesToAdd = rolesToAdd, 
                 RolesToRemove = rolesToRemove
             };
@@ -153,7 +163,7 @@
             await UserManagementService.SaveRolesForUser(rolesForUserRequest);
         }
 
-        Logger.LogInformation("Updated User Id: {userId}", _item.User.Id);
+        Logger.LogInformation("Updated User Id: {userId}", _item.Id);
         await OnSaveClick.InvokeAsync(null);
         await Close();
     }
@@ -164,7 +174,7 @@
 
         await new Css(JSRuntime).HideBodyOverflow();
 
-        _item = await UserManagementService.GetById(id);
+        _item = (await UserManagementService.GetById(id)).User;
         _roles = (await RoleManagementService.List()).Roles;
         var userRoles = await UserManagementService.GetRolesByUserId(id);
         foreach (var role in _roles)
@@ -175,7 +185,7 @@
             _startingRoles[role.Name] = checkedStatus;
         }
 
-        Logger.LogInformation("Acquired user {id}",_item.User.Id);
+        Logger.LogInformation("Acquired user {id}",_item.Id);
 
         Logger.LogInformation("Total Roles assigned: {roleCount}", userRoles.Roles.Count);
 

@@ -4,7 +4,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.eShopWeb;
-using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;
@@ -14,7 +13,7 @@ namespace PublicApiIntegrationTests.UserManagementEndpoints;
 [TestClass]
 public class CreateUserEndpointTest
 {
-    private string _testName = "test@microsoft.com";
+    private readonly string _testName = "test@microsoft.com";
 
     [TestMethod]
     public async Task ReturnsForbiddenGivenNormalUserToken()
@@ -65,12 +64,14 @@ public class CreateUserEndpointTest
 
     private StringContent GetValidNewItemJson(string userName)
     {
-        var newUser = new ApplicationUser()
+        var newUser = new UserDto()
         {
             UserName = userName
         };
-        var request = new CreateUserRequest();
-        request.User = newUser;
+        var request = new CreateUserRequest
+        {
+            User = newUser
+        };
         var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
         return jsonContent;
@@ -78,11 +79,14 @@ public class CreateUserEndpointTest
 
     private StringContent GetInvalidNewItemJson()
     {
-        var newUser = new ApplicationUser()
+        var newUser = new UserDto()
         {
+
         };
-        var request = new CreateUserRequest();
-        request.User = newUser;
+        var request = new CreateUserRequest
+        {
+            User = newUser
+        };
         var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
         return jsonContent;

@@ -26,7 +26,7 @@ public class UpdateRoleEndpoint(UserManager<ApplicationUser> userManager) : Endp
     {
         var response = new UpdateUserResponse(request.CorrelationId());
 
-        if (request is null || request.User is null)
+        if (request is null || request.User is null || request.User.Id is null)
         {
             return TypedResults.NotFound();
         }
@@ -36,11 +36,10 @@ public class UpdateRoleEndpoint(UserManager<ApplicationUser> userManager) : Endp
         {
             return TypedResults.NotFound();
         }
-        // TODO: Update most fields - not the full entity
-        // This is due to EFCore Tracking
-        existingUser.CopyProperties(request.User);
-        
-        await userManager.UpdateAsync(existingUser);
+
+        existingUser.FromUserDto(request.User);
+
+        var updateResponse = await userManager.UpdateAsync(existingUser);
         response.User = (await userManager.FindByIdAsync(existingUser.Id))!;
         return TypedResults.Ok(response);
     }

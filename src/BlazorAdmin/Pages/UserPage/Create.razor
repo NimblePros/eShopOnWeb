@@ -137,9 +137,9 @@
         {
             var result = await UserManagementService.Create(_item);
             var checkedRoles = _selectedRoles.Where(r => r.Value).Select(r => r.Key).ToList();
-            if (checkedRoles.Any()){
+            if (checkedRoles.Count > 0){
                 SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
-                    UserId = _item.User.Id,
+                    UserId = result.User.Id,
                     RolesToAdd = checkedRoles
                 };
 

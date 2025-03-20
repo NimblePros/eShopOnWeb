@@ -39,7 +39,7 @@ public class UserGetRolesByIdEndpoint (UserManager<ApplicationUser> userManager)
             return TypedResults.NotFound();
         }
         
-        response.Roles = rolesForUser.ToList();
+        response.Roles = [.. rolesForUser];
         return TypedResults.Ok(response);
     }
 }

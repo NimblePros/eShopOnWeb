@@ -1,10 +1,8 @@
-﻿using Microsoft.eShopWeb.Infrastructure.Identity;
-
-namespace BlazorAdmin.Models;
+﻿namespace BlazorAdmin.Models;
 
 public class GetUserResponse
 {
-    public ApplicationUser User { get; set; }
+    public User User { get; set; }
 
     public GetUserResponse()
     {

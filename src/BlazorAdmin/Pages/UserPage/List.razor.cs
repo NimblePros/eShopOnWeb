@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using BlazorAdmin.Helpers;
 using BlazorAdmin.Interfaces;
-using Microsoft.eShopWeb.Infrastructure.Identity;
+using BlazorAdmin.Models;
 using Microsoft.Extensions.Logging;
 
 namespace BlazorAdmin.Pages.UserPage;
@@ -14,7 +14,7 @@ public partial class List : BlazorComponent
     [Microsoft.AspNetCore.Components.Inject]
     ILogger<List> Logger { get; set; }
 
-    private List<ApplicationUser> _users = [];
+    private List<User> _users = [];
     private Create CreateComponent { get; set; }
     private Delete DeleteComponent { get; set; }
     private Edit EditComponent { get; set; }
@@ -31,7 +31,6 @@ public partial class List : BlazorComponent
 
         await base.OnAfterRenderAsync(firstRender);
     }
-
 
     private async Task CreateClick()
     {

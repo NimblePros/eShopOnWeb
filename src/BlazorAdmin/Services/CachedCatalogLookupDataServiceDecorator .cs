@@ -15,7 +15,7 @@ public class CachedCatalogLookupDataServiceDecorator<TLookupData, TReponse>
 {
     private readonly ILocalStorageService _localStorageService;
     private readonly CatalogLookupDataService<TLookupData, TReponse> _catalogTypeService;
-    private ILogger<CachedCatalogLookupDataServiceDecorator<TLookupData, TReponse>> _logger;
+    private readonly ILogger<CachedCatalogLookupDataServiceDecorator<TLookupData, TReponse>> _logger;
 
     public CachedCatalogLookupDataServiceDecorator(ILocalStorageService localStorageService,
         CatalogLookupDataService<TLookupData, TReponse> catalogTypeService,
