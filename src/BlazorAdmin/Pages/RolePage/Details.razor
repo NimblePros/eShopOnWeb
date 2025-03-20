@@ -79,7 +79,7 @@
 
     private async Task DeleteClick(string userId, string userName)
     {
-        Logger.LogInformation($"Confirming to remove User {userId} from {_roleName}");
+        Logger.LogInformation("Confirming to remove User {userId} from {roleName}",userId, _roleName);
         await DeleteConfirmationComponent.Open(userId, userName, _roleName, _roleId);
     }
 

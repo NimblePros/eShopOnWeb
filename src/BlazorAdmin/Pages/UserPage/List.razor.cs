@@ -35,19 +35,18 @@ public partial class List : BlazorComponent
 
     private async Task CreateClick()
     {
-        Logger.LogInformation($"Display the user confirmation dialog");
         await CreateComponent.Open();
     }
 
     private async Task EditClick(string id)
     {
-        Logger.LogInformation($"Edit User {id}");
+        Logger.LogInformation("Edit User {id}", id);
         await EditComponent.Open(id);
     }
 
     private async Task DeleteClick(string id, string userName)
     {
-        Logger.LogInformation($"Displaying delete confirmation for User {id}");
+        Logger.LogInformation("Displaying delete confirmation for User {id}", id);
         await DeleteComponent.Open(id, userName);
     }
 

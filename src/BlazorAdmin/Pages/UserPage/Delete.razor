@@ -65,11 +65,10 @@
     private string _userName = "";
 
     private async Task DeleteClick(string id)
-    {
-        // TODO: Confirmation message?
+    {        
         await UserManagementService.Delete(id);
 
-        Logger.LogInformation($"Deleted user Id: {id}");
+        Logger.LogInformation("Deleted user Id: {id}",id);
         await OnSaveClick.InvokeAsync(null);
         await Close();
     }

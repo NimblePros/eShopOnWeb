@@ -134,10 +134,6 @@
     {
         await UserManagementService.Edit(_item);
 
-        foreach (var entry in _selectedRoles){
-            Logger.LogInformation($"Role {entry.Key}: {entry.Value}");
-        }
-
         var checkedRoles = _selectedRoles.Where(r => r.Value).Select(r => r.Key).ToList();
         var startingRoles = _startingRoles.Where(r => r.Value).Select(r => r.Key).ToList();
 
@@ -145,8 +141,8 @@
         var rolesToAdd = checkedRoles.Except(startingRoles).ToList();
 
         if (rolesToAdd.Any() || rolesToRemove.Any()){
-            Logger.LogInformation($"Total number of roles to add: {rolesToAdd.Count}");
-            Logger.LogInformation($"Total number of roles to remove: {rolesToRemove.Count}");
+            Logger.LogInformation("Total number of roles to add: {addedRolesCount}", rolesToAdd.Count);
+            Logger.LogInformation("Total number of roles to remove: {removedRolesCount}", rolesToRemove.Count);
 
             SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
                 UserId = _item.User.Id,
@@ -157,7 +153,7 @@
             await UserManagementService.SaveRolesForUser(rolesForUserRequest);
         }
 
-        Logger.LogInformation($"Updated User Id: {_item.User.Id}");
+        Logger.LogInformation("Updated User Id: {userId}", _item.User.Id);
         await OnSaveClick.InvokeAsync(null);
         await Close();
     }
@@ -179,9 +175,9 @@
             _startingRoles[role.Name] = checkedStatus;
         }
 
-        Logger.LogInformation($"Acquired user {_item.User.Id}");
+        Logger.LogInformation("Acquired user {id}",_item.User.Id);
 
-        Logger.LogInformation($"Total Roles assigned: {userRoles.Roles.Count}");
+        Logger.LogInformation("Total Roles assigned: {roleCount}", userRoles.Roles.Count);
 
         _modalDisplay = "block;";
         _modalClass = "Show";

@@ -147,7 +147,7 @@
             }
             if (result != null)
             {
-                Logger.LogInformation($"Created User {result.User.Id}");
+                Logger.LogInformation("Created User {userId}",result.User.Id);
                 await OnSaveClick.InvokeAsync(null);
                 await Close();
             }
