@@ -1,10 +1,10 @@
 ﻿namespace BlazorAdmin.Models;
 
-public class CreateUserRequest
+public class UpdateUserRequest
 {
     public User User{  get; set; }
 
-    public CreateUserRequest()
+    public UpdateUserRequest()
     {
         User = new();
     }

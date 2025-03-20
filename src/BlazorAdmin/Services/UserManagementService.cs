@@ -18,7 +18,7 @@ public class UserManagementService(HttpService httpService, ILogger<IUserManagem
         await httpService.HttpDelete($"users/{userId}");
     }
 
-    public async Task<GetUserResponse> Edit(GetUserResponse user)
+    public async Task<GetUserResponse> Update(UpdateUserRequest user)
     {
         return await httpService.HttpPut<GetUserResponse>($"users", user);
     }

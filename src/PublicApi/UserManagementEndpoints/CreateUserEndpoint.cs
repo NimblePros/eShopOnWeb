@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.ApplicationCore.Exceptions;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
@@ -34,11 +35,15 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         if (existingUser != null) {
             throw new DuplicateException($"A user with the name {request.User.UserName} already exists");
         };
-        var createUser = await userManager.CreateAsync(request.User);
+
+        ApplicationUser newUser = new ApplicationUser();
+        newUser.FromUserDto(request.User, copyId: false);
+
+        var createUser = await userManager.CreateAsync(newUser);
         if (createUser.Succeeded)
         {
             var createdUser = await userManager.FindByNameAsync(request.User.UserName);
-            response.User = createdUser!;
+            response.User = createdUser!.ToUserDto();            
             await SendCreatedAtAsync<UserGetByIdEndpoint>(new { UserId = response.User.Id }, response, cancellation: ct);
         }
     }

@@ -18,7 +18,6 @@ public class UserListEndpointTest
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);        
     }
 
-
     [TestMethod]
     public async Task ReturnsForbiddenForGeneralAuthorizedAccess()
     {
