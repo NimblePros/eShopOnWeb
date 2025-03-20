@@ -144,16 +144,18 @@
         var rolesToRemove = startingRoles.Except(checkedRoles).ToList();
         var rolesToAdd = checkedRoles.Except(startingRoles).ToList();
 
-        Logger.LogInformation($"Total number of roles to add: {rolesToAdd.Count}");
-        Logger.LogInformation($"Total number of roles to remove: {rolesToRemove.Count}");
+        if (rolesToAdd.Any() || rolesToRemove.Any()){
+            Logger.LogInformation($"Total number of roles to add: {rolesToAdd.Count}");
+            Logger.LogInformation($"Total number of roles to remove: {rolesToRemove.Count}");
 
-        SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
-            UserId = _item.User.Id,
-            RolesToAdd = rolesToAdd, 
-            RolesToRemove = rolesToRemove
-        };
+            SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
+                UserId = _item.User.Id,
+                RolesToAdd = rolesToAdd, 
+                RolesToRemove = rolesToRemove
+            };
 
-        await UserManagementService.SaveRolesForUser(rolesForUserRequest);
+            await UserManagementService.SaveRolesForUser(rolesForUserRequest);
+        }
 
         Logger.LogInformation($"Updated User Id: {_item.User.Id}");
         await OnSaveClick.InvokeAsync(null);

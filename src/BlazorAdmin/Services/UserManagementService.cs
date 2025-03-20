@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BlazorAdmin.Interfaces;
 using BlazorAdmin.Models;
-using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace BlazorAdmin.Services;
@@ -48,6 +46,6 @@ public class UserManagementService(HttpService httpService, ILogger<IUserManagem
 
     public async Task SaveRolesForUser(SaveRolesForUserRequest request)
     {
-        await httpService.HttpPut<GetUserRolesResponse>($"users/{request.UserId}/roles",request);
+        await httpService.HttpPut($"users/{request.UserId}/roles",request);
     }
 }
