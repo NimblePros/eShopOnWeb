@@ -11,7 +11,7 @@ using Microsoft.eShopWeb.Infrastructure.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
-public class SaveRolesForUserEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<SaveRolesForUserRequest, Results<Ok, NotFound>>
+public class SaveRolesForUserEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<SaveRolesForUserRequest, Results<Ok, NotFound, BadRequest>>
 {
     public override void Configure()
     {
@@ -28,7 +28,7 @@ public class SaveRolesForUserEndpoint(UserManager<ApplicationUser> userManager) 
         );
     }
 
-    public override async Task<Results<Ok, NotFound>> ExecuteAsync(SaveRolesForUserRequest request, CancellationToken ct)
+    public override async Task<Results<Ok, NotFound, BadRequest>> ExecuteAsync(SaveRolesForUserRequest request, CancellationToken ct)
     {
         var userToUpdate = await userManager.FindByIdAsync(request.UserId);
         if (userToUpdate is null)
@@ -42,12 +42,12 @@ public class SaveRolesForUserEndpoint(UserManager<ApplicationUser> userManager) 
         }
         if (userToUpdate.UserName == "admin@microsoft.com")
         {
-            throw new AdminProtectionException();
+            return TypedResults.BadRequest();
         }
 
-        if (request.RolesToAdd.Any())
+        if (request.RolesToAdd.Count > 0)
             await userManager.AddToRolesAsync(userToUpdate,request.RolesToAdd);
-        if (request.RolesToRemove.Any())
+        if (request.RolesToRemove.Count > 0)
             await userManager.RemoveFromRolesAsync(userToUpdate,request.RolesToRemove);
 
         return TypedResults.Ok();
