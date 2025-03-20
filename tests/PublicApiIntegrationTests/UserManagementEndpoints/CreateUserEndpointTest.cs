@@ -53,11 +53,33 @@ public class CreateUserEndpointTest
         Assert.AreEqual(HttpStatusCode.Conflict, response.StatusCode);
     }
 
+    [TestMethod]
+    public async Task ReturnsBadRequestForMissingUserName()
+    {
+        var jsonContent = GetInvalidNewItemJson();
+        var client = HttpClientHelper.GetAdminClient();
+        var response = await client.PostAsync("api/users", jsonContent);
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     private StringContent GetValidNewItemJson(string userName)
     {
         var newUser = new ApplicationUser()
         {
             UserName = userName
+        };
+        var request = new CreateUserRequest();
+        request.User = newUser;
+        var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+
+        return jsonContent;
+    }
+
+    private StringContent GetInvalidNewItemJson()
+    {
+        var newUser = new ApplicationUser()
+        {
         };
         var request = new CreateUserRequest();
         request.User = newUser;

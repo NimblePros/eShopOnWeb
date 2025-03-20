@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Ardalis.GuardClauses;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
@@ -26,9 +25,11 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
     public override async Task HandleAsync(CreateUserRequest request, CancellationToken ct)
     {
         var response = new CreateUserResponse(request.CorrelationId());
-        Guard.Against.Null(request);
-        Guard.Against.Null(request.User);
-        Guard.Against.Null(request.User.UserName);
+        if (request is null || request.User is null || request.User.UserName is null)
+        {
+            await SendErrorsAsync(400, ct);
+            return;
+        }
         var existingUser = await userManager.FindByNameAsync(request.User.UserName);
         if (existingUser != null) {
             throw new DuplicateException($"A user with the name {request.User.UserName} already exists");
