@@ -37,7 +37,7 @@ public class CachedCatalogItemServiceDecorator : ICatalogItemService
             }
             else
             {
-                _logger.LogInformation($"Loading {key} from local storage.");
+                _logger.LogInformation("Loading {key} from local storage.", key);
                 await _localStorageService.RemoveItemAsync(key);
             }
         }
@@ -61,7 +61,7 @@ public class CachedCatalogItemServiceDecorator : ICatalogItemService
             }
             else
             {
-                _logger.LogInformation($"Loading {key} from local storage.");
+                _logger.LogInformation("Loading {key} from local storage.", key);
                 await _localStorageService.RemoveItemAsync(key);
             }
         }

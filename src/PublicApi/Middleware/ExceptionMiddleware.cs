@@ -41,6 +41,15 @@ public class ExceptionMiddleware
                 Message = exception.Message
             }.ToString());
         }
+        else if (exception is AdminProtectionException)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            await context.Response.WriteAsync(new ErrorDetails()
+            {
+                StatusCode = context.Response.StatusCode,
+                Message = exception.Message
+            }.ToString());
+        }
         else
         {
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

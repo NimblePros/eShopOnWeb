@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using BlazorAdmin.Models;
 using Microsoft.eShopWeb;
@@ -9,7 +8,7 @@ using PublicApiIntegrationTests.Helpers;
 namespace PublicApiIntegrationTests.RoleManagementEndpoints;
 
 [TestClass]
-public class RoleListEndpoint
+public class RoleListEndpointTest
 {
     [TestMethod]
     public async Task ReturnsUnauthorizedForAnonymousAccess()

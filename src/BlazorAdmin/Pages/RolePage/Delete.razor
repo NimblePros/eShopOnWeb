@@ -64,7 +64,7 @@
     {
         await RoleManagementService.Delete(id);
 
-        Logger.LogInformation($"Deleted Role Id: {id}");
+        Logger.LogInformation("Deleted Role Id: {id}", id);
         await OnSaveClick.InvokeAsync(null);
         await Close();
     }
@@ -74,7 +74,7 @@
         await new Css(JSRuntime).HideBodyOverflow();
 
         _item = await RoleManagementService.GetById(id);
-        Logger.LogInformation($"Loaded role: {_item.Role.Name}");
+        Logger.LogInformation("Loaded role: {roleName}", _item.Role.Name);
 
         _modalDisplay = "block;";
         _modalClass = "Show";

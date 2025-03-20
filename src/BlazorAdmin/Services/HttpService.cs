@@ -138,6 +138,21 @@ public class HttpService
         return await FromHttpResponseMessage<T>(result);
     }
 
+    public async Task<HttpStatusCode> HttpPut(string uri, object dataToSend)
+    {
+        var content = ToJson(dataToSend);
+
+        var result = await _httpClient.PutAsync($"{_apiUrl}{uri}", content);
+        if (!result.IsSuccessStatusCode)
+        {
+            _toastService.ShowToast("Error", ToastLevel.Error);
+            return result.StatusCode;
+        }
+        _toastService.ShowToast($"Updated successfully!", ToastLevel.Success);
+
+        return result.StatusCode;
+    }
+
     private StringContent ToJson(object obj)
     {
         return new StringContent(JsonSerializer.Serialize(obj), Encoding.UTF8, "application/json");

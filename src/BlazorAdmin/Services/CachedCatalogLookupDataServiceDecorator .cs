@@ -32,14 +32,14 @@ public class CachedCatalogLookupDataServiceDecorator<TLookupData, TReponse>
         var cacheEntry = await _localStorageService.GetItemAsync<CacheEntry<List<TLookupData>>>(key);
         if (cacheEntry != null)
         {
-            _logger.LogInformation($"Loading {key} from local storage.");
+            _logger.LogInformation("Loading {key} from local storage.", key);
             if (cacheEntry.DateCreated.AddMinutes(1) > DateTime.UtcNow)
             {
                 return cacheEntry.Value;
             }
             else
             {
-                _logger.LogInformation($"Cache expired; removing {key} from local storage.");
+                _logger.LogInformation("Cache expired; removing {key} from local storage.", key);
                 await _localStorageService.RemoveItemAsync(key);
             }
         }
