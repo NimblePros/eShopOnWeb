@@ -4,6 +4,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.eShopWeb.ApplicationCore.Constants;
 using Microsoft.eShopWeb.ApplicationCore.Exceptions;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.PublicApi.Extensions;
@@ -43,6 +44,7 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         if (createUser.Succeeded)
         {
             var createdUser = await userManager.FindByNameAsync(request.User.UserName);
+            await userManager.AddPasswordAsync(createdUser, AuthorizationConstants.DEFAULT_PASSWORD);
             response.UserId = createdUser!.Id;
             await SendCreatedAtAsync<UserGetByIdEndpoint>(new { UserId = createdUser!.Id }, response, cancellation: ct);
         }
