@@ -21,11 +21,7 @@ else
     <table class="table table-striped table-hover">
         <thead>
             <tr>
-                <th>Name</th>
                 <th>Email</th>
-                <th>Email Confirmed</th>
-                <th>Phone Confirmed</th>
-                <th>Lockout End Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -33,11 +29,7 @@ else
             @foreach (var user in _users)
             {
                 <tr>
-                    <td>@user.UserName</td>
                     <td>@user.Email</td>
-                    <td>@user.EmailConfirmed</td>
-                    <td>@user.PhoneNumberConfirmed</td>
-                    <td>@user.LockoutEnd</td>
                     <td>
                         <button @onclick="@(() => EditClick(user.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
                             Edit

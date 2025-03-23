@@ -33,7 +33,7 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         }
         var existingUser = await userManager.FindByNameAsync(request.User.UserName);
         if (existingUser != null) {
-            throw new DuplicateException($"A user with the name {request.User.UserName} already exists");
+            throw new DuplicateException($"User already exists.");
         };
 
         ApplicationUser newUser = new ApplicationUser();
@@ -43,8 +43,8 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         if (createUser.Succeeded)
         {
             var createdUser = await userManager.FindByNameAsync(request.User.UserName);
-            response.User = createdUser!.ToUserDto();            
-            await SendCreatedAtAsync<UserGetByIdEndpoint>(new { UserId = response.User.Id }, response, cancellation: ct);
+            response.UserId = createdUser!.Id;
+            await SendCreatedAtAsync<UserGetByIdEndpoint>(new { UserId = createdUser!.Id }, response, cancellation: ct);
         }
     }
 }
