@@ -31,12 +31,19 @@ else
                 <tr>
                     <td>@user.Email</td>
                     <td>
-                        <button @onclick="@(() => EditClick(user.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
-                            Edit
-                        </button>
-                        <button @onclick="@(() => DeleteClick(user.Id,user.UserName))" @onclick:stopPropagation="true" class="btn btn-danger">
-                            Delete
-                        </button>
+                        @if (_currentUser is null  || _currentUser.Identity is null)
+                        {
+                            <p>Unknown current user</p>
+                        } else if (user.UserName != _currentUser.Identity.Name && user.UserName != "admin@microsoft.com")
+                        {
+                            <button @onclick="@(() => EditClick(user.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
+                                Edit
+                            </button>
+                            <button @onclick="@(() => DeleteClick(user.Id,user.UserName))" @onclick:stopPropagation="true" class="btn btn-danger">
+                                Delete
+                            </button>
+
+                        }
                     </td>
                 </tr>
 
