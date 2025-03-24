@@ -77,7 +77,7 @@
     {
         await RoleManagementService.Edit(_item);
 
-        Logger.LogInformation("Updated Role Id: {Id} with name {name}", _item.Id, _item.Name);
+        Logger.LogInformation("Updated Role Id: {Id}", _item.Id);
         await OnSaveClick.InvokeAsync(null);
         await Close();
     }

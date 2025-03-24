@@ -74,7 +74,7 @@
         await new Css(JSRuntime).HideBodyOverflow();
 
         _item = await RoleManagementService.GetById(id);
-        Logger.LogInformation("Loaded role: {roleName}", _item.Role.Name);
+        Logger.LogInformation("Loaded role: {id}", id);
 
         _modalDisplay = "block;";
         _modalClass = "Show";

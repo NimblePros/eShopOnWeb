@@ -151,9 +151,6 @@
         var rolesToAdd = checkedRoles.Except(startingRoles).ToList();
 
         if (rolesToAdd.Any() || rolesToRemove.Any()){
-            Logger.LogInformation("Total number of roles to add: {addedRolesCount}", rolesToAdd.Count);
-            Logger.LogInformation("Total number of roles to remove: {removedRolesCount}", rolesToRemove.Count);
-
             SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
                 UserId = _item.Id,
                 RolesToAdd = rolesToAdd, 
@@ -186,8 +183,6 @@
         }
 
         Logger.LogInformation("Acquired user {id}",_item.Id);
-
-        Logger.LogInformation("Total Roles assigned: {roleCount}", userRoles.Roles.Count);
 
         _modalDisplay = "block;";
         _modalClass = "Show";

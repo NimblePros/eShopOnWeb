@@ -60,10 +60,10 @@
 
     private async Task DeleteClick()
     {
-        Logger.LogInformation("Removing User {userId} from Role {roleName}", _userId, _roleName);
+        Logger.LogInformation("Removing User {userId} from Role {roleId}", _userId, _roleId);
         await RoleManagementService.DeleteUserFromRole(_userId, _roleId);
 
-        Logger.LogInformation("Removed User {userId} from {roleName}", _userId, _roleName);
+        Logger.LogInformation("Removed User {userId} from {roleId}", _userId, _roleId);
         await OnSaveClick.InvokeAsync(null);
         await Close();
 

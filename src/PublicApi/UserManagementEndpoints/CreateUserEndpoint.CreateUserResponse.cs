@@ -10,5 +10,6 @@ public class CreateUserResponse : BaseResponse
     }
     public CreateUserResponse() { }
 
-    public UserDto User { get; set; }
+    public string UserId { get; set; }
+
 }

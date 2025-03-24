@@ -79,7 +79,7 @@
 
     private async Task DeleteClick(string userId, string userName)
     {
-        Logger.LogInformation("Confirming to remove User {userId} from {roleName}",userId, _roleName);
+        Logger.LogInformation("Confirming to remove User {userId} from {roleId}",userId, _roleId);
         await DeleteConfirmationComponent.Open(userId, userName, _roleName, _roleId);
     }
 
@@ -88,7 +88,7 @@
         _roleName = roleName;
         _roleId = roleId;
 
-        Logger.LogInformation("Now loading details for {name}... /Role/Details/{Id}", roleName, roleId);
+        Logger.LogInformation("Now loading details... /Role/Details/{Id}", roleName, roleId);
 
 
         _members = (await RoleManagementService.GetMembershipByName(roleName)).RoleMembers;

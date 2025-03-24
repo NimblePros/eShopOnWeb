@@ -139,7 +139,7 @@
             var checkedRoles = _selectedRoles.Where(r => r.Value).Select(r => r.Key).ToList();
             if (checkedRoles.Count > 0){
                 SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
-                    UserId = result.User.Id,
+                    UserId = result.UserId,
                     RolesToAdd = checkedRoles
                 };
 
@@ -147,7 +147,7 @@
             }
             if (result != null)
             {
-                Logger.LogInformation("Created User {userId}",result.User.Id);
+                Logger.LogInformation("Created User {userId}",result.UserId);
                 await OnSaveClick.InvokeAsync(null);
                 await Close();
             }
