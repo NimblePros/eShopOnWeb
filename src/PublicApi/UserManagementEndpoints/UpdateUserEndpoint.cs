@@ -39,7 +39,7 @@ public class UpdateRoleEndpoint(UserManager<ApplicationUser> userManager) : Endp
 
         existingUser.FromUserDto(request.User);
 
-        var updateResponse = await userManager.UpdateAsync(existingUser);
+        await userManager.UpdateAsync(existingUser);
         response.User = (await userManager.FindByIdAsync(existingUser.Id))!;
         return TypedResults.Ok(response);
     }

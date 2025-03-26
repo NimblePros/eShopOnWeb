@@ -48,7 +48,7 @@ public class UpdateUserEndpointTest
     {
         var client = HttpClientHelper.GetAdminClient();
 
-        UpdateUserRequest request = null;
+        UpdateUserRequest? request = null;
         var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
         var updateResponse = await client.PutAsync("api/users", jsonContent);
         Assert.AreEqual(HttpStatusCode.NotFound, updateResponse.StatusCode);
@@ -59,10 +59,7 @@ public class UpdateUserEndpointTest
     {
         var client = HttpClientHelper.GetAdminClient();
 
-        UpdateUserRequest request = new UpdateUserRequest()
-        {
-            User = null
-        };
+        UpdateUserRequest request = new();        
         var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
         var updateResponse = await client.PutAsync("api/users", jsonContent);
         Assert.AreEqual(HttpStatusCode.NotFound, updateResponse.StatusCode);
