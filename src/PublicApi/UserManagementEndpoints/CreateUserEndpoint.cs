@@ -44,7 +44,7 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         if (createUser.Succeeded)
         {
             var createdUser = await userManager.FindByNameAsync(request.User.UserName);
-            await userManager.AddPasswordAsync(createdUser, AuthorizationConstants.DEFAULT_PASSWORD);
+            await userManager.AddPasswordAsync(createdUser!, AuthorizationConstants.DEFAULT_PASSWORD);
             response.UserId = createdUser!.Id;
             await SendCreatedAtAsync<UserGetByIdEndpoint>(new { UserId = createdUser!.Id }, response, cancellation: ct);
         }
