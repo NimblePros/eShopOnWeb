@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using BlazorAdmin.Models;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
+using Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;
 

@@ -1,7 +1,6 @@
 ﻿@using BlazorAdmin.Interfaces
 @using BlazorAdmin.Models
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.eShopWeb.Infrastructure.Identity
 @inject ILogger<Create> Logger
 @inject IJSRuntime JSRuntime
 @inject IUserManagementService UserManagementService
@@ -90,8 +89,8 @@
                             {
                                 <div class="form-group row form-check">
                                     <div class="col-md-6">
-                                        <input type="checkbox" class="form-check-input" @onchange="(e) => UpdateRoleSelectedState(role.Name, (bool)((ChangeEventArgs)e).Value)" />
-                                        <label class="form-check-label">@role</label>
+                                        <input type="checkbox" id="@role" class="form-check-input" @onchange="(e) => UpdateRoleSelectedState(role.Name, (bool)((ChangeEventArgs)e).Value)" />
+                                        <label class="form-check-label" for="@role">@role</label>
                                     </div>
                                 </div>
                             }

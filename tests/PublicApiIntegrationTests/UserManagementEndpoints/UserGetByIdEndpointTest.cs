@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using Microsoft.eShopWeb;
-using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;

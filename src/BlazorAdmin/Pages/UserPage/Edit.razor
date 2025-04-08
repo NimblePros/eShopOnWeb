@@ -9,8 +9,6 @@
 @using BlazorAdmin.Interfaces
 @using BlazorAdmin.Models
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.eShopWeb.ApplicationCore.Entities
-@using Microsoft.eShopWeb.Infrastructure.Identity
 
 <div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
     <div class="modal-dialog" role="document">
@@ -91,8 +89,8 @@
                             {
                                 <div class="form-group row form-check">
                                     <div class="col-md-6">
-                                        <input type="checkbox" class="form-check-input" checked="@_selectedRoles[role.Name]" @onchange="(e) => UpdateRoleSelectedState(role.Name, (bool)((ChangeEventArgs)e).Value)"  />
-                                        <label class="form-check-label">@role</label>
+                                        <input type="checkbox" id="@role" class="form-check-input" checked="@_selectedRoles[role.Name]" @onchange="(e) => UpdateRoleSelectedState(role.Name, (bool)((ChangeEventArgs)e).Value)" />
+                                        <label class="form-check-label" for="@role">@role</label>
                                     </div>
                                 </div>
                             }

@@ -1,10 +1,6 @@
-﻿using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
-using BlazorAdmin.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb;
-using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;
@@ -26,7 +22,7 @@ public class UserGetByUserNameEndpointTest
         response.EnsureSuccessStatusCode();
 
         var adminRoleResponse = await response.Content.ReadAsStringAsync();
-        var adminModel = adminRoleResponse.FromJson<Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models.GetUserResponse>();
+        var adminModel = adminRoleResponse.FromJson<GetUserResponse>();
         Assert.IsNotNull(adminModel);
         Assert.IsNotNull(adminModel.User);
         Assert.IsNotNull(adminModel.User.UserName);
@@ -34,7 +30,7 @@ public class UserGetByUserNameEndpointTest
     }
 
     [TestMethod]
-    public async Task ReturnsNotFoundGivenInvalidId()
+    public async Task ReturnsNotFoundGivenInvalidName()
     {
         var client = HttpClientHelper.GetAdminClient();
 

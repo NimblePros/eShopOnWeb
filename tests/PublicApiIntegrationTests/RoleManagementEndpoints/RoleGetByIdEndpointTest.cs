@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using BlazorAdmin.Models;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
+using Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;
 
@@ -26,7 +26,7 @@ public class RoleGetByIdEndpointTest
 
         var response = await client.GetAsync($"api/roles/{adminRole.Id}");
         response.EnsureSuccessStatusCode();
-        
+
         var adminRoleResponse = await response.Content.ReadAsStringAsync();
         var adminModel = adminRoleResponse.FromJson<GetByIdRoleResponse>();
         Assert.IsNotNull(adminModel);
