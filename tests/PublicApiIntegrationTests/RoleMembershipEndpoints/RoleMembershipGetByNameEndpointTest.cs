@@ -1,11 +1,12 @@
 ﻿using System.Threading.Tasks;
-using BlazorAdmin.Models;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
+using Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;
 
 namespace PublicApiIntegrationTests.RoleMembershipEndpoints;
+
 [TestClass]
 public class RoleMembershipGetByNameEndpointTest
 {

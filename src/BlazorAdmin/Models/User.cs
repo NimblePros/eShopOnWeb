@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BlazorAdmin.Models;
 
-public class User()
+public class User
 {
     public string Id { get; set; }
 

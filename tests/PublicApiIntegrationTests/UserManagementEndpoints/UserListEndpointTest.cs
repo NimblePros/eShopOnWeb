@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
-using BlazorAdmin.Models;
 using Microsoft.eShopWeb;
+using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;
 
@@ -15,7 +15,7 @@ public class UserListEndpointTest
     {
         var client = ProgramTest.NewClient;
         var response = await client.GetAsync("/api/users");
-        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);        
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [TestMethod]

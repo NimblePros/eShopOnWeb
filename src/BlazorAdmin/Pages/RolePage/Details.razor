@@ -1,5 +1,5 @@
 ﻿@using BlazorAdmin.Interfaces
-@using Microsoft.eShopWeb.Infrastructure.Identity
+@using BlazorAdmin.Models
 @inject ILogger<Details> Logger
 @inject IJSRuntime JSRuntime
 @inject IRoleManagementService RoleManagementService
@@ -74,7 +74,7 @@
     private bool _showDetailsModal = false;
     private string _roleName = "";
     private string _roleId = "";
-    private List<ApplicationUser> _members = new List<ApplicationUser>();
+    private List<UserForMembership> _members = new List<UserForMembership>();
     private DeleteUserFromRole DeleteConfirmationComponent { get; set; }
 
     private async Task DeleteClick(string userId, string userName)

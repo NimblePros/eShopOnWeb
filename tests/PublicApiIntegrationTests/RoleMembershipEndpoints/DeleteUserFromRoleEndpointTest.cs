@@ -2,9 +2,10 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using BlazorAdmin.Models;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
+using Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
+using Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;
 
@@ -15,9 +16,9 @@ public class DeleteUserFromRoleEndpointTest
 {
     [TestMethod]
     public async Task ReturnsNotFoundGivenValidRoleIdAndInvalidUserIdAndAdminUserToken()
-    {                
+    {
         var client = HttpClientHelper.GetAdminClient();
-        
+
         var validRoleId = await GetValidRoleId(client, Constants.Roles.ADMINISTRATORS);
         var response = await client.DeleteAsync($"api/roles/{validRoleId}/members/0");
 

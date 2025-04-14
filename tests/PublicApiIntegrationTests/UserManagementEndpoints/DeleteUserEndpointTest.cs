@@ -1,9 +1,8 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
-using BlazorAdmin.Models;
 using Microsoft.eShopWeb;
-using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
 using PublicApiIntegrationTests.Helpers;
 
 namespace PublicApiIntegrationTests.UserManagementEndpoints;
@@ -48,7 +47,7 @@ public class DeleteUserEndpointTest
         var response = await client.GetAsync($"api/users/name/{userName}");
 
         var adminUserResponse = await response.Content.ReadAsStringAsync();
-        var adminUser = adminUserResponse.FromJson<Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models.GetUserResponse>();
+        var adminUser = adminUserResponse.FromJson<GetUserResponse>();
         var deleteResponse = await client.DeleteAsync($"api/users/{adminUser!.User!.Id}");
 
         Assert.AreEqual(HttpStatusCode.BadRequest, deleteResponse.StatusCode);
