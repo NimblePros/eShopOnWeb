@@ -1,0 +1,15 @@
+<nav>
+    <h2>{{ site.data.nav.nav_title }}</h2>
+    <ul>
+       {% for page in site.data.nav.pages %}
+            {% if page.url contains "http" %}
+                {% assign domain = '' %}
+            {% elsif page.url contains "mailto" %}
+                {% assign domain = '' %}
+            {% else %}
+                {% assign domain = site.url | append: site.baseurl %}
+            {% endif %}
+          <li><a href="{{domain}}{{ page.url }}">{{ page.title }}</a></li>
+       {% endfor %}
+    </ul>
+</nav>
