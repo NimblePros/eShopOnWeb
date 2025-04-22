@@ -1,4 +1,4 @@
-baseurl: "/NimblePros/eShopOnWeb"
+baseurl: "/eShopOnWeb"
 title: eShopOnWeb
 description: "Sample ASP.NET Core 9.0 reference application, powered by Microsoft, demonstrating a domain-centric application architecture with monolithic deployment model."
 remote_theme: pages-themes/midnight@v0.2.0
