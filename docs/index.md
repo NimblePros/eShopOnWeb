@@ -1,5 +1,6 @@
 ---
-title: "eShopOnWeb Documentation"
+title: "Home"
+nav_order: 1
 ---
 
 ## Details

@@ -1,5 +1,6 @@
 ---
 title: Features in eShopOnWeb
+nav_order: 3
 ---
 
 These are some of the features in eShopOnWeb:
