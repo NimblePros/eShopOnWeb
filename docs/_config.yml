@@ -6,3 +6,15 @@ color_scheme: "dim"
 search_enabled: true
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
+
+defaults:
+-
+  scope: 
+    psth: ""
+    type: "decisions"
+  values:
+    layout: "adr"
+
+collections:
+  decisions:
+    output: true
