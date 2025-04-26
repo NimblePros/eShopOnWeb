@@ -10,14 +10,7 @@ plugins:
 defaults:
 -
   scope: 
-    path: ""
-    type: "decisions"
+    path: "decisions"
   values:
     layout: "adr"
--
-  scope:
-    path: ""
-    type: "faqs"
-  values:
-    layout: "faq"
-    parent: "Frequently Asked Questions"
+    parent: "Architecture Decision Records"

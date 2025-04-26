@@ -1,8 +1,8 @@
 ---
-parent: "Architecture Decision Records"
 title: Request for ADRs
-requested_by: Steve "Ardalis" Smith
-status: "in progress"
+decisioner: Steve "Ardalis" Smith
+status: Active
+date: 2025-04-24
 ---
 
 We will implement Architecture Decision Records in the eShopOnWeb documentation.
