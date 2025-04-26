@@ -1,5 +1,6 @@
 ---
-name: Just the Docs Theme
+parent: "Architecture Decision Records"
+title: Just the Docs Theme
 requested_by: Sarah "Sadukie" Dutkiewicz
 status: "in progress"
 ---

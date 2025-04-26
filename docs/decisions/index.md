@@ -1,6 +1,6 @@
 ---
-title: Architecture Decision Records
-nav_order: 2
+title: "Architecture Decision Records"
+nav_order: 1
 layout: adr-index
 ---
 

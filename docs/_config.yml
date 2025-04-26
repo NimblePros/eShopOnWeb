@@ -20,9 +20,4 @@ defaults:
     type: "faqs"
   values:
     layout: "faq"
-
-collections:
-  decisions:
-    output: true
-  faqs:
-    output: true
+    parent: "Frequently Asked Questions"

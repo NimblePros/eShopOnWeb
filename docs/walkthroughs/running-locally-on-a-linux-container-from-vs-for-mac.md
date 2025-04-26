@@ -1,6 +1,7 @@
 ---
 title: Running Locally on a Linux Container from Visual Studio for Mac
 parent: Walkthroughs
+nav_order: 6
 ---
 
 To deploy the eShopOnWeb sample to a local Linux Docker container, from Visual Studio for Mac, follow these step-by-step instructions:

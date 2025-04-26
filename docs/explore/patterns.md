@@ -5,16 +5,16 @@ parent: Explore
 
 The eShopOnWeb reference application employs a number of software design patterns which are implemented either in the code itself, or with the assistance of various open source NuGet packages.
 
-- [MVC](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#mvc)
-- [Razor Pages](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#razor-pages)
-- [API Endpoints](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#api-endpoints)
-- [Mediator](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#mediator)
-- [Repository](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#repository)
-- [Specification](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#specification)
-- [Guard Clauses](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#guard-clauses)
-- [Entities](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#entities)
-- [Aggregates](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#aggregates)
-- [Resources](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns#resources)
+- [MVC](#mvc)
+- [Razor Pages](#razor-pages)
+- [API Endpoints](#api-endpoints)
+- [Mediator](#mediator)
+- [Repository](#repository)
+- [Specification](#specification)
+- [Guard Clauses](#guard-clauses)
+- [Entities](#entities)
+- [Aggregates](#aggregates)
+- [Resources](#resources)
 
 ## MVC
 

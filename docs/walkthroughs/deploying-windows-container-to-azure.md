@@ -1,7 +1,7 @@
 ---
 title: Deploying as a Windows Container into a Windows Container host in Azure
 parent: Walkthroughs
-nav_exclude: true
+nav_order: 8
 ---
 
 To deploy the eShopOnWeb sample to a Windows 2016 virtual machine running Docker on Azure, from Visual Studio, follow these step-by-step instructions:

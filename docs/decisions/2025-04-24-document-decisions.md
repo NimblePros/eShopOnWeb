@@ -1,5 +1,6 @@
 ---
-name: Request for ADRs
+parent: "Architecture Decision Records"
+title: Request for ADRs
 requested_by: Steve "Ardalis" Smith
 status: "in progress"
 ---

@@ -1,6 +1,7 @@
 ---
 title: Deploying as a Linux Container into Azure App Service
 parent: Walkthroughs
+nav_order: 5
 ---
 
 To deploy the eShopOnWeb sample to a Linux Docker container on Azure App Services from Visual Studio, follow these step-by-step instructions:

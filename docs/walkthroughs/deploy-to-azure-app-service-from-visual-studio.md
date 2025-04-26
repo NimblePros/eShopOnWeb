@@ -4,7 +4,7 @@ parent: Walkthroughs
 nav_order: 1
 ---
 
-To deploy the eShopOnWeb sample application to an Azure App Service (assuming you've already cloned or downloaded it locally, and you [have an Azure account](https://azure.microsoft.com/en-us/free/)), follow these steps from Visual Studio ([see here to start from the Azure Portal](https://github.com/dotnet-architecture/eShopOnWeb/wiki/02.-Deploying-to-Azure-App-Service-from-Azure-Portal)):
+To deploy the eShopOnWeb sample application to an Azure App Service (assuming you've already cloned or downloaded it locally, and you [have an Azure account](https://azure.microsoft.com/en-us/free/)), follow these steps from Visual Studio ([see here to start from the Azure Portal](/walkthroughs/deploy-to-azure-app-service-from-azure-portal)):
 
 ## 1. Open the eShopOnWeb solution in Visual Studio.
 

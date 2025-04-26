@@ -1,7 +1,7 @@
 ---
 title: Running locally on a Windows Container from Visual Studio
-nav_exclude: true
 parent: Walkthroughs
+nav_order: 7
 ---
 
 To deploy the eShopOnWeb sample to a local Windows Docker container from Visual Studio, follow these step-by-step instructions:

@@ -1,9 +1,9 @@
 ---
 title: "Home"
-nav_order: 1
+nav_order: 0
 ---
 
-## Welcome to the eShopOnWeb wiki!
+## Associated eBook
 
 Download and read this reference sample's associated e-book, [Architecting Modern Web Applications with ASP.NET Core and Microsoft Azure](https://dotnet.microsoft.com/download/e-book/aspnet/pdf), by [Steve Smith](https://github.com/ardalis).
 
@@ -22,20 +22,19 @@ The book covers the following topics and uses this sample repository to demonstr
 
 ## For Beginners
 
-Read the [Getting Started for Beginners guide](https://github.com/NimblePros/eShopOnWeb/wiki/Getting-Started-for-Beginners) if you're new to programming with ASP.NET Core.
+Read the [Getting Started for Beginners guide](/Getting-Started-for-Beginners) if you're new to programming with ASP.NET Core.
 
 ## Walkthroughs
 
-We've created several [walkthroughs](https://github.com/NimblePros/eShopOnWeb/wiki/Walkthroughs) to help demonstrate how easily you can deploy the eShopOnWeb sample to a variety of different destination hosts and platforms.
+We've created several [walkthroughs](/Walkthroughs) to help demonstrate how easily you can deploy the eShopOnWeb sample to a variety of different destination hosts and platforms.
 
 ## Explore
 
-While the associated e-book covers the general principles and patterns, the specific implementation details for much of the code is included in the source code and explained further here in the wiki:
+While the associated e-book covers the general principles and patterns, the specific implementation details for much of the code is included in the source code and explained further here:
 
-* [Architecture](https://github.com/NimblePros/eShopOnWeb/wiki/Architecture)
-* [Patterns](https://github.com/NimblePros/eShopOnWeb/wiki/Patterns)
-* [Code](https://github.com/NimblePros/eShopOnWeb/wiki/Code)
-* [Tests](https://github.com/NimblePros/eShopOnWeb/wiki/Tests)
+* [Architecture](/explore/Architecture)
+* [Patterns](/explore/Patterns)
+* [Tests](/explore/Tests)
 
 ## Frequently Asked Questions
 
