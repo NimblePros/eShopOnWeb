@@ -2,39 +2,46 @@
 title: Getting Started for Beginners
 ---
 
-If you're new to building applications with ASP.NET Core and Visual Studio, go through [this video tutorial](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-01?view=vs-2019) to help get you started. It covers the following topics:
+If you're new to building applications with ASP.NET Core and Visual Studio, go through [this tutorial](https://youtu.be/Fz_HAqQGLtY) to help get you started. It covers the following topics:
 
-- [Installing Visual Studio 2019](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-01?view=vs-2019)
-- [Creating an ASP.NET Core Web App](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-02?view=vs-2019)
-- [Working with data using EF Core](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-03?view=vs-2019)
-- [Exposing a Web API](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-04?view=vs-2019)
-- [Deploying and hosting the app in Azure](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-05?view=vs-2019)
+- [Installing Visual Studio 2022](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-01?view=vs-2022)
+- [Creating an ASP.NET Core Web App](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-02?view=vs-2022)
+- [Working with data using EF Core](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-03?view=vs-2022)
+- [Exposing a Web API](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-04?view=vs-2022)
+- [Deploying and hosting the app in Azure](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-05?view=vs-2022)
 
 Once you've completed this tutorial, you're ready to learn how to build real world applications using ASP.NET Core and some related technologies, as demonstrated in this eShopOnWeb reference application. Be sure to [download and review the free 100+ page eBook](https://aka.ms/webappebook), which covers high-level concepts and principles for architecting applications. The rest of this guide will provide you with additional resources to make sure you're able to quickly start understand this sample.
 
 ## Getting the Code
 
-You can access the eShopOnWeb sample code on your machine by either downloading it as a ZIP file or cloning it using git. In either case, click on the Clone or download button on the repository's home page:
+You can access [the eShopOnWeb sample code](https://github.com/NimblePros/eShopOnWeb) on your machine by either downloading it as a ZIP file or cloning it using Git. In either case, click on the **Code** button, then get the URL for cloning Clone download the ZIP file:
 
-![image](https://github.com/user-attachments/assets/1f5859ba-367f-4124-8f67-8896b0edca5b)
+![NimblePros/eShopOnWeb in GitHub](./assets/images/beginner-guide/eshoponweb-github-code.png)
 
-Then to get the ZIP file just click Download ZIP. Otherwise, you can click Open in Visual Studio or from Visual Studio 2019 you can choose Clone or check out code from the launch screen:
+You can download the ZIP file and then open the SLN file in Visual Studio 2022.
 
-![image](https://github.com/user-attachments/assets/1f5859ba-367f-4124-8f67-8896b0edca5b)
+Otherwise, from Visual Studio 2022, you can choose **Clone a repository** or check out code from the launch screen:
+
+![Visual Studio Loading Dialog - highlighting the Clone a repo option](./assets/images/beginner-guide/vs-clone.png)
 
 and then put in https://github.com/NimblePros/eShopOnWeb as the URL to clone.
 
-![image](https://github.com/user-attachments/assets/c8960123-ad78-4a2c-bdf3-84b9da41aaff)
+![Visual Studio Clone Dialog with the NimblePros/eShopOnWeb clone URL](./assets/images/beginner-guide/vs-clone-git-url.png)
 
-Open the eShopOnWeb.sln solution file, and then right-click on the Web project and select Set as Startup Project. Now you're ready to run the application.
+Once you have a copy of the code, open the **eShopOnWeb.sln** solution file. Then right-click on the **Web** project and select **Set as Startup Project**. Now you're ready to run the application.
 
 ## Solution Structure
 
-As applications grow in size, it can be worthwhile to break them up into several projects, usually based on their focus. This follows the Separation of Concerns principle, and common examples of focus for individual portions of an application are user interface (UI), business logic, and data access or infrastructure. The eShopOnWeb solution has been split up into three main application projects:
+As applications grow in size, it can be worthwhile to break them up into several projects, usually based on their focus. This follows the [Separation of Concerns principle](https://deviq.com/principles/separation-of-concerns), and common examples of focus for individual portions of an application are user interface (UI), business logic, and data access or infrastructure. The eShopOnWeb solution has been split up into three main application projects:
+
+- BlazorAdmin
+- PublicApi
+- Web
+
+There are 2 additional supporting projects:
 
 - ApplicationCore
 - Infrastructure
-- Web
 
 The business logic and domain model are kept in the ApplicationCore project. Data access and other infrastructure plumbing code belongs in the Infrastructure project. And ASP.NET Core (Web) concerns belong in the Web project. The solution also has a number of different kinds of automated tests, found in separate Test folders. Projects depend on one another and can help enforce the direction of dependencies. In this case, we don't want our business logic to depend on low level plumbing code like that found in the Infrastructure project, so we structure the dependency direction so that Infrastructure depends on Application Core. This follows the [Dependency Inversion Principle (DIP)](https://deviq.com/dependency-inversion-principle/), because the implementation code in Infrastructure implements interfaces defined in ApplicationCore. ([Learn more about SOLID Principles for C# Developers](https://mailchi.mp/nimblepros/solid-email-course))
 
@@ -61,7 +68,7 @@ The infrastructure concerns implemented in this project include:
 
 ## Web Project
 
-The Web project has several features you're already familiar with from the [video tutorials](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-01?view=vs-2019), but there are a few additions as well that are described here.
+The Web project has several features you're already familiar with from the [video tutorials](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-01?view=vs-2022), but there are a few additions as well that are described here.
 
 [Areas in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/areas?view=aspnetcore-2.2) are used to organize functionality, and in this case the Identity functionality uses an Area for configuration and customization.
 
@@ -83,7 +90,19 @@ ASP.NET Core and this application make heavy use of a technique called [dependen
 
 As noted above, the Web application has authorization configured for the app using [Identity](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity). This is configured with its own EF Core database context (`AppIdentityDbContext`) and when you run the app you work with identity when you register or log in. It's generally a good idea to avoid tightly coupling your authorization process with your business logic, so you'll notice that ApplicationCore has no knowledge of the app's auth strategy.
 
-When you run the application, click on the Login link in the site header to log in. Note that the sample comes with a user and password already set up for you, noted at the bottom of the login page: `demouser@microsoft.com` / `Pass@word1`.
+The BlazorAdmin application uses a [custom AuthenticationStateProvider](https://learn.microsoft.com/en-us/aspnet/core/blazor/security/authentication-state?view=aspnetcore-9.0&pivots=server#implement-a-custom-authenticationstateprovider) for its authorization.
+
+The PublicApi application makes use of [JWT bearer tokens](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-jwt-bearer-authentication?view=aspnetcore-9.0). This uses the same identity database context configuration that the Web application uses.
+
+There are three demo accounts to work with:
+
+| Account Name | Password | Role |
+|--------------|----------|------|
+| demouser@microsoft.com | Pass@word1 | |
+| productmgr@microsoft.com | Pass@word1 | Product Manager |
+| admin@microsoft.com | Pass@word1 | Administrator |
+
+If you want to get into the code with a friendly guide, check out this course from [NimblePros Academy](https://academy.nimblepros.com) on [ASP.NET Identity in Action: Implementing Individual Accounts](https://academy.nimblepros.com/purchase?product_id=6215750). Note: This URL will give you a discounted price on the course, not the full price.
 
 ## Performance Considerations
 

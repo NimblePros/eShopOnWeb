@@ -1,5 +1,6 @@
 ---
 title: ".NET Maintenance"
+parent: Explore
 ---
 
 When we need to update to a new version of .NET, the following .NET references need to be updated:

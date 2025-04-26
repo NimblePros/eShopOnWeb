@@ -1,5 +1,6 @@
 ---
 title: Patterns
+parent: Explore
 ---
 
 The eShopOnWeb reference application employs a number of software design patterns which are implemented either in the code itself, or with the assistance of various open source NuGet packages.

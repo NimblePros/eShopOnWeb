@@ -1,5 +1,6 @@
 ---
 title: "Architecture"
+parent: Explore
 ---
 
 The main application in the eShopOnWeb solution is a monolithic ASP.NET Core web app. It is organized according to Clean Architecture principles, such that dependencies on infrastructure concerns are minimized throughout the application. Business concepts and domain model concerns are kept in the ApplicationCore project, which other projects depend on.

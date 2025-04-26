@@ -1,5 +1,6 @@
 ---
 title: Tests
+parent: Explore
 ---
 
 We have a variety of tests in this application.
