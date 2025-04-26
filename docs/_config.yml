@@ -14,7 +14,15 @@ defaults:
     type: "decisions"
   values:
     layout: "adr"
+-
+  scope:
+    path: ""
+    type: "faqs"
+  values:
+    layout: "faq"
 
 collections:
   decisions:
+    output: true
+  faqs:
     output: true

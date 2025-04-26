@@ -7,11 +7,7 @@ layout: default
 <h2>Decisions</h2>
 <ul>
 
-{% assign decisions = site.decisions | where_exp: "item", "item.list != false" %}
-
-{% for decision in decisions %}
-    {% if page.url %}
+{% for decision in site.decisions %}
     <li><a href="{{decision.url}}">{{decision.title}}</a></li>
-    {% endif %}
 {% endfor %}
 </ul>

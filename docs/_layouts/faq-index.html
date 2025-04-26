@@ -1,0 +1,11 @@
+---
+layout: default
+---
+
+{{ content }}
+
+<ul>
+{% for question in site.faqs %}
+    <li><a href="{{question.url}}">{{question.title}}</a></li>
+{% endfor %}
+</ul>
