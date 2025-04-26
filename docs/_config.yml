@@ -10,7 +10,7 @@ plugins:
 defaults:
 -
   scope: 
-    psth: ""
+    path: ""
     type: "decisions"
   values:
     layout: "adr"
