@@ -1,0 +1,16 @@
+baseurl: "/eShopOnWeb"
+title: eShopOnWeb
+description: "Sample ASP.NET Core 9.0 reference application, powered by Microsoft, demonstrating a domain-centric application architecture with monolithic deployment model."
+remote_theme: just-the-docs/just-the-docs
+color_scheme: "dim"
+search_enabled: true
+plugins:
+- jekyll-remote-theme # add this line to the plugins list if you already have one
+
+defaults:
+-
+  scope: 
+    path: "decisions"
+  values:
+    layout: "adr"
+    parent: "Architecture Decision Records"
