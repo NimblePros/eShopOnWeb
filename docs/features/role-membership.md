@@ -3,7 +3,7 @@ title: Role Membership
 parent: Features
 ---
 
-As mentioned in [Role Management](/features/role-management), there are starting roles with the system. There are also starting role assignments.
+As mentioned in [Role Management]({{ site.baseurl }}/features/role-management), there are starting roles with the system. There are also starting role assignments.
 
 ## Starting Role Assignments
 
@@ -19,8 +19,8 @@ These are the starting accounts and their role assignments:
 
 The code is arranged with the following role membership management:
 
-- A user can be added or removed from a role in [user management](/features/user-management).
-- A user can be removed from a role in [role management](/features/role-management).
+- A user can be added or removed from a role in [user management]({{ site.baseurl }}/features/user-management).
+- A user can be removed from a role in [role management]({{ site.baseurl }}/features/role-management).
 
 ## Important Things to Note about Role Membership
 

@@ -22,20 +22,20 @@ The book covers the following topics and uses this sample repository to demonstr
 
 ## For Beginners
 
-Read the [Getting Started for Beginners guide](/getting-started-for-beginners) if you're new to programming with ASP.NET Core.
+Read the [Getting Started for Beginners guide]({{ site.baseurl }}/getting-started-for-beginners) if you're new to programming with ASP.NET Core.
 
 ## Walkthroughs
 
-We've created several [walkthroughs](/walkthroughs) to help demonstrate how easily you can deploy the eShopOnWeb sample to a variety of different destination hosts and platforms.
+We've created several [walkthroughs]({{ site.baseurl }}/walkthroughs) to help demonstrate how easily you can deploy the eShopOnWeb sample to a variety of different destination hosts and platforms.
 
 ## Explore
 
 While the associated e-book covers the general principles and patterns, the specific implementation details for much of the code is included in the source code and explained further here:
 
-* [Architecture](/explore/architecture)
-* [Patterns](/explore/patterns)
-* [Tests](/explore/tests)
+* [Architecture]({{ site.baseurl }}/explore/architecture)
+* [Patterns]({{ site.baseurl }}/explore/patterns)
+* [Tests]({{ site.baseurl }}/explore/tests)
 
 ## Frequently Asked Questions
 
-View the FAQ [here](/faq)
+View the FAQ [here]({{ site.baseurl }}/faq)

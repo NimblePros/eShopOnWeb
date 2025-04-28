@@ -167,7 +167,7 @@ This project includes a `.devcontainer` folder with a [dev container configurati
 
 You can use the dev container to build and run the app without needing to install any of its tools locally! You can work in GitHub Codespaces or the VS Code Dev Containers extension.
 
-Learn more about using the dev container in its [readme](/.devcontainer/devcontainerreadme.md).
+Learn more about using the dev container in its [readme]({{ site.baseurl }}/.devcontainer/devcontainerreadme.md).
 
 ## Running the sample using Docker
 
