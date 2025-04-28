@@ -4,6 +4,8 @@ nav_order: 3
 has_toc: false
 ---
 
+![eShopOnWeb](../assets/images/features/eShopOnWeb.png)
+
 These are some of the features in eShopOnWeb:
 
 - [Single sign-on with GitHub]({{ site.baseurl }}/features/sso-with-github)
