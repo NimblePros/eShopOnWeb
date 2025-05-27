@@ -5,5 +5,5 @@ FROM ruby:3.3
 # Update the Ruby bundler
 RUN gem update bundler 
 
-# Install Bundler and Jekyll
-RUN gem install bundler jekyll 
+# Install Bundler and GitHub Pages
+RUN gem install bundler github-pages
