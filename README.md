@@ -20,7 +20,10 @@ A list of Frequently Asked Questions about this repository can be found [here](h
   - [Linux/MacOS](#linuxmacos)
 - [Running the sample locally](#running-the-sample-locally)
   - [Configuring the sample to use SQL Server](#configuring-the-sample-to-use-sql-server)
-- [Running the sample in the dev container](#running-the-sample-in-the-dev-container)
+- [Dev Containers for the eShopOnWeb repo](#dev-containers-for-the-eshoponweb-repo)
+  - [eShopOnWeb App Dev Container](#eshoponweb-app-dev-container)
+  - [eShopOnWeb Docs Dev Container](#eshoponweb-docs-dev-container)
+  - [Learn More about Dev Containers](#learn-more-about-dev-containers)
 - [Running the sample using Docker](#running-the-sample-using-docker)
 - [Getting the GitHub Single Sign-On Working](#getting-the-github-single-sign-on-working)
 - [Community Extensions](#community-extensions)
@@ -161,13 +164,28 @@ You can also run the samples in Docker (see below).
     dotnet ef migrations add InitialIdentityModel --context appidentitydbcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Identity/Migrations
     ```
 
-## Running the sample in the dev container
+## Dev Containers for the eShopOnWeb repo
+
+We use dev containers to make it easier for you to run the eShopOnWeb application locally as well as our documentation.
+
+### eShopOnWeb App Dev Container
 
 This project includes a `.devcontainer` folder with a [dev container configuration](https://containers.dev/), which lets you use a container as a full-featured dev environment.
 
 You can use the dev container to build and run the app without needing to install any of its tools locally! You can work in GitHub Codespaces or the VS Code Dev Containers extension.
 
-Learn more about using the dev container in its [readme]({{ site.baseurl }}/.devcontainer/devcontainerreadme.md).
+Learn more about using the dev container in [eShopOnWeb's dev container readme](/.devcontainer/devcontainerreadme.md).
+
+### eShopOnWeb Docs Dev Container
+
+If you want to help maintain [the documentation](https://nimblepros.github.io/eShopOnWeb/), we have a [.devcontainer folder within the docs folder](/docs/.devcontainer). This allows us to see our documentation changes in a container running Ruby and the GitHub Pages environment.
+
+### Learn More about Dev Containers
+
+- [NimblePros YouTube: Run GitHub Pages Locally in a Dev Container](https://www.youtube.com/watch?v=JpLJi5JBmYM&t=5s)
+- [NimblePros Blog: Run GitHub Pages Locally in a Dev Container](https://blog.nimblepros.com/blogs/github-pages-with-dev-containers/)
+- [NimblePros Blog: Introduction to Dev Containers](https://blog.nimblepros.com/blogs/introduction-to-dev-containers/)
+- [NimblePros Webinar: Dev Containers Unwrapped!](https://www.youtube.com/watch?v=Wvetp2YkwPY)
 
 ## Running the sample using Docker
 
