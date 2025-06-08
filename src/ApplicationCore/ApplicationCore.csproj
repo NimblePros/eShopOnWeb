@@ -3,12 +3,14 @@
 	<PropertyGroup>	
 		<RootNamespace>Microsoft.eShopWeb.ApplicationCore</RootNamespace>
 		<Nullable>enable</Nullable>
+		<TargetFramework>net9.0</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Ardalis.GuardClauses" />
 		<PackageReference Include="Ardalis.Result" />
-		<PackageReference Include="Ardalis.Specification" />		
+		<PackageReference Include="Ardalis.Specification" />
+		<PackageReference Include="MediatR" />		
 		<PackageReference Include="System.Security.Claims" />
 		<PackageReference Include="System.Text.Json" />
 	</ItemGroup>

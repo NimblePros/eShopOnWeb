@@ -27,28 +27,18 @@ public static class Dependencies
         }
         else
         {
-            // use real database
-            // Requires LocalDB which can be installed with SQL Server Express 2016
-            // https://www.microsoft.com/en-us/download/details.aspx?id=54284
-            string catalogConnectionString = configuration.GetConnectionString("CatalogConnection")!;
             services.AddDbContext<CatalogContext>((provider, options) =>
             {
-                // why doesn't this extension method work?
-                // see: https://github.com/NimblePros/Metronome/blob/main/src/NimblePros.Metronome/ServiceRegistrationExtensions.cs#L24
-                //options.UseSqlServer(catalogConnectionString).AddMetronomeDbTracking(provider); ;
-
-                // but this works
-                options.UseSqlServer(catalogConnectionString)
+                var connectionString = configuration.GetConnectionString("CatalogConnection");
+                options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure())
                     .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
             });
 
-            // Add Identity DbContext
-            string identityConnectionString = configuration.GetConnectionString("IdentityConnection")!;
             services.AddDbContext<AppIdentityDbContext>((provider, options) =>
             {
-                options.UseSqlServer(identityConnectionString);
-                // not sure why AddMetronomeDbTracking extension method doesn't work here
-                options.AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
+                var connectionString = configuration.GetConnectionString("IdentityConnection");
+                options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure())
+                    .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
             });
         }
     }

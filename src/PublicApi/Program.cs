@@ -1,4 +1,6 @@
-﻿using BlazorShared;
+﻿using System;
+using Azure.Identity;
+using BlazorShared;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Builder;
@@ -15,6 +17,17 @@ using Microsoft.Extensions.Logging;
 using NimblePros.Metronome;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (!builder.Environment.IsDevelopment())
+{
+    var keyVaultEndpointUri = new Uri(builder.Configuration["AzureKeyVaultEndpoint"]!);
+    var managedIdentityClientId = builder.Configuration["ManagedIdentityClientId"];
+    var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+    {
+        ManagedIdentityClientId = managedIdentityClientId
+    });
+    builder.Configuration.AddAzureKeyVault(keyVaultEndpointUri, credential);
+}
 
 // Add service defaults & Aspire components.
 builder.AddAspireServiceDefaults();
@@ -52,12 +65,6 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddSwagger();
 
 builder.Services.AddMetronome();
-string seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
-
-builder.AddSeqEndpoint(connectionName: "seq", options =>
-{
-    options.ServerUrl = seqUrl;
-});
 
 var app = builder.Build();
 

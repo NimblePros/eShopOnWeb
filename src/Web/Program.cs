@@ -1,4 +1,5 @@
 ﻿using Ardalis.ListStartupServices;
+using Azure.Identity;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -8,9 +9,21 @@ using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
+using Microsoft.eShopWeb.Web.Features.OrderRegistration;
 using NimblePros.Metronome;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (!builder.Environment.IsDevelopment())
+{
+    var keyVaultEndpointUri = new Uri(builder.Configuration["AzureKeyVaultEndpoint"]!);
+    var managedIdentityClientId = builder.Configuration["ManagedIdentityClientId"];
+    var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+    {
+        ManagedIdentityClientId = managedIdentityClientId
+    });
+    builder.Configuration.AddAzureKeyVault(keyVaultEndpointUri, credential);
+}
 
 // Add service defaults & Aspire components.
 builder.AddAspireServiceDefaults();
@@ -73,6 +86,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizePage("/Basket/Checkout");
 });
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 
 builder.Services.AddCustomHealthChecks();
 
@@ -85,7 +99,6 @@ builder.Services.Configure<ServiceConfig>(config =>
 builder.Services.AddBlazor(builder.Configuration);
 
 builder.Services.AddMetronome();
-builder.AddSeqEndpoint(connectionName: "seq");
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
