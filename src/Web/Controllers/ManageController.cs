@@ -488,7 +488,7 @@ public class ManageController : Controller
     private async Task<ApplicationUser> GetCurrentUserAsync()
     {
         var user = await _userManager.GetUserAsync(User);
-        return user ?? throw new UserNotFoundException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+        return user ?? throw new UserNotFoundException(_userManager.GetUserId(User) ?? string.Empty);
     }
 
 }
