@@ -33,7 +33,7 @@ public class GetById
         int orderId = existingOrder.Id;
         _output.WriteLine($"OrderId: {orderId}");
 
-        var orderFromRepo = await _orderRepository.GetByIdAsync(orderId);
+        var orderFromRepo = await _orderRepository.GetByIdAsync(orderId, TestContext.Current.CancellationToken);
         Assert.Equal(OrderBuilder.TestBuyerId, orderFromRepo.BuyerId);
 
         // Note: Using InMemoryDatabase OrderItems is available. Will be null if using SQL DB.

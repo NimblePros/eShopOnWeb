@@ -1,5 +1,4 @@
-﻿using Microsoft.eShopWeb.FunctionalTests.Web;
-using Xunit;
+﻿using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages;
 
