@@ -5,7 +5,6 @@ using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.UnitTests.Builders;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.eShopWeb.IntegrationTests.Repositories.OrderRepositoryTests;
 
