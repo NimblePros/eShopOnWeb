@@ -3,22 +3,17 @@
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Controllers;
 
 [Collection("Sequential")]
-public class CatalogControllerIndex : IClassFixture<TestApplication>
+public class CatalogControllerIndex(TestApplication factory) : IClassFixture<TestApplication>
 {
-    public CatalogControllerIndex(TestApplication factory)
-    {
-        Client = factory.CreateClient();
-    }
-
-    public HttpClient Client { get; }
+    public HttpClient Client { get; } = factory.CreateClient();
 
     [Fact]
     public async Task ReturnsHomePageWithProductListing()
     {
         // Arrange & Act
-        var response = await Client.GetAsync("/");
+        var response = await Client.GetAsync("/", TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
-        var stringResponse = await response.Content.ReadAsStringAsync();
+        var stringResponse = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Contains(".NET Bot Black Sweatshirt", stringResponse);

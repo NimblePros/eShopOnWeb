@@ -6,7 +6,7 @@ namespace Microsoft.eShopWeb.UnitTests.ApplicationCore.Entities.OrderTests;
 
 public class OrderTotal
 {
-    private decimal _testUnitPrice = 42m;
+    private readonly decimal _testUnitPrice = 42m;
 
     [Fact]
     public void IsZeroForNewOrder()
@@ -22,7 +22,7 @@ public class OrderTotal
         var builder = new OrderBuilder();
         var items = new List<OrderItem>
             {
-                new OrderItem(builder.TestCatalogItemOrdered, _testUnitPrice, 1)
+                new(builder.TestCatalogItemOrdered, _testUnitPrice, 1)
             };
         var order = new OrderBuilder().WithItems(items);
         Assert.Equal(_testUnitPrice, order.Total());

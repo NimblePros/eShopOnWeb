@@ -21,30 +21,30 @@ public class BasketPageCheckout : IClassFixture<TestApplication>
     {
 
         // Load Home Page
-        var response = await Client.GetAsync("/");
+        var response = await Client.GetAsync("/", TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
-        var stringResponse1 = await response.Content.ReadAsStringAsync();
+        var stringResponse1 = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         string token = WebPageHelpers.GetRequestVerificationToken(stringResponse1);
 
         // Add Item to Cart
         var keyValues = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("id", "2"),
-            new KeyValuePair<string, string>("name", "shirt"),
-            new KeyValuePair<string, string>("price", "19.49"),
-            new KeyValuePair<string, string>("__RequestVerificationToken", token)
+            new("id", "2"),
+            new("name", "shirt"),
+            new("price", "19.49"),
+            new("__RequestVerificationToken", token)
         };
         var formContent = new FormUrlEncodedContent(keyValues);
-        var postResponse = await Client.PostAsync("/basket/index", formContent);
+        var postResponse = await Client.PostAsync("/basket/index", formContent, TestContext.Current.CancellationToken);
         postResponse.EnsureSuccessStatusCode();
-        var stringResponse = await postResponse.Content.ReadAsStringAsync();
+        var stringResponse = await postResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         Assert.Contains(".NET Black &amp; White Mug", stringResponse);
 
         keyValues.Clear();
 
         formContent = new FormUrlEncodedContent(keyValues);
-        var postResponse2 = await Client.PostAsync("/Basket/Checkout", formContent);
+        var postResponse2 = await Client.PostAsync("/Basket/Checkout", formContent, TestContext.Current.CancellationToken);
         Assert.Contains("/Identity/Account/Login", postResponse2!.RequestMessage!.RequestUri!.ToString()!);
     }
 }

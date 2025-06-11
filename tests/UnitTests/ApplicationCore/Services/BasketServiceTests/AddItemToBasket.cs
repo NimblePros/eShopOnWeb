@@ -19,13 +19,13 @@ public class AddItemToBasket
         var basket = new Basket(_buyerId);
         basket.AddItem(1, 1.5m);
 
-        _mockBasketRepo.FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), default).Returns(basket);
+        _mockBasketRepo.FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), Arg.Any<CancellationToken>()).Returns(basket);
 
         var basketService = new BasketService(_mockBasketRepo, _mockLogger);
 
         await basketService.AddItemToBasket(basket.BuyerId, 1, 1.50m);
 
-        await _mockBasketRepo.Received().FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), default);
+        await _mockBasketRepo.Received().FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -33,12 +33,12 @@ public class AddItemToBasket
     {
         var basket = new Basket(_buyerId);
         basket.AddItem(1, 1.1m, 1);
-        _mockBasketRepo.FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), default).Returns(basket);
+        _mockBasketRepo.FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), Arg.Any<CancellationToken>()).Returns(basket);
 
         var basketService = new BasketService(_mockBasketRepo, _mockLogger);
 
         await basketService.AddItemToBasket(basket.BuyerId, 1, 1.50m);
 
-        await _mockBasketRepo.Received().UpdateAsync(basket, default);
+        await _mockBasketRepo.Received().UpdateAsync(basket, Arg.Any<CancellationToken>());
     }
 }

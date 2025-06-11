@@ -21,9 +21,9 @@ public class AccountControllerSignIn : IClassFixture<TestApplication>
     [Fact]
     public async Task ReturnsSignInScreenOnGet()
     {
-        var response = await Client.GetAsync("/identity/account/login");
+        var response = await Client.GetAsync("/identity/account/login", TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
-        var stringResponse = await response.Content.ReadAsStringAsync();
+        var stringResponse = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         Assert.Contains("demouser@microsoft.com", stringResponse);
     }
@@ -45,9 +45,9 @@ public class AccountControllerSignIn : IClassFixture<TestApplication>
     [Fact]
     public async Task ReturnsFormWithRequestVerificationToken()
     {
-        var response = await Client.GetAsync("/identity/account/login");
+        var response = await Client.GetAsync("/identity/account/login", TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
-        var stringResponse = await response.Content.ReadAsStringAsync();
+        var stringResponse = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         string token = WebPageHelpers.GetRequestVerificationToken(stringResponse);
         Assert.True(token.Length > 50);
@@ -56,19 +56,19 @@ public class AccountControllerSignIn : IClassFixture<TestApplication>
     [Fact]
     public async Task ReturnsSuccessfulSignInOnPostWithValidCredentials()
     {
-        var getResponse = await Client.GetAsync("/identity/account/login");
+        var getResponse = await Client.GetAsync("/identity/account/login", TestContext.Current.CancellationToken);
         getResponse.EnsureSuccessStatusCode();
-        var stringResponse1 = await getResponse.Content.ReadAsStringAsync();
+        var stringResponse1 = await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         var keyValues = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("Email", "demouser@microsoft.com"),
-            new KeyValuePair<string, string>("Password", "Pass@word1"),
-            new KeyValuePair<string, string>(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringResponse1))
+            new("Email", "demouser@microsoft.com"),
+            new("Password", "Pass@word1"),
+            new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringResponse1))
         };
         var formContent = new FormUrlEncodedContent(keyValues);
 
-        var postResponse = await Client.PostAsync("/identity/account/login", formContent);
+        var postResponse = await Client.PostAsync("/identity/account/login", formContent, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Redirect, postResponse.StatusCode);
         Assert.Equal(new System.Uri("/", UriKind.Relative), postResponse.Headers.Location);
     }
@@ -77,36 +77,36 @@ public class AccountControllerSignIn : IClassFixture<TestApplication>
     public async Task UpdatePhoneNumberProfile()
     {
         //Login
-        var getResponse = await Client.GetAsync("/identity/account/login");
+        var getResponse = await Client.GetAsync("/identity/account/login", TestContext.Current.CancellationToken);
         getResponse.EnsureSuccessStatusCode();
-        var stringResponse1 = await getResponse.Content.ReadAsStringAsync();
+        var stringResponse1 = await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         var keyValues = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("Email", "demouser@microsoft.com"),
-            new KeyValuePair<string, string>("Password", "Pass@word1"),
-            new KeyValuePair<string, string>(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringResponse1))
+            new("Email", "demouser@microsoft.com"),
+            new("Password", "Pass@word1"),
+            new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringResponse1))
         };
         var formContent = new FormUrlEncodedContent(keyValues);
-        await Client.PostAsync("/identity/account/login", formContent);
+        await Client.PostAsync("/identity/account/login", formContent, TestContext.Current.CancellationToken);
 
         //Profile page
-        var profileResponse = await Client.GetAsync("/manage/my-account");
+        var profileResponse = await Client.GetAsync("/manage/my-account", TestContext.Current.CancellationToken);
         profileResponse.EnsureSuccessStatusCode();
-        var stringProfileResponse = await profileResponse.Content.ReadAsStringAsync();
+        var stringProfileResponse = await profileResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         //Update phone number
         var updateProfileValues = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("Email", "demouser@microsoft.com"),
-            new KeyValuePair<string, string>("PhoneNumber", "03656565"),
-            new KeyValuePair<string, string>(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringProfileResponse))
+            new("Email", "demouser@microsoft.com"),
+            new("PhoneNumber", "03656565"),
+            new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringProfileResponse))
         };
         var updateProfileContent = new FormUrlEncodedContent(updateProfileValues);
-        var postProfileResponse = await Client.PostAsync("/manage/my-account", updateProfileContent);
+        var postProfileResponse = await Client.PostAsync("/manage/my-account", updateProfileContent, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Redirect, postProfileResponse.StatusCode);
-        var profileResponse2 = await Client.GetAsync("/manage/my-account");
-        var stringProfileResponse2 = await profileResponse2.Content.ReadAsStringAsync();
+        var profileResponse2 = await Client.GetAsync("/manage/my-account", TestContext.Current.CancellationToken);
+        var stringProfileResponse2 = await profileResponse2.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         Assert.Contains("03656565", stringProfileResponse2);
 
     }
