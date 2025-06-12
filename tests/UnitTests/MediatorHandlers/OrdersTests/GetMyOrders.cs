@@ -17,7 +17,7 @@ public class GetMyOrders
         var address = new Address("", "", "", "", "");
         Order order = new Order("buyerId", address, new List<OrderItem> { item });
               
-        _mockOrderRepository.ListAsync(Arg.Any<ISpecification<Order>>(), default).Returns(new List<Order> { order });
+        _mockOrderRepository.ListAsync(Arg.Any<ISpecification<Order>>(), Arg.Any<CancellationToken>()).Returns(new List<Order> { order });
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public class GetMyOrders
 
         var handler = new GetMyOrdersHandler(_mockOrderRepository);
 
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
     }

@@ -1,0 +1,105 @@
+﻿@using BlazorAdmin.Interfaces
+@using BlazorAdmin.Models
+@inject ILogger<Create> Logger
+@inject IJSRuntime JSRuntime
+@inject IRoleManagementService RoleManagementService
+
+@namespace BlazorAdmin.Pages.RolePage
+
+<div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <EditForm Model="_item" OnValidSubmit="@CreateClick">
+                <DataAnnotationsValidator />
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Create</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @if (_item == null)
+                    {
+                        <Spinner></Spinner>
+                    }
+                    else
+                    {
+                        <div class="container">
+                            <div class="row">                               
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-6">Name</label>
+                                        <div class="col-md-12">
+                                            <InputText class="form-control" @bind-Value="_item.Name" />
+                                            <ValidationMessage For="(() => _item.Name)" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        Create
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+
+@if (_showCreateModal)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+
+    [Parameter]
+    public EventCallback<string> OnSaveClick { get; set; }
+
+    private string _modalDisplay = "none;";
+    private string _modalClass = "";
+    private bool _showCreateModal = false;
+    private CreateRoleRequest _item = new CreateRoleRequest();
+
+    private async Task CreateClick()
+    {
+        var result = await RoleManagementService.Create(_item);
+        if (result != null)
+        {
+            Logger.LogInformation("Created Role {id}", result.Role.Id);
+            await OnSaveClick.InvokeAsync(null);
+            await Close();
+        }
+    }
+
+    public async Task Open()
+    {
+
+        Logger.LogInformation("Now loading... /Roles/Create");
+
+        await new Css(JSRuntime).HideBodyOverflow();
+
+        _item = new CreateRoleRequest();
+
+        _modalDisplay = "block;";
+        _modalClass = "Show";
+        _showCreateModal = true;
+
+        StateHasChanged();
+    }
+
+    private async Task Close()
+    {
+        await new Css(JSRuntime).ShowBodyOverflow();
+        _modalDisplay = "none";
+        _modalClass = "";
+        _showCreateModal = false;
+    }
+
+}

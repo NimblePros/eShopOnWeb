@@ -32,13 +32,13 @@ public class ExceptionMiddleware
     {
         context.Response.ContentType = "application/json";
 
-        if (exception is DuplicateException duplicationException)
+        if (exception is DuplicateException || exception is RoleStillAssignedException)
         {
             context.Response.StatusCode = (int)HttpStatusCode.Conflict;
             await context.Response.WriteAsync(new ErrorDetails()
             {
                 StatusCode = context.Response.StatusCode,
-                Message = duplicationException.Message
+                Message = exception.Message
             }.ToString());
         }
         else

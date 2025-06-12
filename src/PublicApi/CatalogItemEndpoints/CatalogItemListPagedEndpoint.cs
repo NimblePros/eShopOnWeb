@@ -51,7 +51,7 @@ public class CatalogItemListPagedEndpoint(IRepository<CatalogItem> itemRepositor
 
         if (request.PageSize > 0)
         {
-            response.PageCount = int.Parse(Math.Ceiling((decimal)totalItems / request.PageSize).ToString());
+            response.PageCount = (int) Math.Ceiling((decimal)totalItems / request.PageSize);
         }
         else
         {

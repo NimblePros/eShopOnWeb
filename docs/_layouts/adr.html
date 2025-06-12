@@ -1,0 +1,13 @@
+---
+layout: default
+---
+
+<p><strong>Decision made by:</strong> {{page.decisioner}}</p>
+<p><strong>Decision Date:</strong> {{page.date | date: "%B %-d, %Y"}}</p>
+<p><strong>Status:</strong> {{page.status}}</p>
+<hr />
+
+{{ content }}
+
+<hr />
+<small><a href="/decisions">Architecture Decisions List</a></small>

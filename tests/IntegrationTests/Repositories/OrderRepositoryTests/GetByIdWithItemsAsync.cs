@@ -38,9 +38,11 @@ public class GetByIdWithItemsAsync
         _catalogContext.Orders.Add(firstOrder);
         int firstOrderId = firstOrder.Id;
 
-        var secondOrderItems = new List<OrderItem>();
-        secondOrderItems.Add(new OrderItem(OrderBuilder.TestCatalogItemOrdered, itemOneUnitPrice, itemOneUnits));
-        secondOrderItems.Add(new OrderItem(OrderBuilder.TestCatalogItemOrdered, itemTwoUnitPrice, itemTwoUnits));
+        var secondOrderItems = new List<OrderItem>
+        {
+            new(OrderBuilder.TestCatalogItemOrdered, itemOneUnitPrice, itemOneUnits),
+            new(OrderBuilder.TestCatalogItemOrdered, itemTwoUnitPrice, itemTwoUnits)
+        };
         var secondOrder = OrderBuilder.WithItems(secondOrderItems);
         _catalogContext.Orders.Add(secondOrder);
         int secondOrderId = secondOrder.Id;
@@ -49,7 +51,7 @@ public class GetByIdWithItemsAsync
 
         //Act
         var spec = new OrderWithItemsByIdSpec(secondOrderId);
-        var orderFromRepo = await _orderRepository.FirstOrDefaultAsync(spec);
+        var orderFromRepo = await _orderRepository.FirstOrDefaultAsync(spec, TestContext.Current.CancellationToken);
 
         //Assert
         Assert.Equal(secondOrderId, orderFromRepo.Id);

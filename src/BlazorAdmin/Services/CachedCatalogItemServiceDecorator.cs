@@ -13,7 +13,7 @@ public class CachedCatalogItemServiceDecorator : ICatalogItemService
 {
     private readonly ILocalStorageService _localStorageService;
     private readonly CatalogItemService _catalogItemService;
-    private ILogger<CachedCatalogItemServiceDecorator> _logger;
+    private readonly ILogger<CachedCatalogItemServiceDecorator> _logger;
 
     public CachedCatalogItemServiceDecorator(ILocalStorageService localStorageService,
         CatalogItemService catalogItemService,
@@ -37,7 +37,7 @@ public class CachedCatalogItemServiceDecorator : ICatalogItemService
             }
             else
             {
-                _logger.LogInformation($"Loading {key} from local storage.");
+                _logger.LogInformation("Loading {key} from local storage.", key);
                 await _localStorageService.RemoveItemAsync(key);
             }
         }
@@ -61,7 +61,7 @@ public class CachedCatalogItemServiceDecorator : ICatalogItemService
             }
             else
             {
-                _logger.LogInformation($"Loading {key} from local storage.");
+                _logger.LogInformation("Loading {key} from local storage.", key);
                 await _localStorageService.RemoveItemAsync(key);
             }
         }
@@ -93,12 +93,10 @@ public class CachedCatalogItemServiceDecorator : ICatalogItemService
         return result;
     }
 
-    public async Task<string> Delete(int id)
+    public async Task Delete(int id)
     {
-        var result = await _catalogItemService.Delete(id);
+        await _catalogItemService.Delete(id);
         await RefreshLocalStorageList();
-
-        return result;
     }
 
     private async Task RefreshLocalStorageList()

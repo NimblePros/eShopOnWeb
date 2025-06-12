@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.Web.Extensions;
 using Microsoft.eShopWeb.Web.Services;
 using Microsoft.eShopWeb.Web.ViewModels.Manage;
 
@@ -46,11 +47,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> MyAccount()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var model = new IndexViewModel
         {
@@ -73,11 +70,7 @@ public class ManageController : Controller
             return View(model);
         }
 
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var email = user.Email;
         if (model.Email != email)
@@ -112,11 +105,7 @@ public class ManageController : Controller
             return View(model);
         }
 
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
@@ -136,11 +125,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> ChangePassword()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var hasPassword = await _userManager.HasPasswordAsync(user);
         if (!hasPassword)
@@ -161,11 +146,7 @@ public class ManageController : Controller
             return View(model);
         }
 
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var changePasswordResult = await _userManager
             .ChangePasswordAsync(user, model.OldPassword!, model.NewPassword!);
@@ -185,11 +166,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> SetPassword()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var hasPassword = await _userManager.HasPasswordAsync(user);
 
@@ -211,11 +188,7 @@ public class ManageController : Controller
             return View(model);
         }
 
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword!);
         if (!addPasswordResult.Succeeded)
@@ -233,11 +206,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> ExternalLogins()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var model = new ExternalLoginsViewModel { CurrentLogins = await _userManager.GetLoginsAsync(user) };
         model.OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
@@ -265,11 +234,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> LinkLoginCallback()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var info = await _signInManager.GetExternalLoginInfoAsync(user.Id);
         if (info == null)
@@ -282,23 +247,28 @@ public class ManageController : Controller
         {
             throw new ApplicationException($"Unexpected error occurred adding external login for user with ID '{user.Id}'.");
         }
-
-        // Clear the existing external cookie to ensure a clean login process
-        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        if (info.Principal.Claims.Any())
+        {
+            var claimsToSync = new Dictionary<string, string>();
+            foreach (var claim in info.Principal.Claims)
+            {
+                claimsToSync.Add(claim.Type, claim.Value);
+            }
+            var refreshSignIn = await _userManager.SaveClaimsAsync(claimsToSync, info, user);
+            if (refreshSignIn)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+            }
+        }
 
         StatusMessage = "The external login was added.";
         return RedirectToAction(nameof(ExternalLogins));
     }
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveLogin(RemoveLoginViewModel model)
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -318,11 +288,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> TwoFactorAuthentication()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var model = new TwoFactorAuthenticationViewModel
         {
@@ -337,11 +303,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> Disable2faWarning()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         if (!user.TwoFactorEnabled)
         {
@@ -355,11 +317,7 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Disable2fa()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
         if (!disable2faResult.Succeeded)
@@ -374,11 +332,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> EnableAuthenticator()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         var model = new EnableAuthenticatorViewModel();
         await LoadSharedKeyAndQrCodeUriAsync(user, model);
@@ -404,11 +358,7 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EnableAuthenticator(EnableAuthenticatorViewModel model)
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         if (!ModelState.IsValid)
         {
@@ -447,11 +397,7 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResetAuthenticator()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         await _userManager.SetTwoFactorEnabledAsync(user, false);
         await _userManager.ResetAuthenticatorKeyAsync(user);
@@ -464,11 +410,7 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> GenerateRecoveryCodes()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         if (!user.TwoFactorEnabled)
         {
@@ -486,11 +428,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> GenerateRecoveryCodesWarning()
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-        }
+        var user = await GetCurrentUserAsync();
 
         if (!user.TwoFactorEnabled)
         {
@@ -545,6 +483,12 @@ public class ManageController : Controller
 
         model.SharedKey = FormatKey(unformattedKey!);
         model.AuthenticatorUri = GenerateQrCodeUri(user.Email!, unformattedKey!);
+    }
+
+    private async Task<ApplicationUser> GetCurrentUserAsync()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        return user ?? throw new UserNotFoundException(_userManager.GetUserId(User) ?? string.Empty);
     }
 
 }

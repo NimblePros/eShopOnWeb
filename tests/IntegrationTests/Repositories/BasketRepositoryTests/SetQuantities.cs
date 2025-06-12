@@ -13,7 +13,7 @@ public class SetQuantities
 {
     private readonly CatalogContext _catalogContext;
     private readonly EfRepository<Basket> _basketRepository;
-    private readonly BasketBuilder BasketBuilder = new BasketBuilder();
+    private readonly BasketBuilder _basketBuilder = new();
 
     public SetQuantities()
     {
@@ -27,12 +27,12 @@ public class SetQuantities
     [Fact]
     public async Task RemoveEmptyQuantities()
     {
-        var basket = BasketBuilder.WithOneBasketItem();
+        var basket = _basketBuilder.WithOneBasketItem();
         var basketService = new BasketService(_basketRepository, null);
-        await _basketRepository.AddAsync(basket);
+        await _basketRepository.AddAsync(basket, TestContext.Current.CancellationToken);
         _catalogContext.SaveChanges();
 
-        await basketService.SetQuantities(BasketBuilder.BasketId, new Dictionary<string, int>() { { BasketBuilder.BasketId.ToString(), 0 } });
+        await basketService.SetQuantities(_basketBuilder.BasketId, new Dictionary<string, int>() { { _basketBuilder.BasketId.ToString(), 0 } });
 
         Assert.Empty(basket.Items);
     }

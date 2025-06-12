@@ -1,0 +1,108 @@
+﻿@inject ILogger<Edit> Logger
+@inject IJSRuntime JSRuntime
+@inject IRoleManagementService RoleManagementService
+
+@inherits BlazorAdmin.Helpers.BlazorComponent
+
+@namespace BlazorAdmin.Pages.RolePage
+@using BlazorAdmin.Interfaces
+@using BlazorAdmin.Models
+@using Microsoft.AspNetCore.Identity
+
+<div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <EditForm Model="_item" OnValidSubmit="@SaveClick">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit @_item.Name</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    @if (_item == null)
+                    {
+                        <Spinner></Spinner>
+                    }
+                    else
+                    {
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12">
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-6">Name</label>
+                                        <div class="col-md-12">
+                                            <InputText class="form-control" @bind-Value="_item.Name" />
+                                            <ValidationMessage For="(() => _item.Name)" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        Save
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+
+@if (_showEditModal)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+
+
+
+    [Parameter]
+    public EventCallback<string> OnSaveClick { get; set; }
+
+    private string _modalDisplay = "none;";
+    private string _modalClass = "";
+    private bool _showEditModal = false;
+    private IdentityRole _item = new IdentityRole();
+
+    private async Task SaveClick()
+    {
+        await RoleManagementService.Edit(_item);
+
+        Logger.LogInformation("Updated Role Id: {Id}", _item.Id);
+        await OnSaveClick.InvokeAsync(null);
+        await Close();
+    }
+
+    public async Task Open(string id)
+    {
+        Logger.LogInformation("Now loading... /Roles/Edit/{Id}", id);
+
+        await new Css(JSRuntime).HideBodyOverflow();
+
+        _item = (await RoleManagementService.GetById(id)).Role;
+
+        _modalDisplay = "block;";
+        _modalClass = "Show";
+        _showEditModal = true;
+
+        StateHasChanged();
+    }
+
+    private async Task Close()
+    {
+        await new Css(JSRuntime).ShowBodyOverflow();
+
+        _modalDisplay = "none";
+        _modalClass = "";
+        _showEditModal = false;
+    }
+}

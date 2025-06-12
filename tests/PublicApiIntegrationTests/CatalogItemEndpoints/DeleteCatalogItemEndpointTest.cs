@@ -1,9 +1,9 @@
-﻿using BlazorShared.Models;
+﻿using System.Net;
+using System.Threading.Tasks;
+using BlazorShared.Models;
 using Microsoft.eShopWeb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+using PublicApiIntegrationTests.Helpers;
 
 namespace PublicApiIntegrationTests.CatalogItemEndpoints;
 
@@ -11,25 +11,19 @@ namespace PublicApiIntegrationTests.CatalogItemEndpoints;
 public class DeleteCatalogItemEndpointTest
 {
     [TestMethod]
-    public async Task ReturnsSuccessGivenValidIdAndAdminUserToken()
+    public async Task ReturnsSuccessGivenValidIdAndProductManagerUserToken()
     {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var client = HttpClientHelper.GetProductManagerClient();
         var response = await client.DeleteAsync("api/catalog-items/12");
         response.EnsureSuccessStatusCode();
-        var stringResponse = await response.Content.ReadAsStringAsync();
-        var model = stringResponse.FromJson<DeleteCatalogItemResponse>();
-
-        Assert.AreEqual("Deleted", model!.Status);
+        
+        Assert.AreEqual(HttpStatusCode.NoContent,response.StatusCode);
     }
 
     [TestMethod]
-    public async Task ReturnsNotFoundGivenInvalidIdAndAdminUserToken()
+    public async Task ReturnsNotFoundGivenInvalidIdAndProductManagerUserToken()
     {
-        var adminToken = ApiTokenHelper.GetAdminUserToken();
-        var client = ProgramTest.NewClient;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var client = HttpClientHelper.GetProductManagerClient();
         var response = await client.DeleteAsync("api/catalog-items/0");
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);

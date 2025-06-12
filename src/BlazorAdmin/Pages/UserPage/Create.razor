@@ -1,0 +1,187 @@
+﻿@using BlazorAdmin.Interfaces
+@using BlazorAdmin.Models
+@using Microsoft.AspNetCore.Identity
+@inject ILogger<Create> Logger
+@inject IJSRuntime JSRuntime
+@inject IUserManagementService UserManagementService
+@inject IRoleManagementService RoleManagementService
+
+@namespace BlazorAdmin.Pages.UserPage
+
+<div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @if (_item == null)
+            {
+                <Spinner></Spinner>
+            }
+            else
+            {
+                <EditForm Model="_item.User" OnValidSubmit="@CreateClick">
+                    <DataAnnotationsValidator />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Create</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <!-- User Information -->
+                                    <div class="form-group row">
+                                        <label for="UserName" class="control-label col-md-6">Username</label>
+                                        <div class="col-md-6">
+                                            <InputText id="UserName" class="form-control" @bind-Value="_item.User.UserName" />
+                                            <ValidationMessage For="@(() => _item.User.UserName)" class="text-danger" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="Email" class="control-label col-md-6">Email</label>
+                                        <div class="col-md-6">
+                                            <InputText id="Email" class="form-control" @bind-Value="_item.User.Email" />
+                                            <ValidationMessage For="@(() => _item.User.Email)" class="text-danger" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="PhoneNumber" class="control-label col-md-6">Phone Number</label>
+                                        <div class="col-md-6">
+                                            <InputText id="PhoneNumber" class="form-control" @bind-Value="_item.User.PhoneNumber" />
+                                            <ValidationMessage For="@(() => _item.User.PhoneNumber)" class="text-danger" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row form-check">
+                                        <div class="col-md-6">
+                                            <InputCheckbox id="EmailConfirmed" class="form-check-input" @bind-Value="_item.User.EmailConfirmed" />
+                                            <label for="EmailConfirmed" class="form-check-label">Email Confirmed</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row form-check">
+                                        <div class="col-md-6">
+                                            <InputCheckbox id="TwoFactorEnabled" class="form-check-input" @bind-Value="_item.User.TwoFactorEnabled" />
+                                            <label for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication Enabled</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="LockoutEnd" class="control-label col-md-6">Lockout Until</label>
+                                        <div class="col-md-6">
+                                            <InputDate id="LockoutEnd" class="form-control" @bind-Value="_item.User.LockoutEnd" />
+                                            <ValidationMessage For="@(() => _item.User.LockoutEnd)" class="text-danger" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4>Roles</h4>
+                        @if (_roles == null || _roles.Count == 0)
+                        {
+                            <p>No roles available.</p>
+                        }
+                        else
+                        {
+                            @foreach (var role in _roles)
+                            {
+                                <div class="form-group row form-check">
+                                    <div class="col-md-6">
+                                        <input type="checkbox" id="@role" class="form-check-input" @onchange="(e) => UpdateRoleSelectedState(role.Name, (bool)((ChangeEventArgs)e).Value)" />
+                                        <label class="form-check-label" for="@role">@role</label>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            Create
+                        </button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+@if (_showCreateModal)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+
+
+
+    [Parameter]
+    public EventCallback<string> OnSaveClick { get; set; }
+
+    private string _modalDisplay = "none;";
+    private string _modalClass = "";
+    private bool _showCreateModal = false;
+    private CreateUserRequest _item;
+
+    private Dictionary<string, bool> _selectedRoles = new();
+    private List<IdentityRole>  _roles;
+
+    private async Task CreateClick()
+    {
+        if (_item.User != null)
+        {
+            var result = await UserManagementService.Create(_item);
+            var checkedRoles = _selectedRoles.Where(r => r.Value).Select(r => r.Key).ToList();
+            if (checkedRoles.Count > 0){
+                SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
+                    UserId = result.UserId,
+                    RolesToAdd = checkedRoles
+                };
+
+                await UserManagementService.SaveRolesForUser(rolesForUserRequest);
+            }
+            if (result != null)
+            {
+                Logger.LogInformation("Created User {userId}",result.UserId);
+                await OnSaveClick.InvokeAsync(null);
+                await Close();
+            }
+        }
+    }
+
+    public async Task Open()
+    {
+
+        Logger.LogInformation("Now loading... /Users/Create");
+
+        await new Css(JSRuntime).HideBodyOverflow();
+
+        _item = new CreateUserRequest();
+
+        _roles = (await RoleManagementService.List()).Roles;
+  
+        _modalDisplay = "block;";
+        _modalClass = "Show";
+        _showCreateModal = true;
+
+        StateHasChanged();
+    }
+
+    private void UpdateRoleSelectedState(string role, bool isChecked)
+    {
+        _selectedRoles[role] = isChecked;
+    }
+
+    private async Task Close()
+    {
+        await new Css(JSRuntime).ShowBodyOverflow();
+        _modalDisplay = "none";
+        _modalClass = "";
+        _showCreateModal = false;
+    }
+
+}

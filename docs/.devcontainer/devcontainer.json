@@ -1,0 +1,8 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "eShopOnWeb Documentation",
+	"dockerFile": "dockerFile",
+    "forwardPorts": [4000, 35729],    
+    "runArgs": ["--name","eShopOnWeb_docs_devcontainer"],
+    "postStartCommand": "bundle install && bundle exec jekyll serve --baseurl='' --livereload --force_polling"
+}

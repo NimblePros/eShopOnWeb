@@ -6,21 +6,29 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace PublicApiIntegrationTests
+namespace PublicApiIntegrationTests.Helpers
 {
     public class ApiTokenHelper
     {
         public static string GetAdminUserToken()
         {
-            string userName = "admin@microsoft.com";
+            var userName = "admin@microsoft.com";
             string[] roles = { "Administrators" };
+
+            return CreateToken(userName, roles);
+        }
+
+        public static string GetProductManagerUserToken()
+        {
+            var userName = "productmgr@microsoft.com";
+            string[] roles = { "Product Managers" };
 
             return CreateToken(userName, roles);
         }
 
         public static string GetNormalUserToken()
         {
-            string userName = "demouser@microsoft.com";
+            var userName = "demouser@microsoft.com";
             string[] roles = { };
 
             return CreateToken(userName, roles);

@@ -1,0 +1,129 @@
+﻿@using BlazorAdmin.Interfaces
+@using BlazorAdmin.Models
+@inject ILogger<Details> Logger
+@inject IJSRuntime JSRuntime
+@inject IRoleManagementService RoleManagementService
+
+@namespace BlazorAdmin.Pages.RolePage
+
+
+<div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">@_roleName Role - Members</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (_members == null)
+                {
+                    <Spinner></Spinner>
+                }
+                else
+                {                   
+                    @if (_members.Count == 0)
+                    {
+                        <p>No members found.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="cursor-pointer">
+                                @foreach (var member in _members)
+                                {
+
+                                    <tr>
+                                        <td>@member.UserName</td>
+                                        <td>
+                                            @if (member.UserName != "admin@microsoft.com")
+                                            {
+                                                <button @onclick="@(() => DeleteClick(member.Id,member.UserName))" @onclick:stopPropagation="true" class="btn btn-danger">
+                                                    Remove from Role
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>            
+        </div>
+    </div>
+</div>
+
+<DeleteUserFromRole OnSaveClick="RefreshMembers" @ref="DeleteConfirmationComponent"></DeleteUserFromRole>
+
+@if (_showDetailsModal)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private string _modalDisplay = "none;";
+    private string _modalClass = "";
+    private bool _showDetailsModal = false;
+    private string _roleName = "";
+    private string _roleId = "";
+    private List<UserForMembership> _members = new List<UserForMembership>();
+    private DeleteUserFromRole DeleteConfirmationComponent { get; set; }
+
+    private async Task DeleteClick(string userId, string userName)
+    {
+        Logger.LogInformation("Confirming to remove User {userId} from {roleId}",userId, _roleId);
+        await DeleteConfirmationComponent.Open(userId, userName, _roleName, _roleId);
+    }
+
+    public async Task Open(string roleId, string roleName)
+    {
+        _roleName = roleName;
+        _roleId = roleId;
+
+        Logger.LogInformation("Now loading details... /Role/Details/{Id}", roleName, roleId);
+
+
+        _members = (await RoleManagementService.GetMembershipByName(roleName)).RoleMembers;
+        await ShowModal();
+
+        StateHasChanged();
+    }
+
+    public async Task Close()
+    {
+        await CloseModal();
+    }
+
+    private async Task ShowModal(){
+        await new Css(JSRuntime).HideBodyOverflow();
+
+        _modalDisplay = "block;";
+        _modalClass = "Show";
+        _showDetailsModal = true;
+
+    }
+
+    private async Task CloseModal(){
+        await new Css(JSRuntime).ShowBodyOverflow();
+
+        _modalDisplay = "none";
+        _modalClass = "";
+        _showDetailsModal = false;
+    }
+
+    private async Task RefreshMembers()
+    {
+        Logger.LogInformation("Refreshing members after removing a user from a role");
+        _members = (await RoleManagementService.GetMembershipByName(_roleName)).RoleMembers;
+        StateHasChanged();
+    }
+
+}

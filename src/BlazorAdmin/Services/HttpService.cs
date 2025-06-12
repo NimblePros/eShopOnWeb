@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -46,6 +48,59 @@ public class HttpService
         return await FromHttpResponseMessage<T>(result);
     }
 
+    public async Task<T> HttpDelete<T>(string uri, string id)
+    where T : class
+    {
+        var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}/{id}");
+        if (!result.IsSuccessStatusCode)
+        {
+            var exception = JsonSerializer.Deserialize<ErrorDetails>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            _toastService.ShowToast($"Error : {exception.Message}", ToastLevel.Error);
+            return null;
+        }
+        _toastService.ShowToast($"Deleted successfully!", ToastLevel.Success);
+
+        return await FromHttpResponseMessage<T>(result);
+    }
+
+    public async Task<HttpStatusCode> HttpDelete(string uri)
+    {
+        var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}");
+        if (!result.IsSuccessStatusCode)
+        {
+            var exception = JsonSerializer.Deserialize<ErrorDetails>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            _toastService.ShowToast($"Error : {exception.Message}", ToastLevel.Error);
+            return result.StatusCode;
+        }
+        _toastService.ShowToast($"Deleted successfully!", ToastLevel.Success);
+
+        return result.StatusCode;
+    }
+
+    public async Task<T> HttpDelete<T>(string uri)
+    where T : class
+    {
+        var result = await _httpClient.DeleteAsync($"{_apiUrl}{uri}");
+        if (!result.IsSuccessStatusCode)
+        {
+            var exception = JsonSerializer.Deserialize<ErrorDetails>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            _toastService.ShowToast($"Error : {exception.Message}", ToastLevel.Error);
+            return null;
+        }
+        _toastService.ShowToast($"Deleted successfully!", ToastLevel.Success);
+
+        return await FromHttpResponseMessage<T>(result);
+    }
+
     public async Task<T> HttpPost<T>(string uri, object dataToSend)
         where T : class
     {
@@ -62,6 +117,7 @@ public class HttpService
 
             return null;
         }
+        _toastService.ShowToast($"Created successfully!", ToastLevel.Success);
 
         return await FromHttpResponseMessage<T>(result);
     }
@@ -77,8 +133,24 @@ public class HttpService
             _toastService.ShowToast("Error", ToastLevel.Error);
             return null;
         }
+        _toastService.ShowToast($"Updated successfully!", ToastLevel.Success);
 
         return await FromHttpResponseMessage<T>(result);
+    }
+
+    public async Task<HttpStatusCode> HttpPut(string uri, object dataToSend)
+    {
+        var content = ToJson(dataToSend);
+
+        var result = await _httpClient.PutAsync($"{_apiUrl}{uri}", content);
+        if (!result.IsSuccessStatusCode)
+        {
+            _toastService.ShowToast("Error", ToastLevel.Error);
+            return result.StatusCode;
+        }
+        _toastService.ShowToast($"Updated successfully!", ToastLevel.Success);
+
+        return result.StatusCode;
     }
 
     private StringContent ToJson(object obj)

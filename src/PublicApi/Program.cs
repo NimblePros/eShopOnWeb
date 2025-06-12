@@ -1,5 +1,6 @@
 ﻿using BlazorShared;
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NimblePros.Metronome;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,7 @@ builder.Configuration.AddConfigurationFile("appsettings.test.json");
 builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<AppIdentityDbContext>()
         .AddDefaultTokenProviders();
 
@@ -48,6 +51,14 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 builder.Services.AddSwagger();
 
+builder.Services.AddMetronome();
+string seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
+
+builder.AddSeqEndpoint(connectionName: "seq", options =>
+{
+    options.ServerUrl = seqUrl;
+});
+
 var app = builder.Build();
 
 app.Logger.LogInformation("PublicApi App created...");
@@ -69,17 +80,9 @@ app.UseCors(CORS_POLICY);
 
 app.UseAuthorization();
 
-// Enable middleware to serve generated Swagger as a JSON endpoint.
-app.UseSwagger();
-
-// Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
-// specifying the Swagger JSON endpoint.
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-});
-
 app.UseFastEndpoints();
+
+app.UseSwaggerGen();
 
 app.Logger.LogInformation("LAUNCHING PublicApi");
 app.Run();
