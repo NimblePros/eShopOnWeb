@@ -28,7 +28,7 @@ To deploy the eShopOnWeb sample application to an Azure App Service (assuming yo
 
 In the upper-right corner of the dialog, select your Microsoft account. Then, select your **Subscription name**. For this walkthrough, we'll create a new App Service, so select **+ Create new**.
 
-![On the Publis dialog, confirm the Microsoft account and subscription. "+ Create new" is highlighted. ](../assets/images/walkthroughs/app-service-from-visual-studio/select-subscription.jpg)
+![On the Publish dialog, confirm the Microsoft account and subscription. "+ Create new" is highlighted. ](../assets/images/walkthroughs/app-service-from-visual-studio/select-subscription.jpg)
 
 ## 7. Add the app services details.
 
@@ -54,11 +54,15 @@ In order to populate the seed data, we need to set the `ASPNETCORE_ENVIRONMENT` 
 
 1. In the **App settings** section, add a new key `ASPNETCORE_ENVIRONMENT` with value `Development`.
 
+1. Select **Apply**.
+
 1. Add another key for `UseOnlyInMemoryDatabase` with the value of `true`.
 
 1. Select **Apply**.
 
-![Add the ASPNETCORE_ENVIRONMENT variable in the Azure Portal.](../assets/images/walkthroughs/app-service-from-visual-studio/azure-app-service-environment-variables.jpg)
+    ![Add the ASPNETCORE_ENVIRONMENT variable in the Azure Portal.](../assets/images/walkthroughs/app-service-from-visual-studio/azure-app-service-environment-variables.jpg)
+
+1. Finally, select **Apply** to apply all of these changes to the App Service.
 
 ## 9. Publish the app.
 
@@ -78,11 +82,6 @@ Once the publish process has completed, your deployed app will launch in your br
 
 [Learn more about Azure deployment options in the official documentation](https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-deploy).
 
-
-
-At this point, you should be able to refresh the site and see it loaded with data (if not, publish once more from Visual Studio).
-
-![image](https://github.com/user-attachments/assets/df803021-8c30-4038-a963-b6e2ce1a16ab)
 
 ## Notes
 
