@@ -76,9 +76,9 @@ You will then need to select the **Publish** button to publish the app to the Ap
 
 ![image](https://github.com/user-attachments/assets/68f4b285-98b4-4ce0-b51c-dd0d5fd78cd7)
 
-Once the publish process has completed, your deployed app will launch in your browser.
+At this point, you should be able to refresh the site and see it loaded with data (if not, publish once more from Visual Studio).
 
-![image](https://github.com/user-attachments/assets/12c3bbdb-0e5e-4314-b6ea-86b063eb5628)
+![eShopOnWeb portal logged in as the demouser and shown running on the resource we created in this demo.](../assets/images/walkthroughs/app-service-from-azure-portal/eShopOnWeb-running.jpg)
 
 [Learn more about Azure deployment options in the official documentation](https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-deploy).
 
