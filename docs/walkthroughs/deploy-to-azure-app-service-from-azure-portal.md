@@ -4,6 +4,8 @@ parent: Walkthroughs
 nav_order: 2
 ---
 
+_**Last updated**: June 13, 2025_
+
 Sometimes, you may need to deploy using Web Deploy - such as if the Kudu site is down or if your company prefers Web Deploy. This demo will walk you through deploying via Web Deploy.
 
 To deploy the eShopOnWeb sample to an Azure App Service, starting in the Azure Portal, follow these step-by-step instructions (or, [deploy to Azure directly from from Visual Studio]({{ site.baseurl }}/walkthroughs/deploy-to-azure-app-service-from-visual-studio)):
