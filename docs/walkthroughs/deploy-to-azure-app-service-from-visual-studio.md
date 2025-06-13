@@ -4,57 +4,86 @@ parent: Walkthroughs
 nav_order: 1
 ---
 
+_**Last updated**: June 13, 2025_
+
 To deploy the eShopOnWeb sample application to an Azure App Service (assuming you've already cloned or downloaded it locally, and you [have an Azure account](https://azure.microsoft.com/en-us/free/)), follow these steps from Visual Studio ([see here to start from the Azure Portal]({{ site.baseurl }}/walkthroughs/deploy-to-azure-app-service-from-azure-portal)):
 
 ## 1. Open the eShopOnWeb solution in Visual Studio.
 
 ## 2. Right-click on the Web project in Solution Explorer and choose Publish.
 
-![image](https://github.com/user-attachments/assets/0d489dfb-9e3a-4bb0-b779-7e3fe0b0d96e)
+![Solution Explorer is open. The context menu is shown for the Web project. Publish is highlighted.](../assets/images/walkthroughs/app-service-from-visual-studio/publish-from-web-project.jpg)
 
-## 3. Choose Microsoft Azure App Service.
+## 3. From the Publish screen, select `+ New profile`
 
-Leave the option to `Create New` selected. Click `Publish`.
+![The Publish tab is open. The "+ New profile" button is highlighted.](../assets/images/walkthroughs/app-service-from-visual-studio/publish-select-new-profile.jpg)
 
-![image](https://github.com/user-attachments/assets/1b377746-4e21-4a4a-86db-9cfdddf27cd3)
+## 4. In the Publish dialog, select `Azure` as the target.
 
-## 4. Choose an App Name, Subscription, Resource Group, and App Service Plan.
+![Publish dialog is displayed. This is the Target step. Azure is the selected target. The Next button is highlighted.](../assets/images/walkthroughs/app-service-from-visual-studio/select-publish-target.jpg)
 
-Create a new Resource Group, if desired. You can specify a Free App Service Plan, if desired, as shown.
+## 5. Select `Azure App Service (Linux)` for the Specific target.
 
-![image](https://github.com/user-attachments/assets/44700de9-bbac-44c5-9656-0fef86026d56)
+![Publish dialog is displayed. This is the specific target step. Azure App Service (Linux) is the selected target. The Next button is highlighted.](../assets/images/walkthroughs/app-service-from-visual-studio/specific-target-azure-app-service-linux.jpg)
 
-## 5. Click Create.
+## 6. Select the subscription and app service.
 
-The Publish profile will be saved and the eShopOnWeb sample will be published to the Azure App Service.
+In the upper-right corner of the dialog, select your Microsoft account. Then, select your **Subscription name**. For this walkthrough, we'll create a new App Service, so select **+ Create new**.
 
-![image](https://github.com/user-attachments/assets/68f4b285-98b4-4ce0-b51c-dd0d5fd78cd7)
+![On the Publish dialog, confirm the Microsoft account and subscription. "+ Create new" is highlighted. ](../assets/images/walkthroughs/app-service-from-visual-studio/select-subscription.jpg)
 
-Once the publish process has completed, your deployed app will launch in your browser.
+## 7. Add the app services details.
 
-![image](https://github.com/user-attachments/assets/12c3bbdb-0e5e-4314-b6ea-86b063eb5628)
+On the **App Service (Linux)** dialog, make sure that the following details are correct:
 
-[Learn more about Azure deployment options in the official documentation](https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-deploy).
+- Microsoft account
+- **Name** - This is for the App Service's name. This is unique for app services.
+- **Subscription name**
+- **Resource group** - If needed, create a new resource group.
+- **Hosting Plan** - You can create a Linux hosting plan here.
 
-## Optional
+If all looks well, then select **Create**. This will create the Azure resources.
 
-If you are not seeing data initially in the store, the most likely reason is that the Azure App Service is configured for `Production`, not `Development` (Note: This is not the same as `Debug` vs. `Release` configuration). The sample data is only seeded in the `Development` environment. You can configure the App Service to run in `Development` as follows:
+![The App Service (Linux) dialog is displayed. The settings are for the subscription, app service name, resource group, and hosting plan.](../assets/images/walkthroughs/app-service-from-visual-studio/app-service-details.jpg)
+
+## 8. Update Azure App Settings' Environment Variables
+
+In order to populate the seed data, we need to set the `ASPNETCORE_ENVIRONMENT` variable to `Development`. (Note: This is not the same as `Debug` vs. `Release` configuration). The sample data is only seeded in the `Development` environment. You can configure the App Service to run in `Development` as follows:
 
 1. In the Azure Portal, navigate to your Web App.
 
-1. Click Application settings.
+1. Select **Settings** > **Environment Variables**.
 
-1. Scroll down to App settings.
+1. In the **App settings** section, add a new key `ASPNETCORE_ENVIRONMENT` with value `Development`.
 
-1. Add a new key `ASPNETCORE_ENVIRONMENT` with value `Development`.
+1. Select **Apply**.
 
-1. Click `Save`.
+1. Add another key for `UseOnlyInMemoryDatabase` with the value of `true`.
 
-![image](https://github.com/user-attachments/assets/89c7f1e2-6ae9-4f9c-83d9-d6a286240ef6)
+1. Select **Apply**.
+
+    ![Add the ASPNETCORE_ENVIRONMENT variable in the Azure Portal.](../assets/images/walkthroughs/app-service-from-visual-studio/azure-app-service-environment-variables.jpg)
+
+1. Finally, select **Apply** to apply all of these changes to the App Service.
+
+## 9. Publish the app.
+
+Once the Azure resources are created, the Publish dialog will appear for you to select an existing or new Azure resource. Select the new Azure App Service (Linux) that you created above. Then, select **Finish**.
+
+![In the Publish dialog, on the App Service step. The new app service is highlighted, then the Finish button is highlighted.](../assets/images/walkthroughs/app-service-from-visual-studio/finalize-publish.jpg)
+
+The Publish profile will be saved.
+
+You will then need to select the **Publish** button to publish the app to the App Service.
+
+![image](https://github.com/user-attachments/assets/68f4b285-98b4-4ce0-b51c-dd0d5fd78cd7)
 
 At this point, you should be able to refresh the site and see it loaded with data (if not, publish once more from Visual Studio).
 
-![image](https://github.com/user-attachments/assets/df803021-8c30-4038-a963-b6e2ce1a16ab)
+![eShopOnWeb portal logged in as the demouser and shown running on the resource we created in this demo.](../assets/images/walkthroughs/app-service-from-azure-portal/eShopOnWeb-running.jpg)
+
+[Learn more about Azure deployment options in the official documentation](https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-deploy).
+
 
 ## Notes
 
