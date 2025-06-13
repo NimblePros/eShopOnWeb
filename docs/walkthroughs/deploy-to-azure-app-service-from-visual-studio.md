@@ -54,6 +54,8 @@ In order to populate the seed data, we need to set the `ASPNETCORE_ENVIRONMENT` 
 
 1. In the **App settings** section, add a new key `ASPNETCORE_ENVIRONMENT` with value `Development`.
 
+1. Add another key for `UseOnlyInMemoryDatabase` with the value of `true`.
+
 1. Select **Apply**.
 
 ![Add the ASPNETCORE_ENVIRONMENT variable in the Azure Portal.](../assets/images/walkthroughs/app-service-from-visual-studio/azure-app-service-environment-variables.jpg)
