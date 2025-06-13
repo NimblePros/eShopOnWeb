@@ -2,13 +2,7 @@
 title: Getting Started for Beginners
 ---
 
-If you're new to building applications with ASP.NET Core and Visual Studio, go through [this tutorial](https://youtu.be/Fz_HAqQGLtY) to help get you started. It covers the following topics:
-
-- [Installing Visual Studio 2022](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-01?view=vs-2022)
-- [Creating an ASP.NET Core Web App](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-02?view=vs-2022)
-- [Working with data using EF Core](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-03?view=vs-2022)
-- [Exposing a Web API](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-04?view=vs-2022)
-- [Deploying and hosting the app in Azure](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-aspnet-core-ef-step-05?view=vs-2022)
+If you're new to building applications with ASP.NET Core and Visual Studio, go through [this ASP.NET Razor Pages tutorial](https://learn.microsoft.com/aspnet/core/data/ef-rp/intro?view=aspnetcore-9.0&tabs=visual-studio) or [this ASP.NET MVC tutorial](https://learn.microsoft.com/aspnet/core/data/ef-mvc/intro?view=aspnetcore-9.0) to help get you started. 
 
 Once you've completed this tutorial, you're ready to learn how to build real world applications using ASP.NET Core and some related technologies, as demonstrated in this eShopOnWeb reference application. Be sure to [download and review the free 100+ page eBook](https://aka.ms/webappebook), which covers high-level concepts and principles for architecting applications. The rest of this guide will provide you with additional resources to make sure you're able to quickly start understand this sample.
 
