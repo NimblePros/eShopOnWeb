@@ -20,7 +20,11 @@ We've created several walkthroughs to help demonstrate how easily you can deploy
 ## Working with Windows Containers
 
 - [Running locally on a Windows Container]({{ site.baseurl }}/walkthroughs/running-locally-on-a-windows-container)
-- [Deploying as a Windows Container into a Windows Container host in Azure]({{ site.baseurl }}/walkthroughs/deploying-windows-container-to-azure)
+- [Deploying as a Windows Container into a Windows Conta
+
+## Deploy with Azure Developer CLI
+
+- [Deploy with Azure Developer CLI (azd)](./deploy-with-azd)
 
 ## Adding New Features using Visual Studio for Mac
 
