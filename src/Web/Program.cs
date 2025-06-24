@@ -12,6 +12,7 @@ using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
 using NServiceBus;
 using NimblePros.Metronome;
+using Microsoft.eShopWeb.ApplicationCore.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,22 +53,7 @@ if (!string.IsNullOrEmpty(gitHubClientId))
 }
 
 // NServiceBus
-builder.Host.UseNServiceBus(_ =>
-{
-    var endpointConfiguration = new EndpointConfiguration("orders-worker");
-    endpointConfiguration.UseSerialization<SystemJsonSerializer>();
-
-    var transport = endpointConfiguration.UseTransport<LearningTransport>();
-
-    transport.Routing().RouteToEndpoint(
-      typeof(OrderCreatedEvent),
-      "orders-worker");
-
-    endpointConfiguration.SendFailedMessagesTo("error");
-    endpointConfiguration.AuditProcessedMessagesTo("audit");
-
-    return endpointConfiguration;
-});
+builder.Host.UseNServiceBus( config => NServiceBusConfiguration.GetNServiceBusConfiguration());
 
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 builder.Services.AddCoreServices(builder.Configuration);
