@@ -49,6 +49,8 @@
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageVersion Include="Microsoft.Win32.Primitives" Version="4.3.0" />
     <PackageVersion Include="MinimalApi.Endpoint" Version="1.3.0" />
+    <PackageVersion Include="NServiceBus" Version="9.2.7" />
+    <PackageVersion Include="NServiceBus.Extensions.Hosting" Version="3.0.1" />
     <PackageVersion Include="NimblePros.Metronome" Version="0.4.1" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />

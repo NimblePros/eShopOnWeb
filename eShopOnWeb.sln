@@ -46,6 +46,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eShopWeb.AppHost", "src\eSh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eShopWeb.AspireServiceDefaults", "src\eShopWeb.AspireServiceDefaults\eShopWeb.AspireServiceDefaults.csproj", "{DC649B65-3762-44ED-9DF8-54F450CEA311}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eShopOnWeb.Worker", "src\eShopOnWeb.Worker\eShopOnWeb.Worker.csproj", "{479A770A-EC51-E26C-D0F8-8F2254F6F1CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,10 @@ Global
 		{DC649B65-3762-44ED-9DF8-54F450CEA311}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC649B65-3762-44ED-9DF8-54F450CEA311}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC649B65-3762-44ED-9DF8-54F450CEA311}.Release|Any CPU.Build.0 = Release|Any CPU
+		{479A770A-EC51-E26C-D0F8-8F2254F6F1CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{479A770A-EC51-E26C-D0F8-8F2254F6F1CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{479A770A-EC51-E26C-D0F8-8F2254F6F1CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{479A770A-EC51-E26C-D0F8-8F2254F6F1CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,6 +126,7 @@ Global
 		{715CF7AF-A1EE-40A6-94A0-8DA3F3B2CAE9} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
 		{D53EF010-8F8C-4337-A059-456E19D8AE63} = {15EA4737-125B-4E6E-A806-E13B7EBCDCCF}
 		{9269A0CE-2596-4215-8ACA-765724A1630C} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
+		{479A770A-EC51-E26C-D0F8-8F2254F6F1CB} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {49813262-5DA3-4D61-ABD3-493C74CE8C2B}

@@ -1,13 +1,16 @@
-﻿using Ardalis.ListStartupServices;
+﻿using System.Text.Json;
+using Ardalis.ListStartupServices;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate.Events;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
+using NServiceBus;
 using NimblePros.Metronome;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +50,24 @@ if (!string.IsNullOrEmpty(gitHubClientId))
             };
         });
 }
+
+// NServiceBus
+builder.Host.UseNServiceBus(_ =>
+{
+    var endpointConfiguration = new EndpointConfiguration("orders-api");
+    endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+
+    var transport = endpointConfiguration.UseTransport<LearningTransport>();
+
+    transport.Routing().RouteToEndpoint(
+      typeof(OrderCreatedEvent),
+      "orders-worker");
+
+    endpointConfiguration.SendOnly();
+    endpointConfiguration.EnableInstallers();
+
+    return endpointConfiguration;
+});
 
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 builder.Services.AddCoreServices(builder.Configuration);

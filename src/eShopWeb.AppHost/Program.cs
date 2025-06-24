@@ -1,4 +1,4 @@
-﻿var builder = DistributedApplication.CreateBuilder(args);
+var builder = DistributedApplication.CreateBuilder(args);
 
 var seq = builder.AddSeq("seq")
                  .ExcludeFromManifest()
@@ -13,5 +13,7 @@ builder
     .AddProject<Projects.Web>(nameof(Projects.Web).ToLower())
         .WithReference(seq)
         .WaitFor(seq);
+
+builder.AddProject<Projects.eShopOnWeb_Worker>("eshoponweb-worker");
 
 builder.Build().Run();

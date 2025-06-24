@@ -1,0 +1,1 @@
+{"Order":{"BuyerId":"demouser@microsoft.com","OrderDate":"2025-06-23T21:34:52.104515-04:00","ShipToAddress":{"Street":"123 Main St.","City":"Kent","State":"OH","Country":"United States","ZipCode":"44240"},"OrderItems":[{"ItemOrdered":{"CatalogItemId":2,"ProductName":".NET Grey \u0026 White Mug","PictureUri":"/images/products/2.png"},"UnitPrice":10.50,"Units":1,"Id":18}],"Id":15}}
