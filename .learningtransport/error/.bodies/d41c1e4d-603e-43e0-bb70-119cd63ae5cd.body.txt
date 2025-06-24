@@ -1,1 +1,0 @@
-{"Order":{"BuyerId":"demouser@microsoft.com","OrderDate":"2025-06-23T21:37:29.0868298-04:00","ShipToAddress":{"Street":"123 Main St.","City":"Kent","State":"OH","Country":"United States","ZipCode":"44240"},"OrderItems":[{"ItemOrdered":{"CatalogItemId":5,"ProductName":"Roslyn Red Sheet","PictureUri":"/images/products/5.png"},"UnitPrice":8.50,"Units":1,"Id":20}],"Id":17}}
