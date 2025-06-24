@@ -12,9 +12,11 @@ namespace eShopOnWeb.Worker.Handlers;
 
         public Task Handle(OrderCreatedEvent message, IMessageHandlerContext context)
         {
-            _logger.LogInformation("{OrderDate} - Received {EventName} - Order {OrderId} from buyer {BuyerId}: {OrderTotal:C}",
+            _logger.LogInformation("{OrderDate} - Received {EventName} - Order {OrderId} from buyer {BuyerId}: {OrderTotal:C}\nTotal Units: {itemCount}\nTotal Line Items: {uniqueItems}",
               nameof(OrderCreatedEvent),
-              message.OrderDate,message.Id,message.BuyerId,message.Total);
+              message.OrderDate,message.Id,message.BuyerId,message.Total,
+              message.Items.Sum(x => x.Units),
+              message.Items.Count);
             return Task.CompletedTask;
         }
     }

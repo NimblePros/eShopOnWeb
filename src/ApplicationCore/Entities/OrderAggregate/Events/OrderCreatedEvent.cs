@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using NServiceBus;
 
@@ -9,12 +11,14 @@ public class OrderCreatedEvent :IMessage
     public string BuyerId { get; init; }
     public DateTimeOffset OrderDate { get; init; }
     public decimal Total { get; init; }
+    public IReadOnlyCollection<OrderItem> Items { get; init; } = [];
     public OrderCreatedEvent() { }
 
-    public OrderCreatedEvent(int orderId, string buyerId, DateTimeOffset orderDate, decimal orderTotal) {
+    public OrderCreatedEvent(int orderId, string buyerId, DateTimeOffset orderDate, decimal orderTotal, IReadOnlyCollection<OrderItem> orderItems) {
         Id = orderId;
         BuyerId = buyerId;
         OrderDate = orderDate;
         Total = orderTotal;
+        Items = orderItems;
     }
 }

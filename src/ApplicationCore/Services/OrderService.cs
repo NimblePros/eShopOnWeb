@@ -53,7 +53,7 @@ public class OrderService : IOrderService
         var order = new Order(basket.BuyerId, shippingAddress, items);
 
         await _orderRepository.AddAsync(order);
-        OrderCreatedEvent orderCreatedEvent = new(order.Id,order.BuyerId,order.OrderDate, order.Total());
+        OrderCreatedEvent orderCreatedEvent = new(order.Id,order.BuyerId,order.OrderDate, order.Total(), order.OrderItems);
         await _messageSession.Send(orderCreatedEvent,CancellationToken.None);
     }
 }
