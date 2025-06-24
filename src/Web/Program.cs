@@ -54,7 +54,7 @@ if (!string.IsNullOrEmpty(gitHubClientId))
 // NServiceBus
 builder.Host.UseNServiceBus(_ =>
 {
-    var endpointConfiguration = new EndpointConfiguration("orders-api");
+    var endpointConfiguration = new EndpointConfiguration("orders-worker");
     endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
     var transport = endpointConfiguration.UseTransport<LearningTransport>();
@@ -63,8 +63,8 @@ builder.Host.UseNServiceBus(_ =>
       typeof(OrderCreatedEvent),
       "orders-worker");
 
-    endpointConfiguration.SendOnly();
-    endpointConfiguration.EnableInstallers();
+    endpointConfiguration.SendFailedMessagesTo("error");
+    endpointConfiguration.AuditProcessedMessagesTo("audit");
 
     return endpointConfiguration;
 });
