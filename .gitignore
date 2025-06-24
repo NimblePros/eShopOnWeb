@@ -260,3 +260,6 @@ pub/
 .devcontainer
 
 .azure
+
+# NServiceBus
+.learningtransport
