@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - eshoponweb-us
+name: Build and deploy ASP.Net Core app to Azure Web App - eshoponweb-web-westeurope-unique
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -23,20 +23,22 @@ jobs:
         with:
           dotnet-version: '9.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      - name: Build Web UI
+        run: dotnet build src/Web/Web.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish src/Web/Web.csproj --configuration Release --output ./publish
+
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ./publish
+
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -51,15 +53,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BF3CDC2BBF8D428C90F201745C7949EC }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_69C1EFD2ACCE482A84DBE2F11EFF55C8 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C4355D7E36EF43ACBB7719B360CFB13F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_370C84A9BF7D408E8399026226416D1A }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_17945742F59B405195556DD2242E9FC1 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A90C52B59F1F46D287C941080D53F791 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'eshoponweb-us'
-          slot-name: 'eshoponweb-us-stage001'
+          app-name: 'eshoponweb-web-westeurope-unique'
+          slot-name: 'stage001'
           package: .
           
