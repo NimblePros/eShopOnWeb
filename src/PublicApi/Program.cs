@@ -59,25 +59,9 @@ builder.AddSeqEndpoint(connectionName: "seq", options =>
 {
     options.ServerUrl = seqUrl;
 });
-
-// Enhanced Application Insights configuration
-builder.Services.AddApplicationInsightsTelemetry(options =>
+builder.Services.AddApplicationInsightsTelemetry(new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions
 {
-    options.ConnectionString = builder.Configuration.GetConnectionString("APPLICATIONINSIGHTS_CONNECTION_STRING") 
-                            ?? builder.Configuration["ApplicationInsights:ConnectionString"];
-});
-
-// Add Application Insights logging
-builder.Services.AddLogging(logging =>
-{
-    logging.AddApplicationInsights(
-        configureTelemetryConfiguration: (config) => 
-        {
-            config.ConnectionString = builder.Configuration.GetConnectionString("APPLICATIONINSIGHTS_CONNECTION_STRING") 
-                                   ?? builder.Configuration["ApplicationInsights:ConnectionString"];
-        },
-        configureApplicationInsightsLoggerOptions: (options) => { }
-    );
+    ConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
 });
 
 var app = builder.Build();
