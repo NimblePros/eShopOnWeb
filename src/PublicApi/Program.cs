@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NimblePros.Metronome;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,10 @@ string seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341
 builder.AddSeqEndpoint(connectionName: "seq", options =>
 {
     options.ServerUrl = seqUrl;
+});
+builder.Services.AddApplicationInsightsTelemetry(new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions
+{
+    ConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
 });
 
 var app = builder.Build();
