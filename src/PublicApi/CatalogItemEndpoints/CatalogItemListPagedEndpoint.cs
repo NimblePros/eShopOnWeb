@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 
@@ -14,7 +15,7 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// List Catalog Items (paged)
 /// </summary>
 public class CatalogItemListPagedEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer,
-        AutoMapper.IMapper mapper)
+        AutoMapper.IMapper mapper, ILogger<CatalogItemListPagedEndpoint> logger)
     : Endpoint<ListPagedCatalogItemRequest, ListPagedCatalogItemResponse>
 {
     public override void Configure()
@@ -42,6 +43,9 @@ public class CatalogItemListPagedEndpoint(IRepository<CatalogItem> itemRepositor
             typeId: request.CatalogTypeId);
 
         var items = await itemRepository.ListAsync(pagedSpec, ct);
+
+        logger.LogInformation("Retrieved {ItemCount} catalog items from database for page {PageIndex} with page size {PageSize}. Total items available: {TotalItems}", 
+            items.Count, request.PageIndex, request.PageSize, totalItems);
 
         response.CatalogItems.AddRange(items.Select(mapper.Map<CatalogItemDto>));
         foreach (CatalogItemDto item in response.CatalogItems)
