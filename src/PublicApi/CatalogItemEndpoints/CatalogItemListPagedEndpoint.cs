@@ -8,6 +8,9 @@ using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
 using Microsoft.Extensions.Logging;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using System.Collections.Generic;
 
 namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 
@@ -15,7 +18,7 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// List Catalog Items (paged)
 /// </summary>
 public class CatalogItemListPagedEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer,
-        AutoMapper.IMapper mapper, ILogger<CatalogItemListPagedEndpoint> logger)
+        AutoMapper.IMapper mapper, ILogger<CatalogItemListPagedEndpoint> logger, TelemetryClient telemetryClient)
     : Endpoint<ListPagedCatalogItemRequest, ListPagedCatalogItemResponse>
 {
     public override void Configure()

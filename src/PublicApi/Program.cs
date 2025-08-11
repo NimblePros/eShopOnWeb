@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NimblePros.Metronome;
 using Azure.Identity;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +89,7 @@ app.UseFastEndpoints();
 app.UseSwaggerGen();
 
 app.Logger.LogInformation("LAUNCHING PublicApi");
+
 app.Run();
 
 public partial class Program { }
