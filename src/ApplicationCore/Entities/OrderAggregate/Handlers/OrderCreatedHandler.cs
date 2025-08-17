@@ -7,7 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate.Handlers;
 
-public class OrderCreatedHandler(ILogger<OrderCreatedHandler> logger, IEmailSender emailSender) : INotificationHandler<OrderCreatedEvent>
+public class OrderCreatedHandler(
+    ILogger<OrderCreatedHandler> logger,
+    IEmailSender emailSender,
+    IOrderReservationService orderReservationService)
+    : INotificationHandler<OrderCreatedEvent>
 {
     public async Task Handle(OrderCreatedEvent domainEvent, CancellationToken cancellationToken)
     {
@@ -16,5 +20,8 @@ public class OrderCreatedHandler(ILogger<OrderCreatedHandler> logger, IEmailSend
         await emailSender.SendEmailAsync("to@test.com",
                                          "Order Created",
                                          $"Order with id {domainEvent.Order.Id} was created.");
+
+        // the order has been successfully saved:
+        await orderReservationService.NotifyAsync(domainEvent.Order, cancellationToken);
     }
 }

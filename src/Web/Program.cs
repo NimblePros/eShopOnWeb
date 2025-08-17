@@ -9,6 +9,7 @@ using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
 using NimblePros.Metronome;
+using Microsoft.eShopWeb.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,18 @@ if (!string.IsNullOrEmpty(gitHubClientId))
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 builder.Services.AddCoreServices(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
+
+// IOrderReservationService HttpClient
+var cfg = builder.Configuration.GetSection("OrderItemsReserver");
+builder.Services.AddHttpClient<IOrderReservationService, HttpOrderReservationService>((sp, client) =>
+{
+    var baseUrl = cfg["BaseUrl"]!;
+    client.BaseAddress = new Uri(baseUrl);
+
+    var key = cfg["FunctionKey"];
+    if (!string.IsNullOrWhiteSpace(key))
+        client.DefaultRequestHeaders.Add("x-functions-key", key);
+});
 
 // Add memory cache services
 builder.Services.AddMemoryCache();
