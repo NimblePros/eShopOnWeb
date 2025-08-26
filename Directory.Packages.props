@@ -68,9 +68,9 @@
     <PackageVersion Include="System.Threading" Version="4.3.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.12.0" />
     <!-- Aspire -->
-    <PackageVersion Include="Aspire.Hosting.Seq" Version="9.1.0" />
-    <PackageVersion Include="Aspire.Seq" Version="9.1.0" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.1.0" />
+    <PackageVersion Include="Aspire.Hosting.Seq" Version="9.4.0" />
+    <PackageVersion Include="Aspire.Seq" Version="9.4.0" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.4.0" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.1.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
