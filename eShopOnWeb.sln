@@ -48,6 +48,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eShopWeb.AspireServiceDefau
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderItemsReserver", "src\OrderItemsReserver\OrderItemsReserver.csproj", "{8070A37B-B956-48DB-99E7-85E721ADA684}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeliveryOrderProcessor", "src\DeliveryOrderProcessor\DeliveryOrderProcessor.csproj", "{381F7975-2D3B-4660-8816-7BCEB71A21F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,10 @@ Global
 		{8070A37B-B956-48DB-99E7-85E721ADA684}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8070A37B-B956-48DB-99E7-85E721ADA684}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8070A37B-B956-48DB-99E7-85E721ADA684}.Release|Any CPU.Build.0 = Release|Any CPU
+		{381F7975-2D3B-4660-8816-7BCEB71A21F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{381F7975-2D3B-4660-8816-7BCEB71A21F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{381F7975-2D3B-4660-8816-7BCEB71A21F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{381F7975-2D3B-4660-8816-7BCEB71A21F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,6 +133,7 @@ Global
 		{D53EF010-8F8C-4337-A059-456E19D8AE63} = {15EA4737-125B-4E6E-A806-E13B7EBCDCCF}
 		{9269A0CE-2596-4215-8ACA-765724A1630C} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
 		{8070A37B-B956-48DB-99E7-85E721ADA684} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
+		{381F7975-2D3B-4660-8816-7BCEB71A21F7} = {419A6ACE-0419-4315-A6FB-B0E63D39432E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {49813262-5DA3-4D61-ABD3-493C74CE8C2B}

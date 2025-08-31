@@ -31,7 +31,7 @@ public class OrderService : IOrderService
         _mediator = mediator;
     }
 
-    public async Task CreateOrderAsync(int basketId, Address shippingAddress)
+    public async Task<int> CreateOrderAsync(int basketId, Address shippingAddress)
     {
         var basketSpec = new BasketWithItemsSpecification(basketId);
         var basket = await _basketRepository.FirstOrDefaultAsync(basketSpec);
@@ -55,5 +55,7 @@ public class OrderService : IOrderService
         await _orderRepository.AddAsync(order);
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(order);
         await _mediator.Publish(orderCreatedEvent);
+
+        return order.Id;
     }
 }

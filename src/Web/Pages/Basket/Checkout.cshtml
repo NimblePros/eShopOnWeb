@@ -1,86 +1,94 @@
 ﻿@page
-@model CheckoutModel
+@model Microsoft.eShopWeb.Web.Pages.Basket.CheckoutModel
 @{
     ViewData["Title"] = "Checkout";
 }
-<section class="esh-catalog-hero">
-    <div class="container">
-        <img class="esh-catalog-title" src="~/images/main_banner_text.png" />
-    </div>
-</section>
 
-<div class="container">
-    <h1>Review</h1>
-    @if (Model.BasketModel.Items.Any())
-    {
-        <form asp-page="Checkout" method="post">
-            <article class="esh-basket-titles row">
-                <br />
-                <section class="esh-basket-title col-xs-3">Product</section>
-                <section class="esh-basket-title col-xs-3 hidden-lg-down"></section>
-                <section class="esh-basket-title col-xs-2">Price</section>
-                <section class="esh-basket-title col-xs-2">Quantity</section>
-                <section class="esh-basket-title col-xs-2">Cost</section>
-            </article>
-            <div class="esh-catalog-items row">
-                <div asp-validation-summary="All" class="text-danger"></div>
-                @for (int i = 0; i < Model.BasketModel.Items.Count; i++)
-                {
-                    var item = Model.BasketModel.Items[i];
-                    <article class="esh-basket-items row">
-                        <div>
-                            <section class="esh-basket-item esh-basket-item--middle col-lg-3 hidden-lg-down">
-                                <img class="esh-basket-image" src="@item.PictureUrl" />
-                            </section>
-                            <section class="esh-basket-item esh-basket-item--middle col-xs-3">@item.ProductName</section>
-                            <section class="esh-basket-item esh-basket-item--middle col-xs-2">$ @item.UnitPrice.ToString("N2")</section>
-                            <section class="esh-basket-item esh-basket-item--middle col-xs-2">
-                                <input type="hidden" name="@("Items[" + i + "].Id")" value="@item.Id" />
-                                <input type="hidden" name="@("Items[" + i + "].Quantity")" value="@item.Quantity" />
-                                @item.Quantity
-                            </section>
-                            <section class="esh-basket-item esh-basket-item--middle esh-basket-item--mark col-xs-2">$ @Math.Round(item.Quantity * item.UnitPrice, 2).ToString("N2")</section>
-                        </div>
-                        <div class="row">
+<h2>Checkout</h2>
 
-                        </div>
-                    </article>
-                }
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <div class="container">
-                    <article class="esh-basket-titles esh-basket-titles--clean row">
-                        <section class="esh-basket-title col-xs-10"></section>
-                        <section class="esh-basket-title col-xs-2">Total</section>
-                    </article>
+<form method="post">
+    @Html.AntiForgeryToken()
 
-                    <article class="esh-basket-items row">
-                        <section class="esh-basket-item col-xs-10"></section>
-                        <section class="esh-basket-item esh-basket-item--mark col-xs-2">$ @Model.BasketModel.Total().ToString("N2")</section>
-                    </article>
+    <fieldset>
+        <legend>Shipping address</legend>
 
-                    <article class="esh-basket-items row">
-                        <section class="esh-basket-item col-xs-7"></section>
-                    </article>
-                </div>
-                <div class="row">
-                    <section class="esh-basket-item col-xs-1">
-                        <a asp-page="Index" class="btn esh-basket-checkout text-white">[ Back ]</a>
-                    </section>
-                    <section class="esh-basket-item col-xs-push-7 col-xs-4 text-right">
-                        <input type="submit" class="btn esh-basket-checkout" value="[ Pay Now ]" />
-                    </section>
-                </div>
+        <div class="mb-2">
+            <label asp-for="FullName"></label>
+            <input asp-for="FullName" class="form-control" />
+            <span asp-validation-for="FullName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="PhoneNumber"></label>
+            <input asp-for="PhoneNumber" class="form-control" />
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="Address1"></label>
+            <input asp-for="Address1" class="form-control" />
+            <span asp-validation-for="Address1" class="text-danger"></span>
+        </div>
+
+        <div class="mb-2">
+            <label asp-for="Address2"></label>
+            <input asp-for="Address2" class="form-control" />
+            <span asp-validation-for="Address2" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-2">
+                <label asp-for="City"></label>
+                <input asp-for="City" class="form-control" />
+                <span asp-validation-for="City" class="text-danger"></span>
             </div>
-        </form>
-    }
-    else
-    {
-        <h3 class="esh-catalog-items row">
-            Basket is empty.
-        </h3>
+            <div class="col-md-4 mb-2">
+                <label asp-for="State"></label>
+                <input asp-for="State" class="form-control" />
+                <span asp-validation-for="State" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label asp-for="ZipCode"></label>
+                <input asp-for="ZipCode" class="form-control" />
+                <span asp-validation-for="ZipCode" class="text-danger"></span>
+            </div>
+        </div>
 
-        <section class="esh-basket-item">
-            <a asp-page="/Index" class="btn esh-basket-checkout text-white">[ Continue Shopping ]</a>
-        </section>
-    }
-</div>
+        <div class="mb-2">
+            <label asp-for="Country"></label>
+            <input asp-for="Country" class="form-control" />
+            <span asp-validation-for="Country" class="text-danger"></span>
+        </div>
+    </fieldset>
+
+    <hr />
+
+    <h4>Your basket</h4>
+    <table class="table">
+        <thead>
+            <tr><th>Product</th><th>Qty</th><th>Price</th></tr>
+        </thead>
+        <tbody>
+        @for (var i = 0; i < Model.BasketModel.Items.Count; i++)
+        {
+            var it = Model.BasketModel.Items[i];
+            <tr>
+                <td>@it.ProductName</td>
+                <td>
+                    <input type="hidden" name="items[@i].Id" value="@it.Id" />
+                    <input type="number" name="items[@i].Quantity" value="@it.Quantity" min="1" class="form-control" />
+                </td>
+                <td>@it.UnitPrice.ToString("C")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">Place order</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

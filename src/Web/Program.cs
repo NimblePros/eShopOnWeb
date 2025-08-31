@@ -10,6 +10,10 @@ using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
 using NimblePros.Metronome;
 using Microsoft.eShopWeb.Web.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.eShopWeb.Infrastructure.Data;
+using Microsoft.eShopWeb.Web.Delivery;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +29,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
            .AddDefaultUI()
            .AddEntityFrameworkStores<AppIdentityDbContext>()
            .AddDefaultTokenProviders();
+
+builder.Services.AddHttpClient<IOrderDeliveryNotifier, HttpOrderDeliveryNotifier>();
 
 var gitHubClientId = builder.Configuration["GitHub:ClientId"] ?? string.Empty;
 
@@ -63,6 +69,20 @@ builder.Services.AddHttpClient<IOrderReservationService, HttpOrderReservationSer
     var key = cfg["FunctionKey"];
     if (!string.IsNullOrWhiteSpace(key))
         client.DefaultRequestHeaders.Add("x-functions-key", key);
+});
+
+// Consider Azure/AppService proxy headers (X-Forwarded-Proto / X-Forwarded-For)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    // Front proxies are dynamic in Azure — clear lists so headers aren't ignored
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+
+    // On Linux header symmetry may not hold
+    options.RequireHeaderSymmetry = false;
 });
 
 // Add memory cache services
@@ -106,6 +126,27 @@ var app = builder.Build();
 
 app.Logger.LogInformation("App created...");
 
+// Apply migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var catalogCtx = services.GetRequiredService<CatalogContext>();
+        await catalogCtx.Database.MigrateAsync();
+
+        var identityCtx = services.GetRequiredService<AppIdentityDbContext>();
+        await identityCtx.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+        throw;
+    }
+}
+
 await app.SeedDatabaseAsync();
 
 var catalogBaseUrl = builder.Configuration.GetValue(typeof(string), "CatalogBaseUrl") as string;
@@ -118,12 +159,14 @@ if (!string.IsNullOrEmpty(catalogBaseUrl))
     });
 }
 
-
 app.UseCustomHealthChecks();
 
 app.UseTroubleshootingMiddlewares();
 
-app.UseHttpsRedirection();
+// Correct order for Linux/App Service:
+app.UseForwardedHeaders();           // 1) honor proxy headers
+app.UseHttpsRedirection();           // 2) then enforce HTTPS
+
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 app.UseRouting();
@@ -132,6 +175,7 @@ app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<UserContextEnrichmentMiddleware>();
+
 app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
 app.MapRazorPages();
 app.MapHealthChecks("home_page_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("homePageHealthCheck") });

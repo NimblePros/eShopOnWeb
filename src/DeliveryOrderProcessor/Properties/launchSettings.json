@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "DeliveryOrderProcessor": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7168",
+      "launchBrowser": false
+    }
+  }
+}
