@@ -3,6 +3,7 @@
 @inject ICatalogItemService CatalogItemService
 
 @inherits BlazorAdmin.Helpers.BlazorComponent
+@using Radzen
 
 @namespace BlazorAdmin.Pages.CatalogItemPage
 
@@ -17,90 +18,80 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
 
+                <div class="modal-body">
                     @if (_item == null)
                     {
-                        <Spinner></Spinner>
+                        <RadzenSkeleton Count="3" />
                     }
                     else
                     {
                         <div class="container">
                             <div class="row">
+
                                 @if (HasPicture)
                                 {
                                     <img class="col-md-6 esh-picture" src="@LoadPicture">
                                 }
+
                                 <div class="col-md-@(HasPicture?"6":"12") ">
 
                                     <div class="form-group">
                                         <label class="control-label col-md-6">Name</label>
-                                        <div class="col-md-12">
-                                            <InputText class="form-control" @bind-Value="_item.Name" />
-                                            <ValidationMessage For="(() => _item.Name)" />
-                                        </div>
+                                        <RadzenTextBox @bind-Value="_item.Name" Style="width:100%" />
+                                        <ValidationMessage For="(() => _item.Name)" />
                                     </div>
 
                                     <div class="form-group">
                                         <label class="control-label col-md-6">Description</label>
-                                        <div class="col-md-12">
-                                            <InputText class="form-control" @bind-Value="_item.Description" />
-                                            <ValidationMessage For="(() => _item.Description)" />
-                                        </div>
+                                        <RadzenTextBox @bind-Value="_item.Description" Style="width:100%" />
+                                        <ValidationMessage For="(() => _item.Description)" />
                                     </div>
 
                                 </div>
+
                                 <div class="col-md-12">
+
                                     <div class="form-group">
                                         <label class="control-label col-md-6">Brand</label>
-                                        <div class="col-md-12">
-                                            <CustomInputSelect @bind-Value="_item.CatalogBrandId" class="form-control">
-                                                @foreach (var brand in Brands)
-                                                    {
-                                                    <option value="@brand.Id.ToString()">@brand.Name</option>
-                                                    }
-                                            </CustomInputSelect>
-                                            <ValidationMessage For="(() => _item.CatalogBrandId)" />
-                                        </div>
+                                        <RadzenDropDown Data="Brands"
+                                                        TextProperty="Name"
+                                                        ValueProperty="Id"
+                                                        @bind-Value="_item.CatalogBrandId"
+                                                        Style="width:100%" />
+                                        <ValidationMessage For="(() => _item.CatalogBrandId)" />
                                     </div>
 
                                     <div class="form-group">
                                         <label class="control-label col-md-6">Type</label>
-                                        <div class="col-md-12">
-                                            <CustomInputSelect @bind-Value="_item.CatalogTypeId" class="form-control">
-                                                @foreach (var type in Types)
-                                                    {
-                                                    <option value="@type.Id">@type.Name</option>
-                                                    }
-                                            </CustomInputSelect>
-                                            <ValidationMessage For="(() => _item.CatalogTypeId)" />
-                                        </div>
+                                        <RadzenDropDown Data="Types"
+                                                        TextProperty="Name"
+                                                        ValueProperty="Id"
+                                                        @bind-Value="_item.CatalogTypeId"
+                                                        Style="width:100%" />
+                                        <ValidationMessage For="(() => _item.CatalogTypeId)" />
                                     </div>
 
                                     <div class="form-group">
                                         <label class="control-label col-md-6">Price</label>
-                                        <div class="col-md-12">
-                                            <InputNumber @bind-Value="_item.Price" class="form-control" />
-                                            <ValidationMessage For="(() => _item.Price)" />
-                                        </div>
-                                    </div>                                  
+                                        <RadzenNumeric @bind-Value="_item.Price" Style="width:100%" />
+                                        <ValidationMessage For="(() => _item.Price)" />
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        Save
-                    </button>
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="close" Text="Cancel" Click="@Close" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="save" Text="Save" ButtonType="ButtonType.Submit" />
                 </div>
             </EditForm>
         </div>
     </div>
 </div>
-
-
 
 @if (_showEditModal)
 {
@@ -108,13 +99,9 @@
 }
 
 @code {
-    [Parameter]
-    public IEnumerable<CatalogBrand> Brands { get; set; }
-    [Parameter]
-    public IEnumerable<CatalogType> Types { get; set; }
-
-    [Parameter]
-    public EventCallback<string> OnSaveClick { get; set; }
+    [Parameter] public IEnumerable<CatalogBrand> Brands { get; set; }
+    [Parameter] public IEnumerable<CatalogType> Types { get; set; }
+    [Parameter] public EventCallback<string> OnSaveClick { get; set; }
 
     private string LoadPicture => string.IsNullOrEmpty(_item.PictureBase64) ? string.IsNullOrEmpty(_item.PictureUri) ? string.Empty : $"{_item.PictureUri}" : $"data:image/png;base64, {_item.PictureBase64}";
     private bool HasPicture => !(string.IsNullOrEmpty(_item.PictureBase64) && string.IsNullOrEmpty(_item.PictureUri));
@@ -136,20 +123,17 @@
         Logger.LogInformation("Now loading... /Catalog/Edit/{Id}", id);
 
         await new Css(JSRuntime).HideBodyOverflow();
-
         _item = await CatalogItemService.GetById(id);
 
         _modalDisplay = "block;";
         _modalClass = "Show";
         _showEditModal = true;
-
         StateHasChanged();
     }
 
     private async Task Close()
     {
         await new Css(JSRuntime).ShowBodyOverflow();
-
         _modalDisplay = "none";
         _modalClass = "";
         _showEditModal = false;
