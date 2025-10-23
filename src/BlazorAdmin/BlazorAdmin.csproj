@@ -9,6 +9,7 @@
 		<PackageReference Include="Microsoft.Extensions.Identity.Core" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Stores" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Configuration" />
+		<PackageReference Include="Radzen.Blazor" />
 		<PackageReference Include="System.Net.Http.Json" />
 	</ItemGroup>
 

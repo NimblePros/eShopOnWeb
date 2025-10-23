@@ -9,13 +9,14 @@
 @using BlazorAdmin.Interfaces
 @using BlazorAdmin.Models
 @using Microsoft.AspNetCore.Identity
+@using Radzen
 
 <div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             @if (_item == null)
             {
-                <Spinner></Spinner>
+                <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="width:100%" />
             }
             else
             {
@@ -68,6 +69,7 @@
                                             <label for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication Enabled</label>
                                         </div>
                                     </div>
+
                                     <div class="form-group row">
                                         <label for="LockoutEnd" class="control-label col-md-6">Lockout Until</label>
                                         <div class="col-md-6">
@@ -78,6 +80,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <h4>Roles</h4>
                         @if (_roles == null || _roles.Count == 0)
                         {
@@ -89,7 +92,8 @@
                             {
                                 <div class="form-group row form-check">
                                     <div class="col-md-6">
-                                        <input type="checkbox" id="@role" class="form-check-input" checked="@_selectedRoles[role.Name]" @onchange="(e) => UpdateRoleSelectedState(role.Name, (bool)((ChangeEventArgs)e).Value)" />
+                                        <input type="checkbox" id="@role" class="form-check-input" checked="@_selectedRoles[role.Name]" 
+                                               @onchange="(e) => UpdateRoleSelectedState(role.Name, (bool)((ChangeEventArgs)e).Value)" />
                                         <label class="form-check-label" for="@role">@role</label>
                                     </div>
                                 </div>
@@ -97,11 +101,10 @@
                         }
 
                     </div>
+
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
-                            Save
-                        </button>
+                        <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Secondary" Click="Close" Style="margin-right:5px" />
+                        <RadzenButton Text="Save" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Style="margin-left:5px" />
                     </div>
                 </EditForm>
             }
@@ -109,16 +112,12 @@
     </div>
 </div>
 
-
-
 @if (_showEditModal)
 {
     <div class="modal-backdrop fade show"></div>
 }
 
 @code {
-
-
 
     [Parameter]
     public EventCallback<string> OnSaveClick { get; set; }
@@ -134,7 +133,6 @@
 
     private async Task SaveClick()
     {
-
         var updateRequest = new UpdateUserRequest()
         {
             User = _item
@@ -148,10 +146,12 @@
         var rolesToRemove = startingRoles.Except(checkedRoles).ToList();
         var rolesToAdd = checkedRoles.Except(startingRoles).ToList();
 
-        if (rolesToAdd.Any() || rolesToRemove.Any()){
-            SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
+        if (rolesToAdd.Any() || rolesToRemove.Any())
+        {
+            SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest()
+            {
                 UserId = _item.Id,
-                RolesToAdd = rolesToAdd, 
+                RolesToAdd = rolesToAdd,
                 RolesToRemove = rolesToRemove
             };
 
@@ -172,15 +172,15 @@
         _item = (await UserManagementService.GetById(id)).User;
         _roles = (await RoleManagementService.List()).Roles;
         var userRoles = await UserManagementService.GetRolesByUserId(id);
+
         foreach (var role in _roles)
         {
-
             var checkedStatus = userRoles.Roles.Contains(role.Name);
             _selectedRoles[role.Name] = checkedStatus;
             _startingRoles[role.Name] = checkedStatus;
         }
 
-        Logger.LogInformation("Acquired user {id}",_item.Id);
+        Logger.LogInformation("Acquired user {id}", _item.Id);
 
         _modalDisplay = "block;";
         _modalClass = "Show";
@@ -189,7 +189,8 @@
         StateHasChanged();
     }
 
-    private void UpdateRoleSelectedState(string role, bool isChecked){
+    private void UpdateRoleSelectedState(string role, bool isChecked)
+    {
         _selectedRoles[role] = isChecked;
     }
 
