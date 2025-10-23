@@ -1,5 +1,6 @@
 ﻿@page "/admin"
 @attribute [Authorize(Roles = BlazorShared.Authorization.Constants.RoleCombinations.ADMIN_PORTAL_ROLES)]
+@inject DialogService DialogService
 @inherits BlazorAdmin.Helpers.BlazorComponent
 @namespace BlazorAdmin.Pages.CatalogItemPage
 
@@ -9,59 +10,43 @@
 
 @if (catalogItems == null)
 {
-    <Spinner></Spinner>
+    <RadzenProgressBarCircular Style="margin:auto; display:block;"></RadzenProgressBarCircular>
 }
 else
 {
+    <RadzenButton Text="Create New" Style="margin-bottom:10px" Click="@(() => CreateComponent.Open())" />
 
-    <p class="esh-link-wrapper">
-        <button class="btn btn-primary" @onclick="@(CreateClick)">
-            Create New
-        </button>
-    </p>
+    <RadzenDataGrid @ref="catalogGrid" Data="@catalogItems" TItem="CatalogItem" RowSelect="@(item => DetailsComponent.Open(item.Id))" 
+                    ColumnWidth="200px" ShowPagingSummary="true" PageSize="10">
+        <Columns>
+            <RadzenDataGridColumn TItem="CatalogItem" Width="70px">
+                <Template Context="item">
+                    <img src="@item.PictureUri" class="img-thumbnail" style="max-width:50px;" />
+                </Template>
+            </RadzenDataGridColumn>
 
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Item Type</th>
-                <th>Brand</th>
-                <th>Id</th>
-                <th>Name</th>
-                <th>@nameof(CatalogItem.Description)</th>
-                <th>@nameof(CatalogItem.Price)</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody class="cursor-pointer">
-            @foreach (var item in catalogItems)
-            {
-                <tr @onclick="@(() => DetailsClick(item.Id))">
-                    <td>
-                        <img class="img-thumbnail" src="@($"{item.PictureUri}")">
-                    </td>
-                    <td>@item.CatalogType</td>
-                    <td>@item.CatalogBrand</td>
-                    <td>@item.Id</td>
-                    <td>@item.Name</td>
-                    <td>@item.Description</td>
-                    <td>@item.Price</td>
-                    <td>
-                        <button @onclick="@(() => EditClick(item.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
-                            Edit
-                        </button>
+            <RadzenDataGridColumn TItem="CatalogItem" Property="CatalogType" Title="Item Type" />
+            <RadzenDataGridColumn TItem="CatalogItem" Property="CatalogBrand" Title="Brand" />
+            <RadzenDataGridColumn TItem="CatalogItem" Property="Id" Title="Id" />
+            <RadzenDataGridColumn TItem="CatalogItem" Property="Name" Title="Name" />
+            <RadzenDataGridColumn TItem="CatalogItem" Property="Description" Title="Description" />
+            <RadzenDataGridColumn TItem="CatalogItem" Property="Price" Title="Price" />
 
-                        <button @onclick="@(() => DeleteClick(item.Id))" @onclick:stopPropagation="true" class="btn btn-danger">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            <RadzenDataGridColumn TItem="CatalogItem" Title="Actions">
+                <Template Context="item">
+                    <RadzenButton Text="Edit" ButtonStyle="ButtonStyle.Primary" Click="@(() => EditComponent.Open(item.Id))" Style="margin-right:5px;" />
+                    <RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Danger" Click="@(() => DeleteComponent.Open(item.Id))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
 
     <Details Brands="@catalogBrands" Types="@catalogTypes" OnEditClick="EditClick" @ref="DetailsComponent"></Details>
     <Edit Brands="@catalogBrands" Types="@catalogTypes" OnSaveClick="ReloadCatalogItems" @ref="EditComponent"></Edit>
     <Create Brands="@catalogBrands" Types="@catalogTypes" OnSaveClick="ReloadCatalogItems" @ref="CreateComponent"></Create>
     <Delete Brands="@catalogBrands" Types="@catalogTypes" OnSaveClick="ReloadCatalogItems" @ref="DeleteComponent"></Delete>
+}
+
+@code {
+    private RadzenDataGrid<CatalogItem> catalogGrid;
 }
