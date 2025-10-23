@@ -53,6 +53,7 @@
     <PackageVersion Include="NimblePros.Metronome" Version="0.4.1" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
+    <PackageVersion Include="Radzen.Blazor" Version="8.1.4" />
     <PackageVersion Include="System.Diagnostics.Debug" Version="4.3.0" />
     <PackageVersion Include="System.Diagnostics.Tracing" Version="4.3.0" />
     <PackageVersion Include="System.IO.FileSystem" Version="4.3.0" />
