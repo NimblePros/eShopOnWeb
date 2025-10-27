@@ -59,6 +59,8 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
     name: 'appsettings'
     properties: union(appSettings,
       {
+        // Application settings
+        ASPNETCORE_ENVIRONMENT: 'Production'
         // Container settings
         DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry}'
         WEBSITES_ENABLE_APP_SERVICE_STORAGE: 'false'

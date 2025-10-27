@@ -1,0 +1,14 @@
+{
+  "name": "eshop-traffic-simulator",
+  "version": "1.0.0",
+  "description": "Browser traffic simulation for eShopOnWeb with Datadog monitoring",
+  "private": true,
+  "scripts": {
+    "install-browsers": "playwright install chromium",
+    "simulate": "node simulate-traffic.js"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}
+

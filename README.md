@@ -66,10 +66,26 @@ export AZURE_ENV_NAME=my-env
 - Using pre-built image: 3-4 minutes
 
 **What gets deployed:**
-- Azure App Service (Linux container)
-- Azure Container Registry
-- Azure SQL Database (2 databases: catalog + identity)
-- Azure Key Vault (connection strings)
+- Azure App Service (Linux container) - eShopOnWeb application
+- Azure Container Registry - Docker images
+- Azure SQL Database - 2 databases (catalog + identity)
+- Azure Key Vault - Connection strings
+- **Azure Container Instance** - Traffic simulator (runs automatically!)
+
+**Traffic Simulation** (automatic):
+The deployment includes an automated traffic simulator that runs continuously, generating realistic browser traffic for Datadog monitoring.
+
+**Behavior:**
+- 5 simulated user sessions per cycle
+- 60 second delay between cycles
+- Runs forever automatically
+- Catalog browsing, product filtering, add to cart, basket views, admin visits
+- **Datadog observability**: APM traces, RUM events, logs, metrics
+
+**View traffic simulator logs:**
+```bash
+az container logs --name <container-name> --resource-group <resource-group> --follow
+```
 
 **Cleanup:**
 ```bash
@@ -99,6 +115,8 @@ docker-compose up
 - Admin: http://localhost:5106/admin
 
 **Login:** `demouser@microsoft.com` / `Pass@word1`
+
+**Includes:** Traffic simulator runs automatically, generating continuous traffic for observability testing
 
 ---
 
@@ -137,7 +155,8 @@ src/
 ├── PublicApi/              # REST API for Blazor admin
 ├── BlazorAdmin/            # Blazor WebAssembly admin UI
 ├── ApplicationCore/        # Domain entities, interfaces, services
-└── Infrastructure/         # EF Core, data access, identity
+├── Infrastructure/         # EF Core, data access, identity
+└── traffic-simulator/      # Automated traffic generation (Playwright)
 
 infra/                      # Bicep templates for Azure deployment
 scripts/                    # Build and deployment automation

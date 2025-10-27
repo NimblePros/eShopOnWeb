@@ -13,6 +13,8 @@ param location string
 param containerRegistry string  // e.g., 'myacr.azurecr.io'
 param containerImage string = 'eshop-web'
 param containerTag string = 'latest'
+param trafficImage string = 'eshop-traffic'
+param deployTrafficSimulator bool = true
 
 // Optional parameters to override the default azd resource naming conventions. Update the main.parameters.json file to provide values. e.g.,:
 // "resourceGroupName": {
@@ -137,6 +139,25 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
       name: 'B1'
     }
   }
+}
+
+// Traffic simulator container instance
+module trafficSimulator './core/host/traffic-simulator.bicep' = if (deployTrafficSimulator) {
+  name: 'traffic-simulator'
+  scope: rg
+  params: {
+    name: 'ci-traffic-${resourceToken}'
+    location: location
+    tags: union(tags, { 'azd-service-name': 'traffic-simulator' })
+    containerImage: '${trafficImage}:${containerTag}'
+    containerRegistry: containerRegistry
+    targetUrl: 'https://${web.outputs.uri}'
+    cpu: 1
+    memoryInGb: 1
+  }
+  dependsOn: [
+    web
+  ]
 }
 
 // Data outputs

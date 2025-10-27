@@ -14,6 +14,7 @@ cd "$REPO_ROOT"
 # Configuration (with defaults matching build-push-acr.sh)
 ACR_NAME="${ACR_NAME:-alesseshopacr}"
 IMAGE_NAME="${IMAGE_NAME:-eshop-web-instruqt}"
+TRAFFIC_IMAGE_NAME="${TRAFFIC_IMAGE_NAME:-eshop-traffic-instruqt}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 LOCATION="${AZURE_LOCATION:-westus2}"
 ENV_NAME="${AZURE_ENV_NAME:-eshop-$(date +%s)}"
@@ -56,6 +57,8 @@ az deployment sub create \
     containerRegistry="${ACR_NAME}.azurecr.io" \
     containerImage="$IMAGE_NAME" \
     containerTag="$IMAGE_TAG" \
+    trafficImage="$TRAFFIC_IMAGE_NAME" \
+    deployTrafficSimulator=true \
     principalId="$PRINCIPAL_ID" \
     sqlAdminPassword="SQL$(openssl rand -hex 12)!" \
     appUserPassword="APP$(openssl rand -hex 12)!" \
@@ -65,13 +68,20 @@ az deployment sub create \
 RG_NAME=$(az group list --tag azd-env-name="$ENV_NAME" --query "[0].name" -o tsv)
 APP_NAME=$(az webapp list --resource-group "$RG_NAME" --query "[0].name" -o tsv)
 APP_URL=$(az webapp show --name "$APP_NAME" --resource-group "$RG_NAME" --query "defaultHostName" -o tsv)
+CONTAINER_NAME=$(az container list --resource-group "$RG_NAME" --query "[0].name" -o tsv 2>/dev/null || echo "")
+
+# Export for traffic simulation script
+export APP_URL="https://$APP_URL"
 
 echo ""
 echo "✅ Deployment Complete!"
 echo ""
-echo "App URL: https://$APP_URL"
+echo "App URL: $APP_URL"
 echo "Resource Group: $RG_NAME"
 echo "App Service: $APP_NAME"
+if [ -n "$CONTAINER_NAME" ]; then
+  echo "Traffic Simulator: $CONTAINER_NAME (running continuously)"
+fi
 
 # Calculate elapsed time
 END_TIME=$(date +%s)
@@ -82,6 +92,14 @@ SECONDS=$((ELAPSED % 60))
 echo ""
 echo "⏱️  Deployment completed in ${MINUTES}m ${SECONDS}s"
 echo ""
-echo "To delete these resources, run:"
+if [ -n "$CONTAINER_NAME" ]; then
+  echo "🚀 Traffic simulator is running automatically in Azure!"
+  echo "   Generating continuous traffic for Datadog monitoring"
+  echo ""
+  echo "To view traffic simulator logs:"
+  echo "  az container logs --name $CONTAINER_NAME --resource-group $RG_NAME --follow"
+  echo ""
+fi
+echo "To delete all resources:"
 echo "  az group delete --name $RG_NAME --yes --no-wait"
 

@@ -22,4 +22,9 @@ RUN dotnet publish "./PublicApi.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Configure for container
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
 ENTRYPOINT ["dotnet", "PublicApi.dll"]

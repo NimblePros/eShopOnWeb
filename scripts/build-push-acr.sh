@@ -13,16 +13,18 @@ cd "$REPO_ROOT"
 
 # Instruqt configuration (hardcoded)
 ACR_NAME="alesseshopacr"
-IMAGE_NAME="eshop-web-instruqt"
+WEB_IMAGE_NAME="eshop-web-instruqt"
+TRAFFIC_IMAGE_NAME="eshop-traffic-instruqt"
 IMAGE_TAG="${1:-latest}"
 LOCATION="westus2"
 RESOURCE_GROUP="rg-eshop-acr"
 
-echo "Building Docker image for Instruqt"
+echo "Building Docker images for Instruqt"
 echo "Repository: $REPO_ROOT"
 echo "ACR: ${ACR_NAME}.azurecr.io"
-echo "Image: ${IMAGE_NAME}:${IMAGE_TAG}"
-echo "⏳ This will take 2-4 minutes..."
+echo "Web Image: ${WEB_IMAGE_NAME}:${IMAGE_TAG}"
+echo "Traffic Image: ${TRAFFIC_IMAGE_NAME}:${IMAGE_TAG}"
+echo "⏳ This will take 3-5 minutes..."
 echo ""
 
 # Check if ACR exists, create if not
@@ -45,17 +47,30 @@ if ! az acr show --name "$ACR_NAME" &>/dev/null; then
     echo "✅ ACR created: ${ACR_NAME}.azurecr.io"
 fi
 
-# Build and push image
+# Build and push web application image
+echo "Building web application image..."
 az acr build \
   --registry "$ACR_NAME" \
-  --image "${IMAGE_NAME}:${IMAGE_TAG}" \
+  --image "${WEB_IMAGE_NAME}:${IMAGE_TAG}" \
   --file src/Web/Dockerfile \
   --platform linux \
   . \
   --no-logs
 
+echo "✅ Web image built: ${ACR_NAME}.azurecr.io/${WEB_IMAGE_NAME}:${IMAGE_TAG}"
 echo ""
-echo "✅ Image built: ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}"
+
+# Build and push traffic simulator image
+echo "Building traffic simulator image..."
+az acr build \
+  --registry "$ACR_NAME" \
+  --image "${TRAFFIC_IMAGE_NAME}:${IMAGE_TAG}" \
+  --file src/traffic-simulator/Dockerfile \
+  --platform linux \
+  src/traffic-simulator \
+  --no-logs
+
+echo "✅ Traffic image built: ${ACR_NAME}.azurecr.io/${TRAFFIC_IMAGE_NAME}:${IMAGE_TAG}"
 echo ""
 echo "ACR: ${ACR_NAME}.azurecr.io"
 echo "Resource Group: $RESOURCE_GROUP"

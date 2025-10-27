@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
   eshopwebmvc:
     image: ${DOCKER_REGISTRY-}eshopwebmvc
@@ -8,6 +6,8 @@ services:
       dockerfile: src/Web/Dockerfile
     ports:
       - "5106:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
     depends_on:
       - "sqlserver"
   eshoppublicapi:
@@ -15,6 +15,10 @@ services:
     build:
       context: .
       dockerfile: src/PublicApi/Dockerfile
+    ports:
+      - "5200:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
     depends_on:
       - "sqlserver"
   sqlserver:
@@ -24,4 +28,13 @@ services:
     environment:
       - SA_PASSWORD=@someThingComplicated1234
       - ACCEPT_EULA=Y
+  
+  traffic-simulator:
+    build:
+      context: ./src/traffic-simulator
+      dockerfile: Dockerfile
+    environment:
+      - APP_URL=http://eshopwebmvc:8080
+    depends_on:
+      - eshopwebmvc
 
