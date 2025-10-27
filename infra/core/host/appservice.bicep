@@ -52,7 +52,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       minimumElasticInstanceCount: minimumElasticInstanceCount != -1 ? minimumElasticInstanceCount : null
       use32BitWorkerProcess: use32BitWorkerProcess
       functionAppScaleLimit: functionAppScaleLimit != -1 ? functionAppScaleLimit : null
-      healthCheckPath: healthCheckPath
+      healthCheckPath: !empty(healthCheckPath) ? healthCheckPath : null
       cors: {
         allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
       }
@@ -69,6 +69,16 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       {
         SCM_DO_BUILD_DURING_DEPLOYMENT: string(scmDoBuildDuringDeployment)
         ENABLE_ORYX_BUILD: string(enableOryxBuild)
+        // Health check configuration to prevent deployment timing issues
+        WEBSITE_HEALTHCHECK_MAXPINGFAILURES: '10'
+        WEBSITE_HEALTHCHECK_MAXUNHEALTHYWORKERPERCENT: '50'
+        // Ensure the site warms up before accepting traffic
+        WEBSITE_SWAP_WARMUP_PING_PATH: !empty(healthCheckPath) ? healthCheckPath : '/'
+        WEBSITE_SWAP_WARMUP_PING_STATUSES: '200'
+        // Deployment speed optimizations
+        WEBSITE_RUN_FROM_PACKAGE: '0'  // Extract files for better performance
+        WEBSITE_ENABLE_SYNC_UPDATE_SITE: 'true'  // Update site config immediately
+        WEBSITE_TIME_ZONE: 'UTC'  // Prevent timezone lookup delays
       },
       !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
       !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {})

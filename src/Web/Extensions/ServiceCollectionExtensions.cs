@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
         else
         {
             // Configure SQL Server (prod)
-            var credential = new ChainedTokenCredential(new AzureDeveloperCliCredential(), new DefaultAzureCredential());
+            var credential = new DefaultAzureCredential();
             configuration.AddAzureKeyVault(new Uri(configuration["AZURE_KEY_VAULT_ENDPOINT"] ?? ""), credential);
 
             services.AddDbContext<CatalogContext>((provider, options) =>

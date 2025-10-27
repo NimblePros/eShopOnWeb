@@ -100,7 +100,9 @@ Then, execute the `azd init` command to initialize the environment.
 azd init -t NimblePros/eShopOnWeb
 ```
 
-Run `azd up` to provision all the resources to Azure and deploy the code to those resources.
+Run `azd provision` to provision all the resources to Azure and deploy the code to those resources.
+
+Then do `azd deploy`
 ```
 azd up
 ```

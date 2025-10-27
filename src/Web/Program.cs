@@ -85,7 +85,19 @@ builder.Services.Configure<ServiceConfig>(config =>
 builder.Services.AddBlazor(builder.Configuration);
 
 builder.Services.AddMetronome();
-builder.AddSeqEndpoint(connectionName: "seq");
+
+// Only add Seq in development/local environments
+if (builder.Environment.IsDevelopment())
+{
+    try
+    {
+        builder.AddSeqEndpoint(connectionName: "seq");
+    }
+    catch
+    {
+        // Seq not available, continue without it
+    }
+}
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
