@@ -1,4 +1,5 @@
-﻿using Ardalis.ListStartupServices;
+﻿using System;
+using Ardalis.ListStartupServices;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -9,8 +10,17 @@ using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.Extensions;
 using NimblePros.Metronome;
+using Serilog;
+using Serilog.Formatting.Json;
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(new JsonFormatter(renderMessage: true))
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
 
 // Add service defaults & Aspire components.
 builder.AddAspireServiceDefaults();
@@ -139,4 +149,18 @@ app.MapHealthChecks("api_health_check", new HealthCheckOptions { Predicate = che
 app.MapFallbackToFile("index.html");
 
 app.Logger.LogInformation("LAUNCHING");
-app.Run();
+
+try
+{
+    Log.Information("Starting eShopWeb application");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}

@@ -18,6 +18,7 @@
 - Entity Framework Core 9.0
 - Blazor WebAssembly
 - SQL Server
+- Serilog (JSON structured logging)
 - Azure deployment (App Service, Container Registry, Key Vault)
 
 **Origin:** Microsoft reference application, maintained by [NimblePros](https://nimblepros.com/)

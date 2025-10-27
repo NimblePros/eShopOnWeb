@@ -1,4 +1,5 @@
-﻿using BlazorShared;
+﻿using System;
+using BlazorShared;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Builder;
@@ -13,8 +14,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NimblePros.Metronome;
+using Serilog;
+using Serilog.Formatting.Json;
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(new JsonFormatter(renderMessage: true))
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
 
 // Add service defaults & Aspire components.
 builder.AddAspireServiceDefaults();
@@ -85,6 +95,20 @@ app.UseFastEndpoints();
 app.UseSwaggerGen();
 
 app.Logger.LogInformation("LAUNCHING PublicApi");
-app.Run();
+
+try
+{
+    Log.Information("Starting eShopPublicApi application");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 public partial class Program { }
