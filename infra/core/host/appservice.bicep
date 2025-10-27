@@ -8,42 +8,33 @@ param appServicePlanId string
 param keyVaultName string = ''
 param managedIdentity bool = !empty(keyVaultName)
 
-// Runtime Properties
-@allowed([
-  'dotnet', 'dotnetcore', 'dotnet-isolated', 'node', 'python', 'java', 'powershell', 'custom'
-])
-param runtimeName string
-param runtimeNameAndVersion string = '${runtimeName}|${runtimeVersion}'
-param runtimeVersion string
+// Container configuration
+param containerRegistry string
+param containerImage string
+param containerTag string = 'latest'
 
-// Microsoft.Web/sites Properties
-param kind string = 'app,linux'
-
-// Microsoft.Web/sites/config
+// App Service configuration
 param allowedOrigins array = []
 param alwaysOn bool = true
 param appCommandLine string = ''
 param appSettings object = {}
 param clientAffinityEnabled bool = false
-param enableOryxBuild bool = contains(kind, 'linux')
 param functionAppScaleLimit int = -1
-param linuxFxVersion string = runtimeNameAndVersion
 param minimumElasticInstanceCount int = -1
 param numberOfWorkers int = -1
-param scmDoBuildDuringDeployment bool = false
 param use32BitWorkerProcess bool = false
 param ftpsState string = 'FtpsOnly'
-param healthCheckPath string = ''
+param healthCheckPath string = '/health'
 
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: name
   location: location
   tags: tags
-  kind: kind
+  kind: 'app,linux,container'
   properties: {
     serverFarmId: appServicePlanId
     siteConfig: {
-      linuxFxVersion: linuxFxVersion
+      linuxFxVersion: 'DOCKER|${containerRegistry}/${containerImage}:${containerTag}'
       alwaysOn: alwaysOn
       ftpsState: ftpsState
       minTlsVersion: '1.2'
@@ -56,6 +47,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       cors: {
         allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
       }
+      acrUseManagedIdentityCreds: false  // Use anonymous pull (ACR Standard tier)
     }
     clientAffinityEnabled: clientAffinityEnabled
     httpsOnly: true
@@ -67,18 +59,18 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
     name: 'appsettings'
     properties: union(appSettings,
       {
-        SCM_DO_BUILD_DURING_DEPLOYMENT: string(scmDoBuildDuringDeployment)
-        ENABLE_ORYX_BUILD: string(enableOryxBuild)
-        // Health check configuration to prevent deployment timing issues
+        // Container settings
+        DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry}'
+        WEBSITES_ENABLE_APP_SERVICE_STORAGE: 'false'
+        DOCKER_ENABLE_CI: 'true'
+        // Health check configuration
         WEBSITE_HEALTHCHECK_MAXPINGFAILURES: '10'
         WEBSITE_HEALTHCHECK_MAXUNHEALTHYWORKERPERCENT: '50'
-        // Ensure the site warms up before accepting traffic
         WEBSITE_SWAP_WARMUP_PING_PATH: !empty(healthCheckPath) ? healthCheckPath : '/'
         WEBSITE_SWAP_WARMUP_PING_STATUSES: '200'
-        // Deployment speed optimizations
-        WEBSITE_RUN_FROM_PACKAGE: '0'  // Extract files for better performance
-        WEBSITE_ENABLE_SYNC_UPDATE_SITE: 'true'  // Update site config immediately
-        WEBSITE_TIME_ZONE: 'UTC'  // Prevent timezone lookup delays
+        // Performance optimizations
+        WEBSITE_ENABLE_SYNC_UPDATE_SITE: 'true'
+        WEBSITE_TIME_ZONE: 'UTC'
       },
       !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
       !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {})

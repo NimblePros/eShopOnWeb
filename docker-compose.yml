@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: src/Web/Dockerfile
+    ports:
+      - "5106:8080"
     depends_on:
       - "sqlserver"
   eshoppublicapi:

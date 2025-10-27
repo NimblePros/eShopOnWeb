@@ -9,6 +9,11 @@ param environmentName string
 @description('Primary location for all resources')
 param location string
 
+// Container configuration
+param containerRegistry string  // e.g., 'myacr.azurecr.io'
+param containerImage string = 'eshop-web'
+param containerTag string = 'latest'
+
 // Optional parameters to override the default azd resource naming conventions. Update the main.parameters.json file to provide values. e.g.,:
 // "resourceGroupName": {
 //      "value": "myGroupName"
@@ -44,7 +49,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-// The application frontend
+// The application frontend (container-based)
 module web './core/host/appservice.bicep' = {
   name: 'web'
   scope: rg
@@ -53,8 +58,9 @@ module web './core/host/appservice.bicep' = {
     location: location
     appServicePlanId: appServicePlan.outputs.id
     keyVaultName: keyVault.outputs.name
-    runtimeName: 'dotnetcore'
-    runtimeVersion: '9.0'
+    containerRegistry: containerRegistry
+    containerImage: containerImage
+    containerTag: containerTag
     tags: union(tags, { 'azd-service-name': 'web' })
     appSettings: {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
@@ -117,7 +123,7 @@ module keyVault './core/security/keyvault.bicep' = {
   }
 }
 
-// Create an App Service Plan to group applications under the same payment plan and SKU
+// Create an App Service Plan for Linux containers
 module appServicePlan './core/host/appserviceplan.bicep' = {
   name: 'appserviceplan'
   scope: rg
@@ -125,6 +131,8 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
     name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceToken}'
     location: location
     tags: tags
+    kind: 'linux'
+    reserved: true  // Required for Linux
     sku: {
       name: 'B1'
     }
