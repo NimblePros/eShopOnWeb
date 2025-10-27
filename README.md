@@ -30,24 +30,59 @@
 
 ### Deploy to Azure (Container)
 
-**Prerequisites:** Azure CLI, Azure subscription
+**Prerequisites:**
+- [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) installed
+- Azure subscription with contributor access
 
 ```bash
-# 1. Build and push Docker image to ACR
-./scripts/build-push-acr.sh <your-acr-name>
+# 1. Login to Azure
+az login
 
-# 2. Deploy infrastructure and application
-export ACR_NAME=<your-acr-name>
+# 2. Build and push Docker image to ACR (instructor - one-time setup)
+./scripts/build-push-acr.sh
+
+# 3. Deploy infrastructure and application (students)
 ./scripts/deploy-container-instruqt.sh
 ```
 
-**Time:** 3-4 minutes (using pre-built image)
+**Using defaults** (pre-configured for Instruqt):
+```bash
+./scripts/deploy-container-instruqt.sh
+# Uses: alesseshopacr, eshop-web-instruqt:latest, westus2
+```
+
+**Custom configuration:**
+```bash
+export ACR_NAME=myacr
+export IMAGE_NAME=my-image
+export IMAGE_TAG=v1.0
+export AZURE_LOCATION=eastus
+export AZURE_ENV_NAME=my-env
+./scripts/deploy-container-instruqt.sh
+```
+
+**Time:**
+- First time (with build): 6-8 minutes
+- Using pre-built image: 3-4 minutes
 
 **What gets deployed:**
 - Azure App Service (Linux container)
 - Azure Container Registry
 - Azure SQL Database (2 databases: catalog + identity)
 - Azure Key Vault (connection strings)
+
+**Cleanup:**
+```bash
+# Delete the deployed application (keeps ACR for reuse)
+az group delete --name rg-eshop-<env-name> --yes --no-wait
+
+# Find your resource group name
+az group list --query "[?tags.\"azd-env-name\"].{Name:name, EnvName:tags.\"azd-env-name\"}" -o table
+
+# Delete everything including ACR
+az group delete --name rg-eshop-<env-name> --yes --no-wait
+az group delete --name rg-eshop-acr --yes --no-wait
+```
 
 ---
 
@@ -77,9 +112,9 @@ docker-compose up
 
 # Setup database (if using SQL Server)
 cd src/Web
-dotnet tool restore
-dotnet ef database update -c catalogcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj
-dotnet ef database update -c appidentitydbcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj
+    dotnet tool restore
+    dotnet ef database update -c catalogcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj
+    dotnet ef database update -c appidentitydbcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj
 
 # Run web application
 dotnet run --launch-profile https

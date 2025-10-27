@@ -1,33 +1,48 @@
 #!/bin/bash
 # Build and push Docker image to Azure Container Registry
+# Pre-configured for Instruqt deployment
 set -e
 
-ACR_NAME="${1:-}"
-IMAGE_NAME="${2:-eshop-web}"
-IMAGE_TAG="${3:-latest}"
+# Start timing
+START_TIME=$(date +%s)
 
-if [ -z "$ACR_NAME" ]; then
-    echo "Usage: $0 <acr-name> [image-name] [image-tag]"
-    echo "Example: $0 myacr eshop-web latest"
-    exit 1
-fi
+# Change to repository root (script can be run from anywhere)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
 
-echo "Building image in ACR: $ACR_NAME"
+# Instruqt configuration (hardcoded)
+ACR_NAME="alesseshopacr"
+IMAGE_NAME="eshop-web-instruqt"
+IMAGE_TAG="${1:-latest}"
+LOCATION="westus2"
+RESOURCE_GROUP="rg-eshop-acr"
+
+echo "Building Docker image for Instruqt"
+echo "Repository: $REPO_ROOT"
+echo "ACR: ${ACR_NAME}.azurecr.io"
+echo "Image: ${IMAGE_NAME}:${IMAGE_TAG}"
 echo "⏳ This will take 2-4 minutes..."
 echo ""
 
 # Check if ACR exists, create if not
 if ! az acr show --name "$ACR_NAME" &>/dev/null; then
     echo "Creating ACR..."
+    
+    # Create resource group if it doesn't exist
+    az group create --name "$RESOURCE_GROUP" --location "$LOCATION" --output none 2>/dev/null || true
+    
+    # Create ACR with anonymous pull enabled
     az acr create \
       --name "$ACR_NAME" \
-      --resource-group rg-eshop-acr \
-      --location eastus \
+      --resource-group "$RESOURCE_GROUP" \
+      --location "$LOCATION" \
       --sku Standard \
       --output none
     
-    # Enable anonymous pull for Standard tier
     az acr update --name "$ACR_NAME" --anonymous-pull-enabled true --output none
+    
+    echo "✅ ACR created: ${ACR_NAME}.azurecr.io"
 fi
 
 # Build and push image
@@ -42,16 +57,21 @@ az acr build \
 echo ""
 echo "✅ Image built: ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}"
 echo ""
-echo "Deploy to Azure:"
-echo "  az deployment sub create \\"
-echo "    --location westus2 \\"
-echo "    --template-file infra/main.bicep \\"
-echo "    --parameters \\"
-echo "      environmentName='eshop-prod' \\"
-echo "      containerRegistry='${ACR_NAME}.azurecr.io' \\"
-echo "      containerImage='${IMAGE_NAME}' \\"
-echo "      containerTag='${IMAGE_TAG}' \\"
-echo "      principalId=\$(az ad signed-in-user show --query id -o tsv) \\"
-echo "      sqlAdminPassword='SQL\$(openssl rand -hex 12)!' \\"
-echo "      appUserPassword='APP\$(openssl rand -hex 12)!'"
+echo "ACR: ${ACR_NAME}.azurecr.io"
+echo "Resource Group: $RESOURCE_GROUP"
+
+# Calculate elapsed time
+END_TIME=$(date +%s)
+ELAPSED=$((END_TIME - START_TIME))
+MINUTES=$((ELAPSED / 60))
+SECONDS=$((ELAPSED % 60))
+
+echo ""
+echo "⏱️  Build completed in ${MINUTES}m ${SECONDS}s"
+echo ""
+echo "Next step: Deploy to Azure"
+echo "  ./scripts/deploy-container-instruqt.sh"
+echo ""
+echo "To delete the ACR (when no longer needed), run:"
+echo "  az group delete --name $RESOURCE_GROUP --yes --no-wait"
 
