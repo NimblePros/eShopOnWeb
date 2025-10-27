@@ -9,7 +9,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
     depends_on:
-      - "sqlserver"
+      sqlserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/home_page_health_check || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
   eshoppublicapi:
     image: ${DOCKER_REGISTRY-}eshoppublicapi
     build:
@@ -20,7 +27,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
     depends_on:
-      - "sqlserver"
+      sqlserver:
+        condition: service_healthy
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
@@ -28,6 +36,12 @@ services:
     environment:
       - SA_PASSWORD=@someThingComplicated1234
       - ACCEPT_EULA=Y
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '@someThingComplicated1234' -Q 'SELECT 1' -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
   
   traffic-simulator:
     build:
@@ -36,5 +50,6 @@ services:
     environment:
       - APP_URL=http://eshopwebmvc:8080
     depends_on:
-      - eshopwebmvc
+      eshopwebmvc:
+        condition: service_healthy
 

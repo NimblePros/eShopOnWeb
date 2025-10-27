@@ -8,7 +8,8 @@
     "simulate": "node simulate-traffic.js"
   },
   "dependencies": {
-    "playwright": "^1.40.0"
+    "playwright": "^1.40.0",
+    "winston": "^3.11.0"
   }
 }
 

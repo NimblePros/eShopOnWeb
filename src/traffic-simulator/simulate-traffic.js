@@ -5,6 +5,16 @@
  */
 
 const { chromium } = require('playwright');
+const winston = require('winston');
+
+// Configure Winston with JSON logging
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.Console()
+  ]
+});
 
 // Configuration
 const APP_URL = process.env.APP_URL;
@@ -12,14 +22,15 @@ const ITERATIONS_PER_CYCLE = 5;
 const DELAY_BETWEEN_CYCLES = 60000; // 60 seconds
 
 if (!APP_URL) {
-  console.error('❌ ERROR: APP_URL environment variable is required');
+  logger.error('APP_URL environment variable is required');
   process.exit(1);
 }
 
-console.log('🎭 eShopOnWeb Traffic Simulator');
-console.log(`📍 Target: ${APP_URL}`);
-console.log(`🔁 Running continuously (${ITERATIONS_PER_CYCLE} sessions per cycle, 60s delay)`);
-console.log('');
+logger.info('eShopOnWeb Traffic Simulator started', {
+  target: APP_URL,
+  iterationsPerCycle: ITERATIONS_PER_CYCLE,
+  delayBetweenCycles: DELAY_BETWEEN_CYCLES / 1000
+});
 
 // Random delay to simulate human behavior
 const randomDelay = (min = 500, max = 2000) => 
@@ -31,12 +42,10 @@ const scenarios = [
     name: 'Browse and Add to Cart',
     weight: 50,
     async execute(page) {
-      console.log('  📋 Browsing catalog...');
       await page.goto(APP_URL);
       await randomDelay(1000, 2000);
 
       // Browse catalog
-      console.log('  🔍 Filtering by brand...');
       const brandFilter = page.locator('form[method="get"] select[name="BrandFilterApplied"]').first();
       if (await brandFilter.count() > 0) {
         await brandFilter.selectOption({ index: 1 });
@@ -45,7 +54,6 @@ const scenarios = [
       }
 
       // View product details
-      console.log('  👁️  Viewing product details...');
       const productLinks = page.locator('a:has-text("Details")');
       const count = await productLinks.count();
       if (count > 0) {
@@ -53,7 +61,6 @@ const scenarios = [
         await randomDelay(1000, 2000);
 
         // Add to cart
-        console.log('  🛒 Adding to cart...');
         const addToCartBtn = page.locator('input[type="submit"][value="ADD TO BASKET"]');
         if (await addToCartBtn.count() > 0) {
           await addToCartBtn.click();
@@ -62,7 +69,6 @@ const scenarios = [
       }
 
       // View basket
-      console.log('  🛍️  Viewing basket...');
       await page.goto(`${APP_URL}/basket`);
       await randomDelay(1000, 1500);
     }
@@ -71,12 +77,10 @@ const scenarios = [
     name: 'Quick Browse',
     weight: 30,
     async execute(page) {
-      console.log('  🏠 Visiting homepage...');
       await page.goto(APP_URL);
       await randomDelay(1000, 2000);
 
       // Browse a few products
-      console.log('  👀 Browsing products...');
       const productLinks = page.locator('a:has-text("Details")');
       const count = await productLinks.count();
       if (count > 0) {
@@ -94,12 +98,8 @@ const scenarios = [
     name: 'Admin Panel Visit',
     weight: 20,
     async execute(page) {
-      console.log('  🔐 Checking admin panel...');
       await page.goto(`${APP_URL}/admin`);
       await randomDelay(1000, 2000);
-      
-      // Try to access (will redirect to login if not authenticated)
-      console.log('  📊 Admin page loaded');
     }
   }
 ];
@@ -126,7 +126,11 @@ async function runSimulation() {
 
   for (let i = 1; i <= ITERATIONS_PER_CYCLE; i++) {
     const scenario = selectScenario();
-    console.log(`\n[${i}/${ITERATIONS_PER_CYCLE}] Running: ${scenario.name}`);
+    logger.info('Running scenario', {
+      iteration: i,
+      total: ITERATIONS_PER_CYCLE,
+      scenario: scenario.name
+    });
     
     const context = await browser.newContext({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -136,10 +140,17 @@ async function runSimulation() {
 
     try {
       await scenario.execute(page);
-      console.log(`  ✅ Completed successfully`);
+      logger.info('Scenario completed successfully', {
+        scenario: scenario.name,
+        iteration: i
+      });
       successCount++;
     } catch (error) {
-      console.error(`  ❌ Error: ${error.message}`);
+      logger.error('Scenario failed', {
+        scenario: scenario.name,
+        iteration: i,
+        error: error.message
+      });
       errorCount++;
     } finally {
       await context.close();
@@ -150,12 +161,12 @@ async function runSimulation() {
   await browser.close();
 
   const elapsed = Math.round((Date.now() - startTime) / 1000);
-  console.log('\n' + '='.repeat(50));
-  console.log('📊 Cycle Summary');
-  console.log('='.repeat(50));
-  console.log(`✅ Successful: ${successCount}/${ITERATIONS_PER_CYCLE}`);
-  console.log(`❌ Errors: ${errorCount}/${ITERATIONS_PER_CYCLE}`);
-  console.log(`⏱️  Duration: ${elapsed}s`);
+  logger.info('Cycle summary', {
+    successful: successCount,
+    errors: errorCount,
+    total: ITERATIONS_PER_CYCLE,
+    durationSeconds: elapsed
+  });
 }
 
 // Main loop - run forever
@@ -164,24 +175,33 @@ async function main() {
   
   while (true) {
     cycleCount++;
-    console.log(`\n${'='.repeat(60)}`);
-    console.log(`🔄 Cycle #${cycleCount} - ${new Date().toISOString()}`);
-    console.log('='.repeat(60));
+    logger.info('Starting cycle', {
+      cycle: cycleCount,
+      timestamp: new Date().toISOString()
+    });
     
     try {
       await runSimulation();
     } catch (error) {
-      console.error('💥 Error in simulation cycle:', error.message);
+      logger.error('Error in simulation cycle', {
+        cycle: cycleCount,
+        error: error.message
+      });
     }
     
-    console.log(`\n⏳ Waiting 60s before next cycle...`);
+    logger.info('Waiting before next cycle', {
+      delaySeconds: DELAY_BETWEEN_CYCLES / 1000
+    });
     await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_CYCLES));
   }
 }
 
 // Run
 main().catch(error => {
-  console.error('💥 Fatal error:', error);
+  logger.error('Fatal error', {
+    error: error.message,
+    stack: error.stack
+  });
   process.exit(1);
 });
 
