@@ -7,7 +7,11 @@ param environmentName string
 
 @minLength(1)
 @description('Primary location for all resources')
-param location string
+param primaryLocation string = 'spaincentral'
+
+@minLength(1)
+@description('Secondary location for secondary resources')
+param secondaryLocation string = 'eastus'
 
 // Optional parameters to override the default azd resource naming conventions. Update the main.parameters.json file to provide values. e.g.,:
 // "resourceGroupName": {
@@ -20,6 +24,7 @@ param catalogDatabaseServerName string = ''
 param identityDatabaseName string = 'identityDatabase'
 param identityDatabaseServerName string = ''
 param appServicePlanName string = ''
+param secondaryAppServicePlanName string = ''
 param keyVaultName string = ''
 
 @description('Id of the user or app to assign application roles')
@@ -37,13 +42,14 @@ param sqlAdminPassword string = ''
 param appUserPassword string = ''
 
 var abbrs = loadJsonContent('./abbreviations.json')
-var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
+var resourceTokenPrimary = toLower(uniqueString(subscription().id, environmentName, primaryLocation))
+var resourceTokenSecondary = toLower(uniqueString(subscription().id, environmentName, secondaryLocation))
 var tags = { 'azd-env-name': environmentName }
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
-  location: location
+  location: primaryLocation
   tags: tags
 }
 
@@ -52,8 +58,8 @@ module web './core/host/appservice.bicep' = {
   name: 'web'
   scope: rg
   params: {
-    name: !empty(webServiceName) ? webServiceName : '${abbrs.webSitesAppService}web-${resourceToken}'
-    location: location
+    name: !empty(webServiceName) ? webServiceName : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}'
+    location: primaryLocation
     appServicePlanId: appServicePlan.outputs.id
     keyVaultName: keyVault.outputs.name
     runtimeName: 'dotnetcore'
@@ -81,9 +87,9 @@ module catalogDb './core/database/sqlserver/sqlserver.bicep' = if (deploySql) {
   name: 'sql-catalog'
   scope: rg
   params: {
-    name: !empty(catalogDatabaseServerName) ? catalogDatabaseServerName : '${abbrs.sqlServers}catalog-${resourceToken}'
+    name: !empty(catalogDatabaseServerName) ? catalogDatabaseServerName : '${abbrs.sqlServers}catalog-${resourceTokenPrimary}'
     databaseName: catalogDatabaseName
-    location: location
+    location: primaryLocation
     tags: tags
     sqlAdminPassword: sqlAdminPassword
     appUserPassword: appUserPassword
@@ -97,9 +103,9 @@ module identityDb './core/database/sqlserver/sqlserver.bicep' = if (deploySql) {
   name: 'sql-identity'
   scope: rg
   params: {
-    name: !empty(identityDatabaseServerName) ? identityDatabaseServerName : '${abbrs.sqlServers}identity-${resourceToken}'
+    name: !empty(identityDatabaseServerName) ? identityDatabaseServerName : '${abbrs.sqlServers}identity-${resourceTokenPrimary}'
     databaseName: identityDatabaseName
-    location: location
+    location: primaryLocation
     tags: tags
     sqlAdminPassword: sqlAdminPassword
     appUserPassword: appUserPassword
@@ -113,20 +119,34 @@ module keyVault './core/security/keyvault.bicep' = {
   name: 'keyvault'
   scope: rg
   params: {
-    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
-    location: location
+    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceTokenPrimary}'
+    location: primaryLocation
     tags: tags
     principalId: principalId
   }
 }
 
-// Create an App Service Plan to group applications under the same payment plan and SKU
-module appServicePlan './core/host/appserviceplan.bicep' = {
-  name: 'appserviceplan'
+// Create an App Service Plan to group applications under the same payment plan and SKU (primary)
+module appServicePlan './core/host/appServicePlanPrimary.bicep' = {
+  name: 'appserviceplan-primary'
   scope: rg
   params: {
-    name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceToken}'
-    location: location
+    name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceTokenPrimary}'
+    location: primaryLocation
+    tags: tags
+    sku: {
+      name: 'B1'
+    }
+  }
+}
+
+// Secondary App Service Plan in the secondary location
+module appServicePlanSecondary './core/host/appserviceplan.bicep' = {
+  name: 'appserviceplan-secondary'
+  scope: rg
+  params: {
+    name: !empty(secondaryAppServicePlanName) ? secondaryAppServicePlanName : '${abbrs.webServerFarms}${resourceTokenSecondary}'
+    location: secondaryLocation
     tags: tags
     sku: {
       name: 'B1'
@@ -141,7 +161,7 @@ output AZURE_SQL_CATALOG_DATABASE_NAME string = deploySql ? catalogDb.outputs.da
 output AZURE_SQL_IDENTITY_DATABASE_NAME string = deploySql ? identityDb.outputs.databaseName : ''
 
 // App outputs
-output AZURE_LOCATION string = location
+output AZURE_LOCATION string = primaryLocation
 output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_KEY_VAULT_ENDPOINT string = deploySql ? keyVault.outputs.endpoint : ''
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
