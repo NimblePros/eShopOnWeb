@@ -5,10 +5,7 @@ param enableSlot bool = false
 param slotName string = ''
 
 // Reference Properties
-param applicationInsightsName string = ''
 param appServicePlanId string
-param keyVaultName string = ''
-param managedIdentity bool = !empty(keyVaultName)
 
 // Runtime Properties
 @allowed([
@@ -64,18 +61,15 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
     httpsOnly: true
   }
 
-  identity: { type: managedIdentity ? 'SystemAssigned' : 'None' }
+  identity: { type: 'None' }
 
   resource configAppSettings 'config' = {
     name: 'appsettings'
-    properties: union(appSettings,
-      {
+    properties: {
         SCM_DO_BUILD_DURING_DEPLOYMENT: string(scmDoBuildDuringDeployment)
         ENABLE_ORYX_BUILD: string(enableOryxBuild)
         ASPNETCORE_ENVIRONMENT: aspNetCoreEnvironment
-      },
-      !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
-      !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {})
+    }
   }
 
   resource configLogs 'config' = {
@@ -94,9 +88,9 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 
 // Deployment slot (created only when enabled)
 resource appSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (enableSlot) {
-  name: '${name}/${slotName}'
+  parent: appService
+  name: slotName
   location: location
-  tags: tags
   properties: {
     serverFarmId: appServicePlanId
     siteConfig: {
@@ -116,14 +110,5 @@ resource appSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (enableSlot) {
   }
 }
 
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
-  name: keyVaultName
-}
-
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
-  name: applicationInsightsName
-}
-
-output identityPrincipalId string = managedIdentity ? appService.identity.principalId : ''
 output name string = appService.name
 output uri string = 'https://${appService.properties.defaultHostName}'

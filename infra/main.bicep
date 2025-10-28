@@ -19,27 +19,9 @@ param secondaryLocation string = 'eastus'
 // }
 param resourceGroupName string = ''
 param webServiceName string = ''
-param catalogDatabaseName string = 'catalogDatabase'
-param catalogDatabaseServerName string = ''
-param identityDatabaseName string = 'identityDatabase'
-param identityDatabaseServerName string = ''
 param appServicePlanName string = ''
 param secondaryAppServicePlanName string = ''
-param keyVaultName string = ''
-
-@description('Id of the user or app to assign application roles')
-param principalId string = ''
-
-@description('Whether to deploy Azure SQL Server and databases. Set to false to use in-memory DB.')
-param deploySql bool = false
-
-@secure()
-@description('SQL Server administrator password (required when deploySql is true)')
-param sqlAdminPassword string = ''
-
-@secure()
-@description('Application user password (required when deploySql is true)')
-param appUserPassword string = ''
+param slotName string = 'test'
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceTokenPrimary = toLower(uniqueString(subscription().id, environmentName, primaryLocation))
@@ -54,22 +36,16 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 }
 
 // The application frontend (primary)
-module web './core/host/appservice.bicep' = {
+module webPrimary './core/host/appservice.bicep' = {
   name: 'web-primary'
   scope: rg
   params: {
     name: !empty(webServiceName) ? '${webServiceName}-${primaryLocation}' : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}'
     location: primaryLocation
     appServicePlanId: appServicePlan.outputs.id
-    keyVaultName: (deploySql) ? keyVault.outputs.name : ''
     runtimeName: 'dotnetcore'
     runtimeVersion: '9.0'
-    tags: union(tags, { 'azd-service-name': 'web' })
-    appSettings: deploySql ? {
-      AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
-      AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
-      AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
-    } : {}
+    tags: union(tags, { 'azd-service-name': 'web-primary' })
     enableSlot: true
     slotName: slotName
   }
@@ -83,68 +59,9 @@ module webSecondary './core/host/appservice.bicep' = {
     name: !empty(webServiceName) ? '${webServiceName}-${secondaryLocation}' : '${abbrs.webSitesAppService}web-${resourceTokenSecondary}'
     location: secondaryLocation
     appServicePlanId: appServicePlanSecondary.outputs.id
-    keyVaultName: (deploySql) ? keyVault.outputs.name : ''
     runtimeName: 'dotnetcore'
     runtimeVersion: '9.0'
     tags: union(tags, { 'azd-service-name': 'web-secondary' })
-    appSettings: deploySql ? {
-      AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
-      AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
-      AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
-    } : {}
-  }
-}
-
-module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
-  name: 'api-keyvault-access'
-  scope: rg
-  params: {
-    keyVaultName: keyVault.outputs.name
-    principalId: web.outputs.identityPrincipalId
-  }
-}
-
-// The application database: Catalog
-module catalogDb './core/database/sqlserver/sqlserver.bicep' = if (deploySql) {
-  name: 'sql-catalog'
-  scope: rg
-  params: {
-    name: !empty(catalogDatabaseServerName) ? catalogDatabaseServerName : '${abbrs.sqlServers}catalog-${resourceTokenPrimary}'
-    databaseName: catalogDatabaseName
-    location: primaryLocation
-    tags: tags
-    sqlAdminPassword: sqlAdminPassword
-    appUserPassword: appUserPassword
-    keyVaultName: keyVault.outputs.name
-    connectionStringKey: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
-  }
-}
-
-// The application database: Identity
-module identityDb './core/database/sqlserver/sqlserver.bicep' = if (deploySql) {
-  name: 'sql-identity'
-  scope: rg
-  params: {
-    name: !empty(identityDatabaseServerName) ? identityDatabaseServerName : '${abbrs.sqlServers}identity-${resourceTokenPrimary}'
-    databaseName: identityDatabaseName
-    location: primaryLocation
-    tags: tags
-    sqlAdminPassword: sqlAdminPassword
-    appUserPassword: appUserPassword
-    keyVaultName: keyVault.outputs.name
-    connectionStringKey: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
-  }
-}
-
-// Store secrets in a keyvault
-module keyVault './core/security/keyvault.bicep' = {
-  name: 'keyvault'
-  scope: rg
-  params: {
-    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceTokenPrimary}'
-    location: primaryLocation
-    tags: tags
-    principalId: principalId
   }
 }
 
@@ -175,15 +92,3 @@ module appServicePlanSecondary './core/host/appserviceplan.bicep' = {
     }
   }
 }
-
-// Data outputs
-output AZURE_SQL_CATALOG_CONNECTION_STRING_KEY string = deploySql ? catalogDb.outputs.connectionStringKey : ''
-output AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY string = deploySql ? identityDb.outputs.connectionStringKey : ''
-output AZURE_SQL_CATALOG_DATABASE_NAME string = deploySql ? catalogDb.outputs.databaseName : ''
-output AZURE_SQL_IDENTITY_DATABASE_NAME string = deploySql ? identityDb.outputs.databaseName : ''
-
-// App outputs
-output AZURE_LOCATION string = primaryLocation
-output AZURE_TENANT_ID string = tenant().tenantId
-output AZURE_KEY_VAULT_ENDPOINT string = deploySql ? keyVault.outputs.endpoint : ''
-output AZURE_KEY_VAULT_NAME string = deploySql ? keyVault.outputs.name : ''
