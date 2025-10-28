@@ -70,6 +70,8 @@ module web './core/host/appservice.bicep' = {
       AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
       AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
     } : {}
+    enableSlot: true
+    slotName: slotName
   }
 }
 
@@ -154,8 +156,8 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
     name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceTokenPrimary}'
     location: primaryLocation
     tags: tags
-    sku: {
-      name: 'B1'
+    sku: { 
+        name: 'S1'
     }
   }
 }

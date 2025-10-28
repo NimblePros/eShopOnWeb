@@ -1,6 +1,8 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
+param enableSlot bool = false
+param slotName string = ''
 
 // Reference Properties
 param applicationInsightsName string = ''
@@ -87,6 +89,30 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
     dependsOn: [
       configAppSettings
     ]
+  }
+}
+
+// Deployment slot (created only when enabled)
+resource appSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (enableSlot) {
+  name: '${name}/${slotName}'
+  location: location
+  tags: tags
+  properties: {
+    serverFarmId: appServicePlanId
+    siteConfig: {
+      linuxFxVersion: linuxFxVersion
+      alwaysOn: alwaysOn
+      ftpsState: ftpsState
+      minTlsVersion: '1.2'
+      appCommandLine: appCommandLine
+      numberOfWorkers: numberOfWorkers != -1 ? numberOfWorkers : null
+      minimumElasticInstanceCount: minimumElasticInstanceCount != -1 ? minimumElasticInstanceCount : null
+      use32BitWorkerProcess: use32BitWorkerProcess
+      functionAppScaleLimit: functionAppScaleLimit != -1 ? functionAppScaleLimit : null
+      healthCheckPath: healthCheckPath
+    }
+    clientAffinityEnabled: clientAffinityEnabled
+    httpsOnly: true
   }
 }
 
