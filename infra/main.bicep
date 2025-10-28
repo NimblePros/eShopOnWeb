@@ -53,18 +53,38 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-// The application frontend
+// The application frontend (primary)
 module web './core/host/appservice.bicep' = {
-  name: 'web'
+  name: 'web-primary'
   scope: rg
   params: {
-    name: !empty(webServiceName) ? webServiceName : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}'
+    name: !empty(webServiceName) ? '${webServiceName}-${primaryLocation}' : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}'
     location: primaryLocation
     appServicePlanId: appServicePlan.outputs.id
-    keyVaultName: keyVault.outputs.name
+    keyVaultName: (deploySql) ? keyVault.outputs.name : ''
     runtimeName: 'dotnetcore'
     runtimeVersion: '9.0'
     tags: union(tags, { 'azd-service-name': 'web' })
+    appSettings: deploySql ? {
+      AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
+      AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
+      AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
+    } : {}
+  }
+}
+
+// The application frontend (secondary)
+module webSecondary './core/host/appservice.bicep' = {
+  name: 'web-secondary'
+  scope: rg
+  params: {
+    name: !empty(webServiceName) ? '${webServiceName}-${secondaryLocation}' : '${abbrs.webSitesAppService}web-${resourceTokenSecondary}'
+    location: secondaryLocation
+    appServicePlanId: appServicePlanSecondary.outputs.id
+    keyVaultName: (deploySql) ? keyVault.outputs.name : ''
+    runtimeName: 'dotnetcore'
+    runtimeVersion: '9.0'
+    tags: union(tags, { 'azd-service-name': 'web-secondary' })
     appSettings: deploySql ? {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
       AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
@@ -127,7 +147,7 @@ module keyVault './core/security/keyvault.bicep' = {
 }
 
 // Create an App Service Plan to group applications under the same payment plan and SKU (primary)
-module appServicePlan './core/host/appServicePlanPrimary.bicep' = {
+module appServicePlan './core/host/appserviceplan.bicep' = {
   name: 'appserviceplan-primary'
   scope: rg
   params: {
@@ -164,4 +184,4 @@ output AZURE_SQL_IDENTITY_DATABASE_NAME string = deploySql ? identityDb.outputs.
 output AZURE_LOCATION string = primaryLocation
 output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_KEY_VAULT_ENDPOINT string = deploySql ? keyVault.outputs.endpoint : ''
-output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
+output AZURE_KEY_VAULT_NAME string = deploySql ? keyVault.outputs.name : ''
