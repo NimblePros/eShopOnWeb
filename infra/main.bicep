@@ -25,13 +25,16 @@ param keyVaultName string = ''
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
 
-@secure()
-@description('SQL Server administrator password')
-param sqlAdminPassword string
+@description('Whether to deploy Azure SQL Server and databases. Set to false to use in-memory DB.')
+param deploySql bool = false
 
 @secure()
-@description('Application user password')
-param appUserPassword string
+@description('SQL Server administrator password (required when deploySql is true)')
+param sqlAdminPassword string = ''
+
+@secure()
+@description('Application user password (required when deploySql is true)')
+param appUserPassword string = ''
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
@@ -56,11 +59,11 @@ module web './core/host/appservice.bicep' = {
     runtimeName: 'dotnetcore'
     runtimeVersion: '9.0'
     tags: union(tags, { 'azd-service-name': 'web' })
-    appSettings: {
+    appSettings: deploySql ? {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
       AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
       AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
-    }
+    } : {}
   }
 }
 
@@ -74,7 +77,7 @@ module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
 }
 
 // The application database: Catalog
-module catalogDb './core/database/sqlserver/sqlserver.bicep' = {
+module catalogDb './core/database/sqlserver/sqlserver.bicep' = if (deploySql) {
   name: 'sql-catalog'
   scope: rg
   params: {
@@ -90,7 +93,7 @@ module catalogDb './core/database/sqlserver/sqlserver.bicep' = {
 }
 
 // The application database: Identity
-module identityDb './core/database/sqlserver/sqlserver.bicep' = {
+module identityDb './core/database/sqlserver/sqlserver.bicep' = if (deploySql) {
   name: 'sql-identity'
   scope: rg
   params: {
@@ -132,13 +135,13 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
 }
 
 // Data outputs
-output AZURE_SQL_CATALOG_CONNECTION_STRING_KEY string = catalogDb.outputs.connectionStringKey
-output AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY string = identityDb.outputs.connectionStringKey
-output AZURE_SQL_CATALOG_DATABASE_NAME string = catalogDb.outputs.databaseName
-output AZURE_SQL_IDENTITY_DATABASE_NAME string = identityDb.outputs.databaseName
+output AZURE_SQL_CATALOG_CONNECTION_STRING_KEY string = deploySql ? catalogDb.outputs.connectionStringKey : ''
+output AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY string = deploySql ? identityDb.outputs.connectionStringKey : ''
+output AZURE_SQL_CATALOG_DATABASE_NAME string = deploySql ? catalogDb.outputs.databaseName : ''
+output AZURE_SQL_IDENTITY_DATABASE_NAME string = deploySql ? identityDb.outputs.databaseName : ''
 
 // App outputs
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
-output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
+output AZURE_KEY_VAULT_ENDPOINT string = deploySql ? keyVault.outputs.endpoint : ''
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
