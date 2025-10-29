@@ -40,7 +40,7 @@ const randomDelay = (min = 500, max = 2000) =>
 const scenarios = [
   {
     name: 'Browse and Add to Cart',
-    weight: 50,
+    weight: 30,
     async execute(page) {
       await page.goto(APP_URL);
       await randomDelay(1000, 2000);
@@ -74,8 +74,69 @@ const scenarios = [
     }
   },
   {
+    name: 'Full Checkout Flow (Login → Add to Cart → Checkout)',
+    weight: 25,
+    async execute(page) {
+      // 1. Login
+      await page.goto(`${APP_URL}/Identity/Account/Login`);
+      await randomDelay(1000, 1500);
+      
+      // Fill in login credentials
+      await page.fill('input[name="Input.Email"]', 'demouser@microsoft.com');
+      await randomDelay(300, 500);
+      await page.fill('input[name="Input.Password"]', 'Pass@word1');
+      await randomDelay(300, 500);
+      
+      await page.locator('button[type="submit"]:has-text("Log in")').click();
+      await randomDelay(1500, 2000);
+
+      // 2. Browse and add to cart
+      await page.goto(APP_URL);
+      await randomDelay(800, 1200);
+
+      const productLinks = page.locator('a:has-text("Details")');
+      const count = await productLinks.count();
+      if (count > 0) {
+        // Add 2-3 items to cart
+        const itemsToAdd = Math.min(Math.floor(Math.random() * 2) + 2, count);
+        for (let i = 0; i < itemsToAdd; i++) {
+          await page.goto(APP_URL);
+          await randomDelay(500, 800);
+          await productLinks.nth(Math.floor(Math.random() * count)).click();
+          await randomDelay(800, 1200);
+          
+          const addToCartBtn = page.locator('input[type="submit"][value="ADD TO BASKET"]');
+          if (await addToCartBtn.count() > 0) {
+            await addToCartBtn.click();
+            await randomDelay(500, 800);
+          }
+        }
+      }
+
+      // 3. View basket
+      await page.goto(`${APP_URL}/basket`);
+      await randomDelay(1000, 1500);
+
+      // 4. Checkout
+      const checkoutBtn = page.locator('input[type="submit"][value="[ CHECKOUT ]"]');
+      if (await checkoutBtn.count() > 0) {
+        await checkoutBtn.click();
+        await randomDelay(1500, 2000);
+      }
+
+      // 5. Logout
+      await page.goto(`${APP_URL}/Identity/Account/Logout`);
+      await randomDelay(500, 800);
+      const logoutBtn = page.locator('button[type="submit"]:has-text("Click here to Logout")');
+      if (await logoutBtn.count() > 0) {
+        await logoutBtn.click();
+        await randomDelay(500, 800);
+      }
+    }
+  },
+  {
     name: 'Quick Browse',
-    weight: 30,
+    weight: 20,
     async execute(page) {
       await page.goto(APP_URL);
       await randomDelay(1000, 2000);
@@ -95,11 +156,22 @@ const scenarios = [
     }
   },
   {
-    name: 'Admin Panel Visit',
-    weight: 20,
+    name: 'API Health Check (Web → PublicApi)',
+    weight: 15,
     async execute(page) {
-      await page.goto(`${APP_URL}/admin`);
-      await randomDelay(1000, 2000);
+      // This triggers a distributed trace: Web calls PublicApi
+      await page.goto(`${APP_URL}/api_health_check`);
+      await randomDelay(500, 1000);
+    }
+  },
+  {
+    name: 'Direct API Call (PublicApi)',
+    weight: 10,
+    async execute(page) {
+      // Direct call to PublicApi service
+      const apiUrl = APP_URL.replace('eshopwebmvc', 'eshoppublicapi');
+      await page.goto(`${apiUrl}/api/catalog-items`);
+      await randomDelay(500, 1000);
     }
   }
 ];

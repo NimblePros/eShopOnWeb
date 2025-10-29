@@ -14,6 +14,7 @@ cd "$REPO_ROOT"
 # Instruqt configuration (hardcoded)
 ACR_NAME="alesseshopacr"
 WEB_IMAGE_NAME="eshop-web-instruqt"
+API_IMAGE_NAME="eshop-api-instruqt"
 TRAFFIC_IMAGE_NAME="eshop-traffic-instruqt"
 IMAGE_TAG="${1:-latest}"
 LOCATION="westus2"
@@ -23,8 +24,9 @@ echo "Building Docker images for Instruqt"
 echo "Repository: $REPO_ROOT"
 echo "ACR: ${ACR_NAME}.azurecr.io"
 echo "Web Image: ${WEB_IMAGE_NAME}:${IMAGE_TAG}"
+echo "API Image: ${API_IMAGE_NAME}:${IMAGE_TAG}"
 echo "Traffic Image: ${TRAFFIC_IMAGE_NAME}:${IMAGE_TAG}"
-echo "⏳ This will take 3-5 minutes..."
+echo "⏳ This will take 5-7 minutes..."
 echo ""
 
 # Check if ACR exists, create if not
@@ -58,6 +60,19 @@ az acr build \
   --no-logs
 
 echo "✅ Web image built: ${ACR_NAME}.azurecr.io/${WEB_IMAGE_NAME}:${IMAGE_TAG}"
+echo ""
+
+# Build and push public API image
+echo "Building public API image..."
+az acr build \
+  --registry "$ACR_NAME" \
+  --image "${API_IMAGE_NAME}:${IMAGE_TAG}" \
+  --file src/PublicApi/Dockerfile \
+  --platform linux \
+  . \
+  --no-logs
+
+echo "✅ API image built: ${ACR_NAME}.azurecr.io/${API_IMAGE_NAME}:${IMAGE_TAG}"
 echo ""
 
 # Build and push traffic simulator image

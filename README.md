@@ -15,6 +15,7 @@
 
 **Tech Stack:**
 - ASP.NET Core 9.0 MVC
+- ASP.NET Core 9.0 Public API (FastEndpoints)
 - Entity Framework Core 9.0
 - Blazor WebAssembly
 - SQL Server
@@ -49,13 +50,14 @@ az login
 **Using defaults** (pre-configured for Instruqt):
 ```bash
 ./scripts/deploy-container-instruqt.sh
-# Uses: alesseshopacr, eshop-web-instruqt:latest, westus2
+# Uses: alesseshopacr, eshop-web-instruqt:latest, eshop-api-instruqt:latest, westus2
 ```
 
 **Custom configuration:**
 ```bash
 export ACR_NAME=myacr
-export IMAGE_NAME=my-image
+export IMAGE_NAME=my-web-image
+export API_IMAGE_NAME=my-api-image
 export IMAGE_TAG=v1.0
 export AZURE_LOCATION=eastus
 export AZURE_ENV_NAME=my-env
@@ -64,10 +66,11 @@ export AZURE_ENV_NAME=my-env
 
 **Time:**
 - First time (with build): 6-8 minutes
-- Using pre-built image: 3-4 minutes
+- Using pre-built image: 4-5 minutes
 
 **What gets deployed:**
-- Azure App Service (Linux container) - eShopOnWeb application
+- Azure App Service (Linux container) - eShopOnWeb frontend application
+- Azure App Service (Linux container) - PublicApi (for admin panel)
 - Azure Container Registry - Docker images
 - Azure SQL Database - 2 databases (catalog + identity)
 - Azure Key Vault - Connection strings
@@ -105,6 +108,18 @@ az group delete --name rg-eshop-acr --yes --no-wait
 
 ### Run Locally with Docker
 
+**Prerequisites:**
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Datadog API Key](https://app.datadoghq.com/organization-settings/api-keys) (for traces)
+
+**Setup environment variables:**
+```bash
+# Required for Datadog traces
+export DD_API_KEY="your_datadog_api_key"
+export DD_SITE="us3.datadoghq.com"  # or your Datadog site
+```
+
+**Build and run:**
 ```bash
 docker-compose build
 docker-compose up
@@ -116,6 +131,25 @@ docker-compose up
 - Admin: http://localhost:5106/admin
 
 **Login:** `demouser@microsoft.com` / `Pass@word1`
+
+**Datadog Instrumentation:**
+- Uses [serverless-init](https://docs.datadoghq.com/serverless/guide/azure_app_service_linux_containers_serverless_init/?tab=dotnet) for agentless monitoring
+- Automatically sends traces, logs, and metrics to Datadog
+- No local Datadog Agent required
+
+**Troubleshooting:**
+```bash
+# If you see "DD_API_KEY is required for Datadog" error:
+export DD_API_KEY="your_api_key_here"
+
+# If you hit GitHub rate limits during build (rare):
+export GITHUB_TOKEN="your_github_token"
+docker-compose build
+
+# To disable Datadog (for testing without traces):
+export DD_TRACE_ENABLED=false
+docker-compose up
+```
 
 **Includes:** Traffic simulator runs automatically, generating continuous traffic for observability testing
 
@@ -201,3 +235,7 @@ To enable GitHub authentication:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Instrumentation
+1. Datadog Azure ISV for Azure integration 
+2. WebApplication is https://docs.datadoghq.com/serverless/azure_app_service/linux_container?tab=net

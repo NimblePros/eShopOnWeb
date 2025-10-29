@@ -12,6 +12,7 @@ param location string
 // Container configuration
 param containerRegistry string  // e.g., 'myacr.azurecr.io'
 param containerImage string = 'eshop-web'
+param apiImage string = 'eshop-api'
 param containerTag string = 'latest'
 param trafficImage string = 'eshop-traffic'
 param deployTrafficSimulator bool = true
@@ -22,12 +23,19 @@ param deployTrafficSimulator bool = true
 // }
 param resourceGroupName string = ''
 param webServiceName string = ''
+param apiServiceName string = ''
 param catalogDatabaseName string = 'catalogDatabase'
 param catalogDatabaseServerName string = ''
 param identityDatabaseName string = 'identityDatabase'
 param identityDatabaseServerName string = ''
 param appServicePlanName string = ''
 param keyVaultName string = ''
+
+@description('Datadog configuration')
+param ddTraceEnabled string = 'true'
+param ddSite string = 'us3.datadoghq.com'
+param ddApiKey string = ''
+param ddEnv string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -68,7 +76,49 @@ module web './core/host/appservice.bicep' = {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
       AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
       AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
+      baseUrls__apiBase: '${api.outputs.uri}api/'
+      DD_TRACE_ENABLED: ddTraceEnabled
+      DD_SITE: ddSite
+      DD_API_KEY: ddApiKey
+      DD_ENV: !empty(ddEnv) ? ddEnv : environmentName
     }
+  }
+  dependsOn: [
+    api
+  ]
+}
+
+// The application API (container-based)
+module api './core/host/appservice.bicep' = {
+  name: 'api'
+  scope: rg
+  params: {
+    name: !empty(apiServiceName) ? apiServiceName : '${abbrs.webSitesAppService}api-${resourceToken}'
+    location: location
+    appServicePlanId: appServicePlan.outputs.id
+    keyVaultName: keyVault.outputs.name
+    containerRegistry: containerRegistry
+    containerImage: apiImage
+    containerTag: containerTag
+    tags: union(tags, { 'azd-service-name': 'api' })
+    appSettings: {
+      AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
+      AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
+      AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
+      DD_TRACE_ENABLED: ddTraceEnabled
+      DD_SITE: ddSite
+      DD_API_KEY: ddApiKey
+      DD_ENV: !empty(ddEnv) ? ddEnv : environmentName
+    }
+  }
+}
+
+module webKeyVaultAccess './core/security/keyvault-access.bicep' = {
+  name: 'web-keyvault-access'
+  scope: rg
+  params: {
+    keyVaultName: keyVault.outputs.name
+    principalId: web.outputs.identityPrincipalId
   }
 }
 
@@ -77,7 +127,7 @@ module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
   scope: rg
   params: {
     keyVaultName: keyVault.outputs.name
-    principalId: web.outputs.identityPrincipalId
+    principalId: api.outputs.identityPrincipalId
   }
 }
 
@@ -151,7 +201,7 @@ module trafficSimulator './core/host/traffic-simulator.bicep' = if (deployTraffi
     tags: union(tags, { 'azd-service-name': 'traffic-simulator' })
     containerImage: '${trafficImage}:${containerTag}'
     containerRegistry: containerRegistry
-    targetUrl: 'https://${web.outputs.uri}'
+    targetUrl: web.outputs.uri
     cpu: 1
     memoryInGb: 1
   }
