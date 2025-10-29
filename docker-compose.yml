@@ -9,7 +9,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       # Datadog serverless-init configuration (agentless)
-      - DD_TRACE_ENABLED=${DD_TRACE_ENABLED:-true}
       - DD_SITE=${DD_SITE:-us3.datadoghq.com}
       - DD_API_KEY=${DD_API_KEY:?DD_API_KEY is required for Datadog}
       - DD_ENV=${DD_ENV:-local}
@@ -34,7 +33,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       # Datadog serverless-init configuration (agentless)
-      - DD_TRACE_ENABLED=${DD_TRACE_ENABLED:-true}
       - DD_SITE=${DD_SITE:-us3.datadoghq.com}
       - DD_API_KEY=${DD_API_KEY:?DD_API_KEY is required for Datadog}
       - DD_ENV=${DD_ENV:-local}
@@ -43,6 +41,12 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
@@ -65,5 +69,7 @@ services:
       - APP_URL=http://eshopwebmvc:8080
     depends_on:
       eshopwebmvc:
+        condition: service_healthy
+      eshoppublicapi:
         condition: service_healthy
 

@@ -13,9 +13,9 @@ cd "$REPO_ROOT"
 
 # Instruqt configuration (hardcoded)
 ACR_NAME="alesseshopacr"
-WEB_IMAGE_NAME="eshop-web-instruqt"
-API_IMAGE_NAME="eshop-api-instruqt"
-TRAFFIC_IMAGE_NAME="eshop-traffic-instruqt"
+WEB_IMAGE_NAME="eshop-web"
+API_IMAGE_NAME="eshop-publicapi"
+TRAFFIC_IMAGE_NAME="eshop-traffic-simulator"
 IMAGE_TAG="${1:-latest}"
 LOCATION="westus2"
 RESOURCE_GROUP="rg-eshop-acr"

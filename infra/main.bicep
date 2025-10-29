@@ -32,7 +32,6 @@ param appServicePlanName string = ''
 param keyVaultName string = ''
 
 @description('Datadog configuration')
-param ddTraceEnabled string = 'true'
 param ddSite string = 'us3.datadoghq.com'
 param ddApiKey string = ''
 param ddEnv string = ''
@@ -76,8 +75,7 @@ module web './core/host/appservice.bicep' = {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
       AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
       AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
-      baseUrls__apiBase: '${api.outputs.uri}api/'
-      DD_TRACE_ENABLED: ddTraceEnabled
+      baseUrls__apiBase: '${api.outputs.uri}/api/'
       DD_SITE: ddSite
       DD_API_KEY: ddApiKey
       DD_ENV: !empty(ddEnv) ? ddEnv : environmentName
@@ -105,7 +103,6 @@ module api './core/host/appservice.bicep' = {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
       AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
       AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
-      DD_TRACE_ENABLED: ddTraceEnabled
       DD_SITE: ddSite
       DD_API_KEY: ddApiKey
       DD_ENV: !empty(ddEnv) ? ddEnv : environmentName
@@ -186,7 +183,7 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
     kind: 'linux'
     reserved: true  // Required for Linux
     sku: {
-      name: 'B1'
+      name: 'S2'
     }
   }
 }

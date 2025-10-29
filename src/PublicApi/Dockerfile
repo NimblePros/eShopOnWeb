@@ -28,7 +28,7 @@ ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
 # Datadog serverless-init entrypoint
-COPY --from=datadog/serverless-init:1 / /app/.
+COPY --from=datadog/serverless-init:1 / /app/
 
 ARG TRACER_VERSION=2.57.0
 ARG TARGETARCH
@@ -39,8 +39,8 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
       https://github.com/DataDog/dd-trace-dotnet/releases/download/v${TRACER_VERSION}/datadog-dotnet-apm-${TRACER_VERSION}.arm64.tar.gz && \
       mkdir -p /dd_tracer/dotnet/ && tar -xzf /tmp/datadog-dotnet-apm.tar.gz -C /dd_tracer/dotnet/ && rm /tmp/datadog-dotnet-apm.tar.gz; \
     else \
-      # For Azure amd64: use official install script
-      /app/datadog-init/install_ddtrace.sh; \
+      # For Azure amd64: use doc install script
+      chmod +x /app/dotnet.sh && /app/dotnet.sh; \
     fi
 
 ENV DD_SERVICE=eshop-publicapi

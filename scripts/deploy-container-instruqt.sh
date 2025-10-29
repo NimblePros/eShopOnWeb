@@ -13,9 +13,9 @@ cd "$REPO_ROOT"
 
 # Configuration (with defaults matching build-push-acr.sh)
 ACR_NAME="${ACR_NAME:-alesseshopacr}"
-IMAGE_NAME="${IMAGE_NAME:-eshop-web-instruqt}"
-API_IMAGE_NAME="${API_IMAGE_NAME:-eshop-api-instruqt}"
-TRAFFIC_IMAGE_NAME="${TRAFFIC_IMAGE_NAME:-eshop-traffic-instruqt}"
+IMAGE_NAME="${IMAGE_NAME:-eshop-web}"
+API_IMAGE_NAME="${API_IMAGE_NAME:-eshop-publicapi}"
+TRAFFIC_IMAGE_NAME="${TRAFFIC_IMAGE_NAME:-eshop-traffic-simulator}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 LOCATION="${AZURE_LOCATION:-westus2}"
 ENV_NAME="${AZURE_ENV_NAME:-eshop-$(date +%s)}"
@@ -23,7 +23,6 @@ ENV_NAME="${AZURE_ENV_NAME:-eshop-$(date +%s)}"
 # Datadog configuration
 DD_SITE="${DD_SITE:-us3.datadoghq.com}"
 DD_API_KEY="${DD_API_KEY:-}"
-DD_TRACE_ENABLED="${DD_TRACE_ENABLED:-true}"
 DD_ENV="${DD_ENV:-$ENV_NAME}"  # Default to ENV_NAME if not set
 
 echo "Deploying eShopOnWeb"
@@ -93,7 +92,6 @@ az deployment sub create \
     principalId="$PRINCIPAL_ID" \
     sqlAdminPassword="SQL$(openssl rand -hex 12)!" \
     appUserPassword="APP$(openssl rand -hex 12)!" \
-    ddTraceEnabled="$DD_TRACE_ENABLED" \
     ddSite="$DD_SITE" \
     ddApiKey="$DD_API_KEY" \
     ddEnv="$DD_ENV" \
@@ -131,14 +129,6 @@ SECONDS=$((ELAPSED % 60))
 echo ""
 echo "⏱️  Deployment completed in ${MINUTES}m ${SECONDS}s"
 echo ""
-if [ -n "$CONTAINER_NAME" ]; then
-  echo "🚀 Traffic simulator is running automatically in Azure!"
-  echo "   Generating continuous traffic for Datadog monitoring"
-  echo ""
-  echo "To view traffic simulator logs:"
-  echo "  az container logs --name $CONTAINER_NAME --resource-group $RG_NAME --follow"
-  echo ""
-fi
 echo "To delete all resources:"
 echo "  az group delete --name $RG_NAME --yes --no-wait"
 
