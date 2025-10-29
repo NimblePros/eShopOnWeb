@@ -42,7 +42,7 @@ module publicApi './core/host/appservice.bicep' = {
   params: {
     name: !empty(webServiceName) ? '${webServiceName}-api' : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}-api'
     location: primaryLocation
-    appServicePlanId: appServicePlanPrimary.outputs.id
+    appServicePlanId: publicApiPlan.outputs.id
     runtimeName: 'dotnetcore'
     runtimeVersion: '9.0'
     tags: union(tags, { 'azd-service-name': 'public-api' })
@@ -50,6 +50,18 @@ module publicApi './core/host/appservice.bicep' = {
       BaseUrls__WebBase: 'https://${webServiceName}-${environmentName}.trafficmanager.net'
     }
     allowedOrigins: ['https://${webServiceName}-${environmentName}.trafficmanager.net']
+  }
+}
+
+// Public API scale rule
+module publicApiAutoscale './core/host/scaleoncpu.bicep' = {
+  name: 'scale-rule'
+  scope: rg
+  params: {
+    name: '${webServiceName}-api-autoscale-rule-${environmentName}'
+    location: primaryLocation
+    tags: tags
+    targetResourceUri: '/subscriptions/${subscription().id}/resourceGroups/${rg.name}/providers/Microsoft.Web/serverfarms/${publicApiPlan.outputs.id}'
   }
 }
 
@@ -113,6 +125,20 @@ module appServicePlanSecondary './core/host/appserviceplan.bicep' = {
     tags: tags
     sku: {
       name: 'B1'
+    }
+  }
+}
+
+// Create an App Service Plan to group applications under the same payment plan and SKU (primary)
+module publicApiPlan './core/host/appserviceplan.bicep' = {
+  name: 'publicapiplan'
+  scope: rg
+  params: {
+    name: !empty(appServicePlanName) ? '${appServicePlanName}-app' : '${abbrs.webServerFarms}app-${resourceTokenPrimary}'
+    location: primaryLocation
+    tags: tags
+    sku: { 
+        name: 'S1'
     }
   }
 }
