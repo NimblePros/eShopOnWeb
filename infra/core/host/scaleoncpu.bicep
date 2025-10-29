@@ -14,10 +14,11 @@ resource scaleOnCpu 'Microsoft.Insights/autoscaleSettings@2015-04-01' = {
   properties: {
     enabled: true
     targetResourceUri: targetResourceUri
+    targetResourceLocation: location
     notifications: []
     profiles: [
       {
-        name: 'scale-on-cpu'
+        name: 'Scale on CPU'
         capacity: {
           minimum: minimum
           maximum: maximum
@@ -27,13 +28,14 @@ resource scaleOnCpu 'Microsoft.Insights/autoscaleSettings@2015-04-01' = {
           {
             metricTrigger: {
               metricName: 'CpuPercentage'
+              metricNamespace: 'microsoft.web/serverfarms'
               metricResourceUri: targetResourceUri
               operator: 'GreaterThan'
               statistic: 'Average'
               threshold: 70
               timeAggregation: 'Average'
               timeGrain: 'PT1M'
-              timeWindow: 'PT5M'
+              timeWindow: 'PT10M'
             }
             scaleAction: {
               cooldown: 'PT5M'
@@ -45,13 +47,14 @@ resource scaleOnCpu 'Microsoft.Insights/autoscaleSettings@2015-04-01' = {
           {
             metricTrigger: {
               metricName: 'CpuPercentage'
+              metricNamespace: 'microsoft.web/serverfarms'
               metricResourceUri: targetResourceUri
               operator: 'LessThan'
               statistic: 'Average'
-              threshold: 30
+              threshold: 50
               timeAggregation: 'Average'
               timeGrain: 'PT1M'
-              timeWindow: 'PT5M'
+              timeWindow: 'PT10M'
             }
             scaleAction: {
               cooldown: 'PT5M'
