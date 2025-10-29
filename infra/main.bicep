@@ -61,7 +61,7 @@ module publicApiAutoscale './core/host/scaleoncpu.bicep' = {
     name: '${webServiceName}-api-autoscale-rule-${environmentName}'
     location: primaryLocation
     tags: tags
-    targetResourceUri: '/subscriptions/33de2efd-c0d9-4a05-829b-a06b8659e6b7/resourceGroups/rg-test/providers/Microsoft.Web/serverFarms/plan-app-btojtq6iy5uz2'
+    targetResourceUri: publicApiPlan.outputs.id
   }
 }
 
