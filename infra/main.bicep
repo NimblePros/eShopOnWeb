@@ -18,7 +18,7 @@ param secondaryLocation string = 'eastus'
 //      "value": "myGroupName"
 // }
 param resourceGroupName string = ''
-param webServiceName string = ''
+param webServiceName string = 'ek-cloudx-associate-shop'
 param appServicePlanName string = ''
 param secondaryAppServicePlanName string = ''
 param slotName string = 'test'
@@ -92,3 +92,18 @@ module appServicePlanSecondary './core/host/appserviceplan.bicep' = {
     }
   }
 }
+
+// Traffic Manager deployed as a module at resource-group scope
+module trafficManager './core/network/trafficManager.bicep' = {
+  name: 'traffic-manager'
+  scope: rg
+  params: {
+    profileName: 'tm-${environmentName}'
+    relativeName: '${webServiceName}-${environmentName}'
+    tags: tags
+    primaryId: webPrimary.outputs.id
+    secondaryId: webSecondary.outputs.id
+  }
+}
+
+output appUrl string = 'http://${trafficManager.outputs.relativeName}.trafficmanager.net'

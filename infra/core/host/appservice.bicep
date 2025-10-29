@@ -65,11 +65,11 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 
   resource configAppSettings 'config' = {
     name: 'appsettings'
-    properties: {
+    properties: union(appSettings, {
         SCM_DO_BUILD_DURING_DEPLOYMENT: string(scmDoBuildDuringDeployment)
         ENABLE_ORYX_BUILD: string(enableOryxBuild)
         ASPNETCORE_ENVIRONMENT: aspNetCoreEnvironment
-    }
+    })
   }
 
   resource configLogs 'config' = {
@@ -110,5 +110,7 @@ resource appSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (enableSlot) {
   }
 }
 
+output id string = appService.id
 output name string = appService.name
+output hostName string = appService.properties.defaultHostName
 output uri string = 'https://${appService.properties.defaultHostName}'
