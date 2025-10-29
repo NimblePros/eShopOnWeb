@@ -35,23 +35,44 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-// The application frontend (primary)
+// Public API
+module publicApi './core/host/appservice.bicep' = {
+  name: 'public-api'
+  scope: rg
+  params: {
+    name: !empty(webServiceName) ? '${webServiceName}-api' : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}-api'
+    location: primaryLocation
+    appServicePlanId: appServicePlanPrimary.outputs.id
+    runtimeName: 'dotnetcore'
+    runtimeVersion: '9.0'
+    tags: union(tags, { 'azd-service-name': 'public-api' })
+    appSettings: {
+      BaseUrls__WebBase: 'https://${webServiceName}-${environmentName}.trafficmanager.net'
+    }
+    allowedOrigins: ['https://${webServiceName}-${environmentName}.trafficmanager.net']
+  }
+}
+
+// Web (primary)
 module webPrimary './core/host/appservice.bicep' = {
   name: 'web-primary'
   scope: rg
   params: {
     name: !empty(webServiceName) ? '${webServiceName}-${primaryLocation}' : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}'
     location: primaryLocation
-    appServicePlanId: appServicePlan.outputs.id
+    appServicePlanId: appServicePlanPrimary.outputs.id
     runtimeName: 'dotnetcore'
     runtimeVersion: '9.0'
     tags: union(tags, { 'azd-service-name': 'web-primary' })
+    appSettings: {
+      BaseUrls__ApiBase: '${publicApi.outputs.uri}/api/'
+    }
     enableSlot: true
     slotName: slotName
   }
 }
 
-// The application frontend (secondary)
+// Web (secondary)
 module webSecondary './core/host/appservice.bicep' = {
   name: 'web-secondary'
   scope: rg
@@ -62,11 +83,14 @@ module webSecondary './core/host/appservice.bicep' = {
     runtimeName: 'dotnetcore'
     runtimeVersion: '9.0'
     tags: union(tags, { 'azd-service-name': 'web-secondary' })
+    appSettings: {
+      BaseUrls__ApiBase: '${publicApi.outputs.uri}/api/'
+    }
   }
 }
 
 // Create an App Service Plan to group applications under the same payment plan and SKU (primary)
-module appServicePlan './core/host/appserviceplan.bicep' = {
+module appServicePlanPrimary './core/host/appserviceplan.bicep' = {
   name: 'appserviceplan-primary'
   scope: rg
   params: {
@@ -98,7 +122,7 @@ module trafficManager './core/network/trafficManager.bicep' = {
   name: 'traffic-manager'
   scope: rg
   params: {
-    profileName: 'tm-${environmentName}'
+    profileName: 'tm-${webServiceName}-${environmentName}'
     relativeName: '${webServiceName}-${environmentName}'
     tags: tags
     primaryId: webPrimary.outputs.id
