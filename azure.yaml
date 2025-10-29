@@ -2,7 +2,15 @@
 
 name: eShopOnWeb
 services:
-  web:
+  web-primary:
     project: ./src/Web
+    language: csharp
+    host: appservice
+  web-secondary:
+    project: ./src/Web
+    language: csharp
+    host: appservice
+  public-api:
+    project: ./src/PublicApi
     language: csharp
     host: appservice

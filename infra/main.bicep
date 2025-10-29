@@ -7,123 +7,121 @@ param environmentName string
 
 @minLength(1)
 @description('Primary location for all resources')
-param location string
+param primaryLocation string = 'spaincentral'
+
+@minLength(1)
+@description('Secondary location for secondary resources')
+param secondaryLocation string = 'eastus'
 
 // Optional parameters to override the default azd resource naming conventions. Update the main.parameters.json file to provide values. e.g.,:
 // "resourceGroupName": {
 //      "value": "myGroupName"
 // }
 param resourceGroupName string = ''
-param webServiceName string = ''
-param catalogDatabaseName string = 'catalogDatabase'
-param catalogDatabaseServerName string = ''
-param identityDatabaseName string = 'identityDatabase'
-param identityDatabaseServerName string = ''
+param webServiceName string = 'ek-cloudx-associate-shop'
 param appServicePlanName string = ''
-param keyVaultName string = ''
-
-@description('Id of the user or app to assign application roles')
-param principalId string = ''
-
-@secure()
-@description('SQL Server administrator password')
-param sqlAdminPassword string
-
-@secure()
-@description('Application user password')
-param appUserPassword string
+param secondaryAppServicePlanName string = ''
+param slotName string = 'test'
 
 var abbrs = loadJsonContent('./abbreviations.json')
-var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
+var resourceTokenPrimary = toLower(uniqueString(subscription().id, environmentName, primaryLocation))
+var resourceTokenSecondary = toLower(uniqueString(subscription().id, environmentName, secondaryLocation))
 var tags = { 'azd-env-name': environmentName }
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
-  location: location
+  location: primaryLocation
   tags: tags
 }
 
-// The application frontend
-module web './core/host/appservice.bicep' = {
-  name: 'web'
+// Public API
+module publicApi './core/host/appservice.bicep' = {
+  name: 'public-api'
   scope: rg
   params: {
-    name: !empty(webServiceName) ? webServiceName : '${abbrs.webSitesAppService}web-${resourceToken}'
-    location: location
-    appServicePlanId: appServicePlan.outputs.id
-    keyVaultName: keyVault.outputs.name
+    name: !empty(webServiceName) ? '${webServiceName}-api' : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}-api'
+    location: primaryLocation
+    appServicePlanId: publicApiPlan.outputs.id
     runtimeName: 'dotnetcore'
     runtimeVersion: '9.0'
-    tags: union(tags, { 'azd-service-name': 'web' })
+    tags: union(tags, { 'azd-service-name': 'public-api' })
     appSettings: {
-      AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
-      AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
-      AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
+      BaseUrls__WebBase: 'https://${webServiceName}-${environmentName}.trafficmanager.net'
+    }
+    allowedOrigins: ['https://${webServiceName}-${environmentName}.trafficmanager.net']
+  }
+}
+
+// Public API scale rule
+module publicApiAutoscale './core/host/scaleoncpu.bicep' = {
+  name: 'scale-rule'
+  scope: rg
+  params: {
+    name: '${webServiceName}-api-autoscale-rule-${environmentName}'
+    location: primaryLocation
+    tags: tags
+    targetResourceUri: publicApiPlan.outputs.id
+  }
+}
+
+// Web (primary)
+module webPrimary './core/host/appservice.bicep' = {
+  name: 'web-primary'
+  scope: rg
+  params: {
+    name: !empty(webServiceName) ? '${webServiceName}-${primaryLocation}' : '${abbrs.webSitesAppService}web-${resourceTokenPrimary}'
+    location: primaryLocation
+    appServicePlanId: appServicePlanPrimary.outputs.id
+    runtimeName: 'dotnetcore'
+    runtimeVersion: '9.0'
+    tags: union(tags, { 'azd-service-name': 'web-primary' })
+    appSettings: {
+      BaseUrls__ApiBase: '${publicApi.outputs.uri}/api/'
+    }
+    enableSlot: true
+    slotName: slotName
+  }
+}
+
+// Web (secondary)
+module webSecondary './core/host/appservice.bicep' = {
+  name: 'web-secondary'
+  scope: rg
+  params: {
+    name: !empty(webServiceName) ? '${webServiceName}-${secondaryLocation}' : '${abbrs.webSitesAppService}web-${resourceTokenSecondary}'
+    location: secondaryLocation
+    appServicePlanId: appServicePlanSecondary.outputs.id
+    runtimeName: 'dotnetcore'
+    runtimeVersion: '9.0'
+    tags: union(tags, { 'azd-service-name': 'web-secondary' })
+    appSettings: {
+      BaseUrls__ApiBase: '${publicApi.outputs.uri}/api/'
     }
   }
 }
 
-module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
-  name: 'api-keyvault-access'
+// Create an App Service Plan to group applications under the same payment plan and SKU (primary)
+module appServicePlanPrimary './core/host/appserviceplan.bicep' = {
+  name: 'appserviceplan-primary'
   scope: rg
   params: {
-    keyVaultName: keyVault.outputs.name
-    principalId: web.outputs.identityPrincipalId
-  }
-}
-
-// The application database: Catalog
-module catalogDb './core/database/sqlserver/sqlserver.bicep' = {
-  name: 'sql-catalog'
-  scope: rg
-  params: {
-    name: !empty(catalogDatabaseServerName) ? catalogDatabaseServerName : '${abbrs.sqlServers}catalog-${resourceToken}'
-    databaseName: catalogDatabaseName
-    location: location
+    name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceTokenPrimary}'
+    location: primaryLocation
     tags: tags
-    sqlAdminPassword: sqlAdminPassword
-    appUserPassword: appUserPassword
-    keyVaultName: keyVault.outputs.name
-    connectionStringKey: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
+    sku: { 
+        name: 'S1'
+    }
   }
 }
 
-// The application database: Identity
-module identityDb './core/database/sqlserver/sqlserver.bicep' = {
-  name: 'sql-identity'
+// Secondary App Service Plan in the secondary location
+module appServicePlanSecondary './core/host/appserviceplan.bicep' = {
+  name: 'appserviceplan-secondary'
   scope: rg
   params: {
-    name: !empty(identityDatabaseServerName) ? identityDatabaseServerName : '${abbrs.sqlServers}identity-${resourceToken}'
-    databaseName: identityDatabaseName
-    location: location
-    tags: tags
-    sqlAdminPassword: sqlAdminPassword
-    appUserPassword: appUserPassword
-    keyVaultName: keyVault.outputs.name
-    connectionStringKey: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
-  }
-}
-
-// Store secrets in a keyvault
-module keyVault './core/security/keyvault.bicep' = {
-  name: 'keyvault'
-  scope: rg
-  params: {
-    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
-    location: location
-    tags: tags
-    principalId: principalId
-  }
-}
-
-// Create an App Service Plan to group applications under the same payment plan and SKU
-module appServicePlan './core/host/appserviceplan.bicep' = {
-  name: 'appserviceplan'
-  scope: rg
-  params: {
-    name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceToken}'
-    location: location
+    name: !empty(secondaryAppServicePlanName) ? secondaryAppServicePlanName : '${abbrs.webServerFarms}${resourceTokenSecondary}'
+    location: secondaryLocation
     tags: tags
     sku: {
       name: 'B1'
@@ -131,14 +129,31 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
   }
 }
 
-// Data outputs
-output AZURE_SQL_CATALOG_CONNECTION_STRING_KEY string = catalogDb.outputs.connectionStringKey
-output AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY string = identityDb.outputs.connectionStringKey
-output AZURE_SQL_CATALOG_DATABASE_NAME string = catalogDb.outputs.databaseName
-output AZURE_SQL_IDENTITY_DATABASE_NAME string = identityDb.outputs.databaseName
+// Create an App Service Plan to group applications under the same payment plan and SKU (primary)
+module publicApiPlan './core/host/appserviceplan.bicep' = {
+  name: 'publicapiplan'
+  scope: rg
+  params: {
+    name: !empty(appServicePlanName) ? '${appServicePlanName}-app' : '${abbrs.webServerFarms}app-${resourceTokenPrimary}'
+    location: primaryLocation
+    tags: tags
+    sku: { 
+        name: 'S1'
+    }
+  }
+}
 
-// App outputs
-output AZURE_LOCATION string = location
-output AZURE_TENANT_ID string = tenant().tenantId
-output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
-output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
+// Traffic Manager deployed as a module at resource-group scope
+module trafficManager './core/network/trafficManager.bicep' = {
+  name: 'traffic-manager'
+  scope: rg
+  params: {
+    profileName: 'tm-${webServiceName}-${environmentName}'
+    relativeName: '${webServiceName}-${environmentName}'
+    tags: tags
+    primaryId: webPrimary.outputs.id
+    secondaryId: webSecondary.outputs.id
+  }
+}
+
+output appUrl string = 'http://${trafficManager.outputs.relativeName}.trafficmanager.net'
