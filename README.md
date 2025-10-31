@@ -94,7 +94,7 @@ az container logs --name <container-name> --resource-group <resource-group> --fo
 **Cleanup:**
 ```bash
 # Delete the deployed application (keeps ACR for reuse)
-az group delete --name rg-eshop-<env-name> --yes --no-wait
+az group delete --name rg-eshop-1761853864 --yes --no-wait
 
 # Find your resource group name
 az group list --query "[?tags.\"azd-env-name\"].{Name:name, EnvName:tags.\"azd-env-name\"}" -o table

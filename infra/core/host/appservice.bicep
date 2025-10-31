@@ -12,6 +12,13 @@ param managedIdentity bool = !empty(keyVaultName)
 param containerRegistry string
 param containerImage string
 param containerTag string = 'latest'
+param mainContainerName string = 'main'
+
+// Datadog configuration
+@secure()
+param ddApiKey string = ''
+param ddSite string = 'us3.datadoghq.com'
+param ddService string = ''
 
 // App Service configuration
 param allowedOrigins array = []
@@ -34,7 +41,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
   properties: {
     serverFarmId: appServicePlanId
     siteConfig: {
-      linuxFxVersion: 'DOCKER|${containerRegistry}/${containerImage}:${containerTag}'
+      linuxFxVersion: 'sitecontainers'
       alwaysOn: alwaysOn
       ftpsState: ftpsState
       minTlsVersion: '1.2'
@@ -75,7 +82,24 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
         WEBSITE_TIME_ZONE: 'UTC'
       },
       !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights!.properties.ConnectionString } : {},
-      !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault!.properties.vaultUri } : {})
+      !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault!.properties.vaultUri } : {},
+      !empty(ddApiKey) ? {
+        // Datadog configuration for main container
+        DD_API_KEY: ddApiKey
+        DD_SITE: ddSite
+        DD_SERVICE: ddService
+        DD_ENV: 'dd-eshoponweb'
+        DD_VERSION: '1.0'
+        DD_SOURCE: 'csharp'
+        DD_SERVERLESS_LOG_PATH: '/home/LogFiles/*.log'
+        DD_AAS_INSTANCE_LOGGING_ENABLED: 'true'
+        // .NET Tracer configuration (required for containerized .NET apps)
+        DD_DOTNET_TRACER_HOME: '/datadog/tracer'
+        DD_TRACE_LOG_DIRECTORY: '/home/LogFiles/dotnet'
+        CORECLR_ENABLE_PROFILING: '1'
+        CORECLR_PROFILER: '{846F5F1C-F9AE-4B07-969E-05C26BC060D8}'
+        CORECLR_PROFILER_PATH: '/datadog/tracer/Datadog.Trace.ClrProfiler.Native.so'
+      } : {})
   }
 
   resource configLogs 'config' = {
@@ -85,6 +109,19 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       detailedErrorMessages: { enabled: true }
       failedRequestsTracing: { enabled: true }
       httpLogs: { fileSystem: { enabled: true, retentionInDays: 1, retentionInMb: 35 } }
+    }
+    dependsOn: [
+      configAppSettings
+    ]
+  }
+
+  // Main application container
+  resource mainContainer 'sitecontainers' = {
+    name: mainContainerName
+    properties: {
+      image: '${containerRegistry}/${containerImage}:${containerTag}'
+      isMain: true
+      startUpCommand: appCommandLine
     }
     dependsOn: [
       configAppSettings

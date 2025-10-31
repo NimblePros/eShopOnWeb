@@ -21,9 +21,8 @@ LOCATION="${AZURE_LOCATION:-westus2}"
 ENV_NAME="${AZURE_ENV_NAME:-eshop-$(date +%s)}"
 
 # Datadog configuration
-DD_SITE="${DD_SITE:-us3.datadoghq.com}"
 DD_API_KEY="${DD_API_KEY:-}"
-DD_ENV="${DD_ENV:-$ENV_NAME}"  # Default to ENV_NAME if not set
+DD_SITE="${DD_SITE:-us3.datadoghq.com}"
 
 echo "Deploying eShopOnWeb"
 echo "Repository: $REPO_ROOT"
@@ -33,12 +32,11 @@ echo "API Image: ${API_IMAGE_NAME}:${IMAGE_TAG}"
 echo "Traffic Image: ${TRAFFIC_IMAGE_NAME}:${IMAGE_TAG}"
 echo "Location: $LOCATION"
 echo "Environment: $ENV_NAME"
-echo "Datadog Site: $DD_SITE"
-echo "Datadog Environment: $DD_ENV"
 if [ -n "$DD_API_KEY" ]; then
-  echo "Datadog API Key: ${DD_API_KEY:0:4}****"
+  echo "Datadog: Enabled (Site: $DD_SITE)"
 else
-  echo "⚠️  WARNING: DD_API_KEY not set - Datadog monitoring will not work"
+  echo "❌  Please set DD_API_KEY."
+  exit 1
 fi
 echo ""
 
@@ -92,9 +90,8 @@ az deployment sub create \
     principalId="$PRINCIPAL_ID" \
     sqlAdminPassword="SQL$(openssl rand -hex 12)!" \
     appUserPassword="APP$(openssl rand -hex 12)!" \
-    ddSite="$DD_SITE" \
     ddApiKey="$DD_API_KEY" \
-    ddEnv="$DD_ENV" \
+    ddSite="$DD_SITE" \
   --output none
 
 # Get app info

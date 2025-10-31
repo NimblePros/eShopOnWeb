@@ -1,4 +1,6 @@
 ﻿using System;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
 using BlazorShared;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -20,6 +22,7 @@ using Serilog.Formatting.Json;
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(new JsonFormatter(renderMessage: true))
+    .WriteTo.File(new JsonFormatter(renderMessage: true), "/home/LogFiles/dotnet/app.log")
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,12 +32,24 @@ builder.Host.UseSerilog();
 // Add service defaults & Aspire components.
 builder.AddAspireServiceDefaults();
 
+// Configure Azure Key Vault in Production (not in Development or Docker)
+if (!builder.Environment.IsDevelopment() && builder.Environment.EnvironmentName != "Docker")
+{
+    var keyVaultEndpoint = builder.Configuration["AZURE_KEY_VAULT_ENDPOINT"];
+    if (!string.IsNullOrEmpty(keyVaultEndpoint))
+    {
+        builder.Configuration.AddAzureKeyVault(
+            new Uri(keyVaultEndpoint),
+            new DefaultAzureCredential());
+    }
+}
+
 builder.Services.AddFastEndpoints();
 
 // Use to force loading of appsettings.json of test project
 builder.Configuration.AddConfigurationFile("appsettings.test.json");
 
-builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
+builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddRoles<IdentityRole>()

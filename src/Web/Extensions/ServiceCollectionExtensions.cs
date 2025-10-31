@@ -1,5 +1,4 @@
-﻿using Azure.Identity;
-using BlazorAdmin;
+﻿using BlazorAdmin;
 using BlazorAdmin.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -24,10 +23,7 @@ public static class ServiceCollectionExtensions
         }
         else
         {
-            // Configure SQL Server (prod)
-            var credential = new DefaultAzureCredential();
-            configuration.AddAzureKeyVault(new Uri(configuration["AZURE_KEY_VAULT_ENDPOINT"] ?? ""), credential);
-
+            // Configure SQL Server (prod) - Key Vault is already loaded in Program.cs
             services.AddDbContext<CatalogContext>((provider, options) =>
             {
                 var connectionString = configuration[configuration["AZURE_SQL_CATALOG_CONNECTION_STRING_KEY"] ?? ""];

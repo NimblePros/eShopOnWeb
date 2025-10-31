@@ -26,7 +26,7 @@ echo "ACR: ${ACR_NAME}.azurecr.io"
 echo "Web Image: ${WEB_IMAGE_NAME}:${IMAGE_TAG}"
 echo "API Image: ${API_IMAGE_NAME}:${IMAGE_TAG}"
 echo "Traffic Image: ${TRAFFIC_IMAGE_NAME}:${IMAGE_TAG}"
-echo "⏳ This will take 5-7 minutes..."
+echo "⏳ This will take 5-20 minutes..."
 echo ""
 
 # Check if ACR exists, create if not
@@ -102,6 +102,6 @@ echo ""
 echo "Next step: Deploy to Azure"
 echo "  ./scripts/deploy-container-instruqt.sh"
 echo ""
-echo "To delete the ACR (when no longer needed), run:"
+echo "To delete the ACR, run:"
 echo "  az group delete --name $RESOURCE_GROUP --yes --no-wait"
 

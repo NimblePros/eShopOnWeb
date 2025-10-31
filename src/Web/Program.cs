@@ -1,5 +1,7 @@
 ﻿using System;
 using Ardalis.ListStartupServices;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -16,6 +18,7 @@ using Serilog.Formatting.Json;
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(new JsonFormatter(renderMessage: true))
+    .WriteTo.File(new JsonFormatter(renderMessage: true), "/home/LogFiles/dotnet/app.log")
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +27,18 @@ builder.Host.UseSerilog();
 
 // Add service defaults & Aspire components.
 builder.AddAspireServiceDefaults();
+
+// Configure Azure Key Vault in Production
+if (!builder.Environment.IsDevelopment() && !builder.Environment.IsDocker())
+{
+    var keyVaultEndpoint = builder.Configuration["AZURE_KEY_VAULT_ENDPOINT"];
+    if (!string.IsNullOrEmpty(keyVaultEndpoint))
+    {
+        builder.Configuration.AddAzureKeyVault(
+            new Uri(keyVaultEndpoint),
+            new DefaultAzureCredential());
+    }
+}
 
 builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
 

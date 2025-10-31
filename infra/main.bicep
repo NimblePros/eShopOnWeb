@@ -31,10 +31,10 @@ param identityDatabaseServerName string = ''
 param appServicePlanName string = ''
 param keyVaultName string = ''
 
-@description('Datadog configuration')
-param ddSite string = 'us3.datadoghq.com'
+// Datadog configuration
+@secure()
 param ddApiKey string = ''
-param ddEnv string = ''
+param ddSite string = 'us3.datadoghq.com'
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -70,20 +70,18 @@ module web './core/host/appservice.bicep' = {
     containerRegistry: containerRegistry
     containerImage: containerImage
     containerTag: containerTag
+    mainContainerName: 'web-sidecar'
+    ddApiKey: ddApiKey
+    ddSite: ddSite
+    ddService: 'web-app'
     tags: union(tags, { 'azd-service-name': 'web' })
     appSettings: {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
       AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
       AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
       baseUrls__apiBase: '${api.outputs.uri}/api/'
-      DD_SITE: ddSite
-      DD_API_KEY: ddApiKey
-      DD_ENV: !empty(ddEnv) ? ddEnv : environmentName
     }
   }
-  dependsOn: [
-    api
-  ]
 }
 
 // The application API (container-based)
@@ -98,14 +96,15 @@ module api './core/host/appservice.bicep' = {
     containerRegistry: containerRegistry
     containerImage: apiImage
     containerTag: containerTag
+    mainContainerName: 'publicapi-sidecar'
+    ddApiKey: ddApiKey
+    ddSite: ddSite
+    ddService: 'public-api'
     tags: union(tags, { 'azd-service-name': 'api' })
     appSettings: {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
       AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY: 'AZURE-SQL-IDENTITY-CONNECTION-STRING'
       AZURE_KEY_VAULT_ENDPOINT: keyVault.outputs.endpoint
-      DD_SITE: ddSite
-      DD_API_KEY: ddApiKey
-      DD_ENV: !empty(ddEnv) ? ddEnv : environmentName
     }
   }
 }
@@ -202,9 +201,6 @@ module trafficSimulator './core/host/traffic-simulator.bicep' = if (deployTraffi
     cpu: 1
     memoryInGb: 1
   }
-  dependsOn: [
-    web
-  ]
 }
 
 // Data outputs
