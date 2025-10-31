@@ -94,11 +94,11 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
         DD_SERVERLESS_LOG_PATH: '/home/LogFiles/*.log'
         DD_AAS_INSTANCE_LOGGING_ENABLED: 'true'
         // .NET Tracer configuration (required for containerized .NET apps)
-        DD_DOTNET_TRACER_HOME: '/datadog/tracer'
+        DD_DOTNET_TRACER_HOME: '/home/site/wwwroot/datadog'
         DD_TRACE_LOG_DIRECTORY: '/home/LogFiles/dotnet'
         CORECLR_ENABLE_PROFILING: '1'
         CORECLR_PROFILER: '{846F5F1C-F9AE-4B07-969E-05C26BC060D8}'
-        CORECLR_PROFILER_PATH: '/datadog/tracer/Datadog.Trace.ClrProfiler.Native.so'
+        CORECLR_PROFILER_PATH: '/home/site/wwwroot/datadog/linux-x64/Datadog.Trace.ClrProfiler.Native.so'
       } : {})
   }
 
