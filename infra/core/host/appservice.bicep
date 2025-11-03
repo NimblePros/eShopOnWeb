@@ -70,7 +70,6 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
         ASPNETCORE_ENVIRONMENT: 'Production'
         // Container settings
         DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry}'
-        WEBSITES_ENABLE_APP_SERVICE_STORAGE: 'false'
         DOCKER_ENABLE_CI: 'true'
         // Health check configuration
         WEBSITE_HEALTHCHECK_MAXPINGFAILURES: '10'
@@ -82,24 +81,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
         WEBSITE_TIME_ZONE: 'UTC'
       },
       !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights!.properties.ConnectionString } : {},
-      !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault!.properties.vaultUri } : {},
-      !empty(ddApiKey) ? {
-        // Datadog configuration for main container
-        DD_API_KEY: ddApiKey
-        DD_SITE: ddSite
-        DD_SERVICE: ddService
-        DD_ENV: 'dd-eshoponweb'
-        DD_VERSION: '1.0'
-        DD_SOURCE: 'csharp'
-        DD_SERVERLESS_LOG_PATH: '/home/LogFiles/*.log'
-        DD_AAS_INSTANCE_LOGGING_ENABLED: 'true'
-        // .NET Tracer configuration (required for containerized .NET apps)
-        DD_DOTNET_TRACER_HOME: '/home/site/wwwroot/datadog'
-        DD_TRACE_LOG_DIRECTORY: '/home/LogFiles/dotnet'
-        CORECLR_ENABLE_PROFILING: '1'
-        CORECLR_PROFILER: '{846F5F1C-F9AE-4B07-969E-05C26BC060D8}'
-        CORECLR_PROFILER_PATH: '/home/site/wwwroot/datadog/linux-x64/Datadog.Trace.ClrProfiler.Native.so'
-      } : {})
+      !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault!.properties.vaultUri } : {})
   }
 
   resource configLogs 'config' = {

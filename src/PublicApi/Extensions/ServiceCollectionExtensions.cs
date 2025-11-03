@@ -1,15 +1,20 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using Azure.Identity;
 using BlazorShared;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.ApplicationCore.Constants;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Services;
+using Microsoft.eShopWeb.Infrastructure;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Infrastructure.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 
@@ -17,6 +22,34 @@ namespace Microsoft.eShopWeb.PublicApi.Extensions;
 
 public static class ServiceCollectionExtensions
 {
+    public static void AddDatabaseContexts(this IServiceCollection services, IHostEnvironment environment, ConfigurationManager configuration)
+    {
+        if (environment.IsDevelopment() || environment.EnvironmentName == "Docker")
+        {
+            // Configure SQL Server (local/Docker)
+            services.ConfigureLocalDatabaseContexts(configuration);
+        }
+        else
+        {
+            // Configure SQL Server (prod)
+            var credential = new DefaultAzureCredential();
+            configuration.AddAzureKeyVault(new Uri(configuration["AZURE_KEY_VAULT_ENDPOINT"] ?? ""), credential);
+
+            services.AddDbContext<CatalogContext>((provider, options) =>
+            {
+                var connectionString = configuration[configuration["AZURE_SQL_CATALOG_CONNECTION_STRING_KEY"] ?? ""];
+                options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure())
+                    .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
+            });
+            services.AddDbContext<AppIdentityDbContext>((provider, options) =>
+            {
+                var connectionString = configuration[configuration["AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY"] ?? ""];
+                options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure())
+                    .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
+            });
+        }
+    }
+
     public static void AddCustomServices(this IServiceCollection services, ConfigurationManager configuration)
     {
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));

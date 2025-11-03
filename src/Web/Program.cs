@@ -16,7 +16,11 @@ using Serilog.Formatting.Json;
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(new JsonFormatter(renderMessage: true))
-    .WriteTo.File(new JsonFormatter(renderMessage: true), "/home/LogFiles/app.log")
+    .WriteTo.File(
+        formatter: new JsonFormatter(renderMessage: true),
+        path: "/home/LogFiles/app.log",
+        rollingInterval: RollingInterval.Day,
+        flushToDiskInterval: TimeSpan.FromSeconds(1))
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);

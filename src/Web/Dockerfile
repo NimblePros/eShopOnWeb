@@ -32,10 +32,10 @@ COPY --from=build /app/publish ./
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
-RUN mkdir -p /home/site/wwwroot/datadog
+RUN mkdir -p /datadog/tracer
 RUN mkdir -p /home/LogFiles/dotnet
 
-ADD https://github.com/DataDog/dd-trace-dotnet/releases/download/v2.51.0/datadog-dotnet-apm-2.51.0.tar.gz /tmp/datadog.tar.gz
-RUN tar -xzf /tmp/datadog.tar.gz -C /home/site/wwwroot/datadog && rm /tmp/datadog.tar.gz
+ADD https://github.com/DataDog/dd-trace-dotnet/releases/download/v2.51.0/datadog-dotnet-apm-2.51.0.tar.gz /datadog/tracer
+RUN cd /datadog/tracer && tar -zxf datadog-dotnet-apm-2.51.0.tar.gz
 
 ENTRYPOINT ["dotnet", "Web.dll"]
