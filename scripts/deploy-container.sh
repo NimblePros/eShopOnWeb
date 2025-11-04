@@ -90,8 +90,6 @@ az deployment sub create \
     principalId="$PRINCIPAL_ID" \
     sqlAdminPassword="SQL$(openssl rand -hex 12)!" \
     appUserPassword="APP$(openssl rand -hex 12)!" \
-    ddApiKey="$DD_API_KEY" \
-    ddSite="$DD_SITE" \
   --output none
 
 # Get app info

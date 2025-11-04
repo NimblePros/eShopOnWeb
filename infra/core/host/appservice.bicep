@@ -14,12 +14,6 @@ param containerImage string
 param containerTag string = 'latest'
 param mainContainerName string = 'main'
 
-// Datadog configuration
-@secure()
-param ddApiKey string = ''
-param ddSite string = 'us3.datadoghq.com'
-param ddService string = ''
-
 // App Service configuration
 param allowedOrigins array = []
 param alwaysOn bool = true

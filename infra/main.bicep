@@ -171,7 +171,7 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
     kind: 'linux'
     reserved: true  // Required for Linux
     sku: {
-      name: 'S2'
+      name: 'B2'
     }
   }
 }
