@@ -31,11 +31,6 @@ param identityDatabaseServerName string = ''
 param appServicePlanName string = ''
 param keyVaultName string = ''
 
-// Datadog configuration
-@secure()
-param ddApiKey string = ''
-param ddSite string = 'us3.datadoghq.com'
-
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
 
@@ -71,9 +66,6 @@ module web './core/host/appservice.bicep' = {
     containerImage: containerImage
     containerTag: containerTag
     mainContainerName: 'web-sidecar'
-    ddApiKey: ddApiKey
-    ddSite: ddSite
-    ddService: 'web-app'
     tags: union(tags, { 'azd-service-name': 'web' })
     appSettings: {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
@@ -97,9 +89,6 @@ module api './core/host/appservice.bicep' = {
     containerImage: apiImage
     containerTag: containerTag
     mainContainerName: 'publicapi-sidecar'
-    ddApiKey: ddApiKey
-    ddSite: ddSite
-    ddService: 'public-api'
     tags: union(tags, { 'azd-service-name': 'api' })
     appSettings: {
       AZURE_SQL_CATALOG_CONNECTION_STRING_KEY: 'AZURE-SQL-CATALOG-CONNECTION-STRING'
