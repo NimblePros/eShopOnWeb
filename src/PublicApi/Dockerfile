@@ -30,7 +30,7 @@ EXPOSE 8080
 RUN mkdir -p /datadog/tracer
 RUN mkdir -p /home/LogFiles/dotnet
 
-ADD https://github.com/DataDog/dd-trace-dotnet/releases/download/v2.51.0/datadog-dotnet-apm-2.51.0.tar.gz /datadog/tracer
-RUN cd /datadog/tracer && tar -zxf datadog-dotnet-apm-2.51.0.tar.gz
+ADD https://github.com/DataDog/dd-trace-dotnet/releases/download/v3.30.0/datadog-dotnet-apm-3.30.0.tar.gz /datadog/tracer
+RUN cd /datadog/tracer && tar -zxf datadog-dotnet-apm-3.30.0.tar.gz
 
 ENTRYPOINT ["dotnet", "PublicApi.dll"]

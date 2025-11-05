@@ -241,3 +241,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 2. WebApplication is https://docs.datadoghq.com/serverless/azure_app_service/linux_container?tab=net
 3. https://docs.datadoghq.com/logs/log_collection/csharp/?tab=serilog
 4. Make sure WEBSITES_ENABLE_APP_SERVICE_STORAGE is set to default (true)
+5. Inferred services: https://docs.datadoghq.com/tracing/services/inferred_services/?tab=agentv7600#set-up-inferred-services 
