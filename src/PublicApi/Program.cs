@@ -38,7 +38,7 @@ builder.Services.AddFastEndpoints();
 // Use to force loading of appsettings.json of test project
 builder.Configuration.AddConfigurationFile("appsettings.test.json");
 
-builder.Services.ConfigureLocalDatabaseContexts(builder.Configuration);
+builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddRoles<IdentityRole>()
@@ -66,12 +66,23 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddSwagger();
 
 builder.Services.AddMetronome();
-string seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
 
-builder.AddSeqEndpoint(connectionName: "seq", options =>
+// Only add Seq in development/local environments
+if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Docker")
 {
-    options.ServerUrl = seqUrl;
-});
+    try
+    {
+        string seqUrl = builder.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
+        builder.AddSeqEndpoint(connectionName: "seq", options =>
+        {
+            options.ServerUrl = seqUrl;
+        });
+    }
+    catch
+    {
+        // Seq not available, continue without it
+    }
+}
 
 var app = builder.Build();
 
