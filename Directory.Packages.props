@@ -70,7 +70,7 @@
     <!-- Aspire -->
     <PackageVersion Include="Aspire.Hosting.Seq" Version="13.0.1" />
     <PackageVersion Include="Aspire.Seq" Version="13.0.1" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.0.1" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.2.4" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
