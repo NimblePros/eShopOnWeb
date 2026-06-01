@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
@@ -15,10 +17,24 @@ var builder = WebApplication.CreateBuilder(args);
 // Add service defaults & Aspire components.
 builder.AddAspireServiceDefaults();
 
-builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
+// 🔥 READ FLAG
+var useInMemory = builder.Configuration.GetValue<bool>("UseOnlyInMemoryDatabase");
+
+// 🔥 DATABASE CONFIGURATION FIX
+if (useInMemory)
+{
+    builder.Services.AddDbContext<CatalogContext>(options =>
+        options.UseInMemoryDatabase("Catalog"));
+
+    builder.Services.AddDbContext<AppIdentityDbContext>(options =>
+        options.UseInMemoryDatabase("Identity"));
+}
+else
+{
+    builder.Services.AddDatabaseContexts(builder.Environment, builder.Configuration);
+}
 
 builder.Services.AddCookieSettings();
-builder.Services.AddCookieAuthentication();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
            .AddDefaultUI()
@@ -38,7 +54,7 @@ if (!string.IsNullOrEmpty(gitHubClientId))
             options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
             options.TokenEndpoint = "https://github.com/login/oauth/access_token";
             options.UserInformationEndpoint = "https://api.github.com/user";
-            options.UsePkce = false; // PKCE not supported by GitHub       
+            options.UsePkce = false;
             options.SaveTokens = true;
             options.ClaimsIssuer = "GitHub";
             options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
@@ -52,12 +68,10 @@ builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 builder.Services.AddCoreServices(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
 
-// Add memory cache services
 builder.Services.AddMemoryCache();
+
 builder.Services.AddRouting(options =>
 {
-    // Replace the type and the name used to refer to it with your own
-    // IOutboundParameterTransformer implementation
     options.ConstraintMap["slugify"] = typeof(SlugifyParameterTransformer);
 });
 
@@ -65,16 +79,16 @@ builder.Services.AddMvc(options =>
 {
     options.Conventions.Add(new RouteTokenTransformerConvention(
              new SlugifyParameterTransformer()));
-
 });
+
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizePage("/Basket/Checkout");
 });
-builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddCustomHealthChecks();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<ServiceConfig>(config =>
 {
@@ -82,10 +96,8 @@ builder.Services.Configure<ServiceConfig>(config =>
     config.Path = "/allservices";
 });
 
-builder.Services.AddBlazor(builder.Configuration);
-
 builder.Services.AddMetronome();
-builder.AddSeqEndpoint(connectionName: "seq");
+//builder.AddSeqEndpoint(connectionName: "seq");
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -93,9 +105,33 @@ var app = builder.Build();
 
 app.Logger.LogInformation("App created...");
 
-await app.SeedDatabaseAsync();
+// 🔥 FIX: SEED DATABASE (IN-MEMORY AND SQL)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var catalogContext = services.GetRequiredService<CatalogContext>();
+    var identityContext = services.GetRequiredService<AppIdentityDbContext>();
+    var logger = services.GetRequiredService<ILogger<Program>>();
+
+    if (useInMemory)
+    {
+        // Seed in-memory database
+        await CatalogContextSeed.SeedAsync(catalogContext, logger);
+
+        // Seed Identity database with users and roles
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        await AppIdentityDbContextSeed.SeedAsync(identityContext, userManager, roleManager);
+    }
+    else
+    {
+        // Seed SQL database
+        await app.SeedDatabaseAsync();
+    }
+}
 
 var catalogBaseUrl = builder.Configuration.GetValue(typeof(string), "CatalogBaseUrl") as string;
+
 if (!string.IsNullOrEmpty(catalogBaseUrl))
 {
     app.Use((context, next) =>
@@ -105,9 +141,7 @@ if (!string.IsNullOrEmpty(catalogBaseUrl))
     });
 }
 
-
 app.UseCustomHealthChecks();
-
 app.UseTroubleshootingMiddlewares();
 
 app.UseHttpsRedirection();
@@ -118,13 +152,24 @@ app.UseRouting();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseMiddleware<UserContextEnrichmentMiddleware>();
+
 app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
 app.MapRazorPages();
-app.MapHealthChecks("home_page_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("homePageHealthCheck") });
-app.MapHealthChecks("api_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("apiHealthCheck") });
-//endpoints.MapBlazorHub("/admin");
+
+app.MapHealthChecks("home_page_health_check", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("homePageHealthCheck")
+});
+
+app.MapHealthChecks("api_health_check", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("apiHealthCheck")
+});
+
 app.MapFallbackToFile("index.html");
 
 app.Logger.LogInformation("LAUNCHING");
+
 app.Run();
