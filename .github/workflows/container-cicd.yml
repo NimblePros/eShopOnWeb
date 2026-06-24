@@ -15,10 +15,8 @@ env:
   IMAGE_NAME: DotnetWebApp
 
 jobs:
-  Build:
+  install-dependencies:
     runs-on: ubuntu-latest
-    outputs:
-      test-status: ${{ steps.test-run.outcome }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +40,7 @@ jobs:
     if: >
       (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature')) ||
       (github.event_name == 'pull_request' && github.base_ref == 'main')
-    needs: Build
+    needs: install-dependencies
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.set-image.outputs.image }}
