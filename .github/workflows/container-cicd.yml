@@ -15,7 +15,7 @@ env:
   IMAGE_NAME: DotnetWebApp
 
 jobs:
-  test:
+  Build:
     runs-on: ubuntu-latest
     outputs:
       test-status: ${{ steps.test-run.outcome }}
@@ -40,9 +40,9 @@ jobs:
 
   build:
     if: >
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')) ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature')) ||
       (github.event_name == 'pull_request' && github.base_ref == 'main')
-    needs: test
+    needs: Build
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.set-image.outputs.image }}
