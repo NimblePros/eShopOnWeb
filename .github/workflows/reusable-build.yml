@@ -53,7 +53,7 @@ jobs:
           echo "Running dotnet test for each test project under tests/"
           git ls-files 'tests/**/*.csproj' | while read -r proj; do
             echo "Running tests for $proj"
-            dotnet test "$proj" --verbosity minimal
+            dotnet test "$proj" --configuration ${{ inputs.configuration }} --no-build --no-restore --verbosity minimal
           done
 
       - name: Start app using docker compose
