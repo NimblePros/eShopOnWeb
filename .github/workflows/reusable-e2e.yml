@@ -1,0 +1,54 @@
+name: Reusable E2E Workflow
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        default: '20'
+      playwright-install:
+        required: false
+        type: boolean
+        default: true
+      e2e-tests-path:
+        required: false
+        type: string
+        default: 'tests/E2ETests'
+      app-url:
+        required: false
+        type: string
+        default: 'http://localhost:5106'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install Playwright CLI
+        if: ${{ inputs.playwright-install }}
+        run: dotnet tool install --global Microsoft.Playwright.CLI --version 1.* || true
+
+      - name: Install Playwright browsers
+        if: ${{ inputs.playwright-install }}
+        run: playwright install --with-deps || true
+
+      - name: Run E2E tests (if present)
+        run: |
+          if [ -d "${{ inputs.e2e-tests-path }}" ]; then
+            dotnet test ${{ inputs.e2e-tests-path }} --no-build --verbosity normal
+          else
+            echo "No E2E tests found; skipping.";
+          fi

@@ -1,0 +1,58 @@
+name: Reusable Build Workflow
+
+on:
+  workflow_call:
+    inputs:
+      dotnet-version:
+        required: false
+        type: string
+        default: '10.0.x'
+      configuration:
+        required: false
+        type: string
+        default: 'Release'
+      run-tests:
+        required: false
+        type: boolean
+        default: true
+      start-docker:
+        required: false
+        type: boolean
+        default: true
+      wait-url:
+        required: false
+        type: string
+        default: 'http://localhost:5106'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration ${{ inputs.configuration }} --no-restore
+
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
+        run: dotnet test --no-build --verbosity minimal
+
+      - name: Start app using docker compose
+        if: ${{ inputs.start-docker }}
+        run: docker compose -f docker-compose.yml up -d --build
+
+      - name: Wait for web endpoint
+        if: ${{ inputs.start-docker && inputs.wait-url != '' }}
+        run: |
+          for i in {1..30}; do
+            curl -sSf ${{ inputs.wait-url }} && break || sleep 2
+          done

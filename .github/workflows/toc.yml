@@ -1,4 +1,4 @@
-name: Generate Table of Contents
+name: Generate Token
 
 on:
   push:
