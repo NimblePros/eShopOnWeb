@@ -37,9 +37,6 @@ jobs:
         run: dotnet test eShopOnWeb.sln --configuration Release --no-build --verbosity minimal
 
   build:
-    if: >
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature')) ||
-      (github.event_name == 'pull_request' && github.base_ref == 'main')
     needs: install-dependencies
     runs-on: ubuntu-latest
     outputs:
