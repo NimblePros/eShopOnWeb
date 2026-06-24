@@ -22,7 +22,7 @@ on:
       start-docker:
         required: false
         type: boolean
-        default: true
+        default: false
       wait-url:
         required: false
         type: string
