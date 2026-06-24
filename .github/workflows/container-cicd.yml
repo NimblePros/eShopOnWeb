@@ -3,7 +3,7 @@ name: Build, Publish Docker Image and Deploy to Azure Web App (Container)
 on:
   push:
     branches:
-      - 'feature/**'
+      - 'feature-MyTesting/**'
       - 'main'
       - 'develop'
   pull_request:
