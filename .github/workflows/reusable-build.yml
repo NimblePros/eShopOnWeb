@@ -46,9 +46,15 @@ jobs:
       - name: Build
         run: dotnet build ${{ inputs.solution }} --configuration ${{ inputs.configuration }} --no-restore
 
-      - name: Run tests
+      - name: Run tests (per test project)
         if: ${{ inputs.run-tests }}
-        run: dotnet test ${{ inputs.solution }} --no-build --verbosity minimal
+        run: |
+          set -e
+          echo "Running dotnet test for each test project under tests/"
+          git ls-files 'tests/**/*.csproj' | while read -r proj; do
+            echo "Running tests for $proj"
+            dotnet test "$proj" --no-build --verbosity minimal
+          done
 
       - name: Start app using docker compose
         if: ${{ inputs.start-docker }}
