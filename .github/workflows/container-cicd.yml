@@ -1,0 +1,70 @@
+name: Build, Publish Docker Image and Deploy to Azure Web App (Container)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: web
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build solution
+        run: dotnet build eShopOnWeb.sln --configuration Release --no-restore
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
+        run: az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build and push Docker image to ACR
+        env:
+          ACR_NAME: ${{ secrets.ACR_NAME }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          TAG: ${{ github.sha }}
+        run: |
+          REGISTRY=${ACR_NAME}.azurecr.io
+          docker build -f src/Web/Dockerfile -t ${REGISTRY}/${IMAGE_NAME}:${TAG} .
+          docker push ${REGISTRY}/${IMAGE_NAME}:${TAG}
+
+      - name: Get ACR credentials
+        id: acr-creds
+        run: |
+          ACR_USER=$(az acr credential show -n ${{ secrets.ACR_NAME }} --query username -o tsv)
+          ACR_PASS=$(az acr credential show -n ${{ secrets.ACR_NAME }} --query passwords[0].value -o tsv)
+          echo "username=${ACR_USER}" >> $GITHUB_OUTPUT
+          echo "password=${ACR_PASS}" >> $GITHUB_OUTPUT
+
+      - name: Deploy image to Azure Web App (Container)
+        env:
+          ACR_NAME: ${{ secrets.ACR_NAME }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          TAG: ${{ github.sha }}
+          RG: ${{ secrets.RESOURCE_GROUP }}
+          WEBAPP: ${{ secrets.WEBAPP_NAME }}
+          ACR_USER: ${{ steps.acr-creds.outputs.username }}
+          ACR_PASS: ${{ steps.acr-creds.outputs.password }}
+        run: |
+          REGISTRY=${ACR_NAME}.azurecr.io
+          az webapp config container set --name ${WEBAPP} --resource-group ${RG} \
+            --docker-custom-image-name ${REGISTRY}/${IMAGE_NAME}:${TAG} \
+            --docker-registry-server-url https://${REGISTRY} \
+            --docker-registry-server-user ${ACR_USER} \
+            --docker-registry-server-password ${ACR_PASS}
+          az webapp restart --name ${WEBAPP} --resource-group ${RG}
+
+  # Optional: add a small notifications job or health-check after deploy if desired
