@@ -2,14 +2,21 @@ name: Build, Publish Docker Image and Deploy to Azure Web App (Container)
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: web
+  IMAGE_NAME: DotnetWebApp
 
 jobs:
   build-and-push:
+    if: >
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')) ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,48 +33,31 @@ jobs:
       - name: Build solution
         run: dotnet build eShopOnWeb.sln --configuration Release --no-restore
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
-      - name: Login to ACR
-        run: az acr login --name ${{ secrets.ACR_NAME }}
-
-      - name: Build and push Docker image to ACR
+      - name: Build and push Docker image to Docker Hub
         env:
-          ACR_NAME: ${{ secrets.ACR_NAME }}
+          DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           TAG: ${{ github.sha }}
         run: |
-          REGISTRY=${ACR_NAME}.azurecr.io
-          docker build -f src/Web/Dockerfile -t ${REGISTRY}/${IMAGE_NAME}:${TAG} .
-          docker push ${REGISTRY}/${IMAGE_NAME}:${TAG}
-
-      - name: Get ACR credentials
-        id: acr-creds
-        run: |
-          ACR_USER=$(az acr credential show -n ${{ secrets.ACR_NAME }} --query username -o tsv)
-          ACR_PASS=$(az acr credential show -n ${{ secrets.ACR_NAME }} --query passwords[0].value -o tsv)
-          echo "username=${ACR_USER}" >> $GITHUB_OUTPUT
-          echo "password=${ACR_PASS}" >> $GITHUB_OUTPUT
+          docker build -f src/Web/Dockerfile -t docker.io/${DOCKERHUB_REPO}:${TAG} .
+          docker push docker.io/${DOCKERHUB_REPO}:${TAG}
 
       - name: Deploy image to Azure Web App (Container)
         env:
-          ACR_NAME: ${{ secrets.ACR_NAME }}
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
           TAG: ${{ github.sha }}
           RG: ${{ secrets.RESOURCE_GROUP }}
           WEBAPP: ${{ secrets.WEBAPP_NAME }}
-          ACR_USER: ${{ steps.acr-creds.outputs.username }}
-          ACR_PASS: ${{ steps.acr-creds.outputs.password }}
         run: |
-          REGISTRY=${ACR_NAME}.azurecr.io
+          IMAGE=docker.io/${DOCKERHUB_REPO}:${TAG}
           az webapp config container set --name ${WEBAPP} --resource-group ${RG} \
-            --docker-custom-image-name ${REGISTRY}/${IMAGE_NAME}:${TAG} \
-            --docker-registry-server-url https://${REGISTRY} \
-            --docker-registry-server-user ${ACR_USER} \
-            --docker-registry-server-password ${ACR_PASS}
+            --docker-custom-image-name ${IMAGE} \
+            --docker-registry-server-url https://index.docker.io \
+            --docker-registry-server-user ${{ secrets.DOCKERHUB_USERNAME }} \
+            --docker-registry-server-password ${{ secrets.DOCKERHUB_TOKEN }}
           az webapp restart --name ${WEBAPP} --resource-group ${RG}
 
   # Optional: add a small notifications job or health-check after deploy if desired
