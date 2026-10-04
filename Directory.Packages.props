@@ -69,7 +69,7 @@
     <PackageVersion Include="System.Threading" Version="4.3.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
     <!-- Aspire -->
-    <PackageVersion Include="Aspire.Hosting.Seq" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Seq" Version="13.5.0" />
     <PackageVersion Include="Aspire.Seq" Version="13.4.6" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.7.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.7.0" />
