@@ -3,6 +3,8 @@ using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using NimblePros.Metronome;
 
 namespace Microsoft.eShopWeb.Infrastructure;
@@ -51,5 +53,21 @@ public static class Dependencies
                 options.AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
             });
         }
+    }
+
+    public static void AddJwtSettings(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
+    {
+        services.AddOptions<JwtSettings>()
+            .Bind(configuration.GetSection(JwtSettings.CONFIG_NAME))
+            .PostConfigure(settings =>
+            {
+                // Lets the sample run locally with no setup. JwtSettingsValidator rejects this key outside local development.
+                if (string.IsNullOrWhiteSpace(settings.SigningKey) && environment.IsLocalDevelopment())
+                {
+                    settings.SigningKey = JwtSettings.DEVELOPMENT_SIGNING_KEY;
+                }
+            })
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<JwtSettings>, JwtSettingsValidator>();
     }
 }

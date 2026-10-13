@@ -6,6 +6,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />

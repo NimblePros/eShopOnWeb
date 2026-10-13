@@ -7,7 +7,9 @@ namespace Microsoft.eShopWeb.Infrastructure.Identity;
 
 public class AppIdentityDbContextSeed
 {
-    public static async Task SeedAsync(AppIdentityDbContext identityDbContext, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public const string SEED_DEMO_USERS_CONFIG_NAME = "SeedDemoUsers";
+
+    public static async Task SeedAsync(AppIdentityDbContext identityDbContext, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, bool seedDemoUsers)
     {
 
         if (identityDbContext.Database.IsSqlServer())
@@ -17,6 +19,9 @@ public class AppIdentityDbContextSeed
 
         await roleManager.CreateAsync(new IdentityRole(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS));
         await roleManager.CreateAsync(new IdentityRole(BlazorShared.Authorization.Constants.Roles.PRODUCT_MANAGERS));
+
+        // Demo users share a publicly known password, so only create them when explicitly allowed
+        if (!seedDemoUsers) return;
 
         var defaultUser = new ApplicationUser { UserName = "demouser@microsoft.com", Email = "demouser@microsoft.com" };
         await userManager.CreateAsync(defaultUser, AuthorizationConstants.DEFAULT_PASSWORD);

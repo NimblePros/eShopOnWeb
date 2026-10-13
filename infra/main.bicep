@@ -33,6 +33,11 @@ param sqlAdminPassword string
 @description('Application user password')
 param appUserPassword string
 
+// Generated on each provision unless supplied; rotating it only invalidates outstanding API tokens
+@secure()
+@description('JWT signing key used to sign and validate API tokens (at least 32 bytes)')
+param jwtSigningKey string = '${newGuid()}${newGuid()}'
+
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
@@ -114,6 +119,17 @@ module keyVault './core/security/keyvault.bicep' = {
     location: location
     tags: tags
     principalId: principalId
+  }
+}
+
+// Exposed to the apps as configuration key Authentication:Jwt:SigningKey by the Key Vault configuration provider
+module jwtSigningKeySecret './core/security/keyvault-secret.bicep' = {
+  name: 'jwt-signing-key'
+  scope: rg
+  params: {
+    keyVaultName: keyVault.outputs.name
+    name: 'Authentication--Jwt--SigningKey'
+    secretValue: jwtSigningKey
   }
 }
 

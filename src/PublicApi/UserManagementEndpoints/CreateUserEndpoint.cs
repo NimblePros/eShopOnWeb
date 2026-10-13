@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.ApplicationCore.Constants;
 using Microsoft.eShopWeb.ApplicationCore.Exceptions;
+using Microsoft.eShopWeb.Infrastructure;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.PublicApi.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
-public class CreateUserEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<CreateUserRequest, CreateUserResponse>
+public class CreateUserEndpoint(UserManager<ApplicationUser> userManager, IHostEnvironment environment) : Endpoint<CreateUserRequest, CreateUserResponse>
 {
     public override void Configure()
     {
@@ -44,7 +46,11 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         if (createUser.Succeeded)
         {
             var createdUser = await userManager.FindByNameAsync(request.User.UserName);
-            await userManager.AddPasswordAsync(createdUser!, AuthorizationConstants.DEFAULT_PASSWORD);
+            // Outside local development, users are created without a password and must set one themselves
+            if (environment.IsLocalDevelopment())
+            {
+                await userManager.AddPasswordAsync(createdUser!, AuthorizationConstants.DEFAULT_PASSWORD);
+            }
             response.UserId = createdUser!.Id;
             await Send.CreatedAtAsync<UserGetByIdEndpoint>(new { UserId = createdUser!.Id }, response, cancellation: ct);
         }

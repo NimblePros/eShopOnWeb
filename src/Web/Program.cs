@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+using Microsoft.eShopWeb.Infrastructure;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Areas.Identity.Helpers;
@@ -48,6 +49,7 @@ if (!string.IsNullOrEmpty(gitHubClientId))
         });
 }
 
+builder.Services.AddJwtSettings(builder.Configuration, builder.Environment);
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 builder.Services.AddCoreServices(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
