@@ -2,6 +2,7 @@
 using Ardalis.ListStartupServices;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.eShopWeb.Infrastructure;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -25,7 +26,9 @@ public static class WebApplicationExtensions
             var userManager = scopedProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = scopedProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var identityContext = scopedProvider.GetRequiredService<AppIdentityDbContext>();
-            await AppIdentityDbContextSeed.SeedAsync(identityContext, userManager, roleManager);
+            var seedDemoUsers = app.Environment.IsLocalDevelopment()
+                || app.Configuration.GetValue<bool>(AppIdentityDbContextSeed.SEED_DEMO_USERS_CONFIG_NAME);
+            await AppIdentityDbContextSeed.SeedAsync(identityContext, userManager, roleManager, seedDemoUsers);
         }
         catch (Exception ex)
         {

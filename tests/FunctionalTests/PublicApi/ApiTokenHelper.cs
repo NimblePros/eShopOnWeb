@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using Microsoft.eShopWeb.ApplicationCore.Constants;
+using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Api;
@@ -33,12 +32,15 @@ public class ApiTokenHelper
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var key = Encoding.ASCII.GetBytes(AuthorizationConstants.JWT_SECRET_KEY);
+        // Test hosts run in local development environments, which fall back to the development key
+        var settings = new JwtSettings { SigningKey = JwtSettings.DEVELOPMENT_SIGNING_KEY };
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims.ToArray()),
+            Issuer = settings.Issuer,
+            Audience = settings.Audience,
             Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials = new SigningCredentials(settings.GetSecurityKey(), SecurityAlgorithms.HmacSha256)
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
