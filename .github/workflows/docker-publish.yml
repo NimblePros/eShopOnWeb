@@ -15,7 +15,7 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE: eshopwebmvc
+  IMAGE: eshoponwebmvc
 
 jobs:
   docker:
@@ -45,11 +45,12 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE }}
+        images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE }}
         # 'latest' comes from main only. A manual run from another branch publishes a tag named after that branch.
         tags: |
           type=raw,value=latest,enable={{is_default_branch}}
           type=ref,event=branch,enable=${{ github.event_name == 'workflow_dispatch' && github.ref_name != github.event.repository.default_branch }}
+          type=ref,event=pr
 
     - name: Build and push image
       uses: docker/build-push-action@v6
