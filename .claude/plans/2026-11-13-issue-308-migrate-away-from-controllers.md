@@ -70,10 +70,38 @@ Sub-issues: #310 Order, #311 User, #312 Manage, #313 cleanup.
 
 ## Phase 5 — Independent review
 
-- [ ] Separate agent reviews full diff vs. the issue: correctness, regressions, test gaps,
-      security (authz on every page/endpoint, antiforgery), performance, accessibility
-- [ ] Address all significant findings (record skipped ones here)
+- [x] Separate agent reviewed full diff vs. the issue: correctness, regressions, test gaps,
+      security (authz on every page/endpoint, antiforgery), performance, accessibility.
+      No high/medium findings; it confirmed `GET /User` JSON shape, routes BlazorAdmin uses,
+      authz on every page, antiforgery on POSTs, and layout resolution in the Identity area.
+- [x] Addressed:
+  - Logout test now replays the pre-logout cookie and asserts it is revoked.
+  - Added tests: anonymous redirect for disable-2fa / generate-recovery-codes,
+    SendVerificationEmail handler, SetPassword POST, RemoveLogin (success and guard).
+  - RemoveLogin now refuses server-side to remove a user's only sign-in method
+    (pre-existing: only the UI hid the button).
+  - SetPassword redirects straight to ChangePassword so "Your password has been set." shows
+    (pre-existing: the message was consumed by an intermediate redirect).
+  - `aria-current="page"` on the active Manage nav link.
+  - New flow tests use throwaway users (`WebPageHelpers.CreateUserAsync`).
+- Not addressed, with reasons:
+  - Internal-only URLs changed shape (`/manage/disable2fa-warning` → `/manage/disable-2fa`,
+    `*-warning` GETs folded into their pages, link-login callback is now a page handler) and
+    `/order/detail/abc` is 404 rather than 400. Nothing links to the old URLs; noted in the PR
+    instead of adding redirects.
+  - `UpdatesPhoneNumber` still edits the demo user, as the original test did; the change is
+    harmless to other tests and the class runs in the Sequential collection.
+  - Pre-existing, out of scope (noted in PR): no antiforgery on `POST /User/Logout` (needs a
+    BlazorAdmin change), `Disable2fa`/`GenerateRecoveryCodes` GET throw when 2FA is off,
+    missing `alt` text / `javascript:` logout link in shared layout markup, and
+    `GetOrderDetailsHandler` doesn't check the order belongs to the requesting user.
 
 ## Phase 6 — Final verification
 
-- [ ] `dotnet build && dotnet test && dotnet format --verify-no-changes` clean
+- [x] `dotnet build eShopOnWeb.slnx`: 0 errors, no new warnings.
+- [x] `dotnet test --solution eShopOnWeb.slnx`: 172 total, 171 passed, 0 failed, 1 skipped
+      (the existing skipped EndToEnd test).
+- [x] `dotnet format --verify-no-changes` is clean for every `.cs` file this branch touches.
+      As noted in earlier plans, `main` still fails it repo-wide on line endings in untouched files.
+- Note: `dotnet ./BuildTestFormat.cs` fails on `main` because it calls `dotnet test <project>`
+  without `--project` under the MTP runner. That's pre-existing, so I ran the three steps directly.

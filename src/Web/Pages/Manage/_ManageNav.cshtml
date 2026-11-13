@@ -4,11 +4,11 @@
 }
 
 <ul class="nav nav-pills nav-stacked">
-    <li class="@ManageNavPages.IndexNavClass(ViewContext)"><a asp-page="/Manage/MyAccount">Profile</a></li>
-    <li class="@ManageNavPages.ChangePasswordNavClass(ViewContext)"><a asp-page="/Manage/ChangePassword">Password</a></li>
+    <li class="@ManageNavPages.IndexNavClass(ViewContext)"><a asp-page="/Manage/MyAccount" aria-current="@ManageNavPages.AriaCurrent(ViewContext, ManageNavPages.Index)">Profile</a></li>
+    <li class="@ManageNavPages.ChangePasswordNavClass(ViewContext)"><a asp-page="/Manage/ChangePassword" aria-current="@ManageNavPages.AriaCurrent(ViewContext, ManageNavPages.ChangePassword)">Password</a></li>
     @if (hasExternalLogins)
     {
-        <li class="@ManageNavPages.ExternalLoginsNavClass(ViewContext)"><a asp-page="/Manage/ExternalLogins">External logins</a></li>
+        <li class="@ManageNavPages.ExternalLoginsNavClass(ViewContext)"><a asp-page="/Manage/ExternalLogins" aria-current="@ManageNavPages.AriaCurrent(ViewContext, ManageNavPages.ExternalLogins)">External logins</a></li>
     }
-    <li class="@ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"><a asp-page="/Manage/TwoFactorAuthentication">Two-factor authentication</a></li>
+    <li class="@ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"><a asp-page="/Manage/TwoFactorAuthentication" aria-current="@ManageNavPages.AriaCurrent(ViewContext, ManageNavPages.TwoFactorAuthentication)">Two-factor authentication</a></li>
 </ul>

@@ -59,6 +59,8 @@ public class SetPasswordModel(UserManager<ApplicationUser> userManager,
         await signInManager.SignInAsync(user, isPersistent: false);
         StatusMessage = "Your password has been set.";
 
-        return RedirectToPage();
+        // Now that the user has a password, this page would only bounce them to ChangePassword
+        // (and drop the status message on the way), so go there directly.
+        return RedirectToPage("./ChangePassword");
     }
 }

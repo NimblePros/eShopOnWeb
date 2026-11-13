@@ -2,11 +2,9 @@
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.eShopWeb.Infrastructure.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using static Microsoft.eShopWeb.FunctionalTests.Web.WebPageHelpers;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Manage;
 
@@ -17,20 +15,17 @@ namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Manage;
 [Collection("Sequential")]
 public class TwoFactorAuthenticationFlowTests(TestApplication factory) : IClassFixture<TestApplication>
 {
-    private const string Password = "Pass@word1";
-
     [Fact]
     public async Task EnablesAuthenticatorThenRegeneratesRecoveryCodesThenDisables2fa()
     {
         var ct = TestContext.Current.CancellationToken;
-        var email = $"2fa-{Guid.NewGuid():N}@example.com";
-        await CreateUserAsync(email);
+        var email = await CreateUserAsync(factory);
         var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        await WebPageHelpers.LoginAsync(client, email, Password);
+        await LoginAsync(client, email);
 
         // Enable the authenticator with a valid code.
         var enablePage = await client.GetStringAsync("/manage/enable-authenticator", ct);
-        var enableResponse = await PostAsync(client, "/manage/enable-authenticator", enablePage,
+        var enableResponse = await PostFormAsync(client, "/manage/enable-authenticator", enablePage,
             KeyValuePair.Create("Code", await GetCurrentTotpAsync(email)));
         Assert.Equal(HttpStatusCode.Redirect, enableResponse.StatusCode);
         Assert.Equal("/manage/show-recovery-codes", enableResponse.Headers.Location!.OriginalString);
@@ -48,63 +43,37 @@ public class TwoFactorAuthenticationFlowTests(TestApplication factory) : IClassF
 
         // Regenerate recovery codes.
         var generatePage = await client.GetStringAsync("/manage/generate-recovery-codes", ct);
-        var generateResponse = await PostAsync(client, "/manage/generate-recovery-codes", generatePage);
+        var generateResponse = await PostFormAsync(client, "/manage/generate-recovery-codes", generatePage);
         Assert.Equal(HttpStatusCode.Redirect, generateResponse.StatusCode);
         Assert.Equal("/manage/show-recovery-codes", generateResponse.Headers.Location!.OriginalString);
         Assert.Equal(10, CountRecoveryCodes(await client.GetStringAsync("/manage/show-recovery-codes", ct)));
 
         // Disable 2FA.
         var disablePage = await client.GetStringAsync("/manage/disable-2fa", ct);
-        var disableResponse = await PostAsync(client, "/manage/disable-2fa", disablePage);
+        var disableResponse = await PostFormAsync(client, "/manage/disable-2fa", disablePage);
         Assert.Equal(HttpStatusCode.Redirect, disableResponse.StatusCode);
         Assert.Equal("/manage/two-factor-authentication", disableResponse.Headers.Location!.OriginalString);
-        Assert.False((await FindUserAsync(email)).TwoFactorEnabled);
+        Assert.False((await FindUserAsync(factory, email)).TwoFactorEnabled);
     }
 
     [Fact]
     public async Task EnableAuthenticatorRejectsInvalidCode()
     {
         var ct = TestContext.Current.CancellationToken;
-        var email = $"2fa-{Guid.NewGuid():N}@example.com";
-        await CreateUserAsync(email);
+        var email = await CreateUserAsync(factory);
         var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        await WebPageHelpers.LoginAsync(client, email, Password);
+        await LoginAsync(client, email);
 
         var enablePage = await client.GetStringAsync("/manage/enable-authenticator", ct);
-        var response = await PostAsync(client, "/manage/enable-authenticator", enablePage, KeyValuePair.Create("Code", "000000x"));
+        var response = await PostFormAsync(client, "/manage/enable-authenticator", enablePage, KeyValuePair.Create("Code", "000000x"));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Verification code is invalid.", await response.Content.ReadAsStringAsync(ct));
-        Assert.False((await FindUserAsync(email)).TwoFactorEnabled);
-    }
-
-    private static Task<HttpResponseMessage> PostAsync(HttpClient client, string url, string pageWithForm,
-        params KeyValuePair<string, string>[] fields)
-    {
-        var values = new List<KeyValuePair<string, string>>(fields)
-        {
-            new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(pageWithForm))
-        };
-        return client.PostAsync(url, new FormUrlEncodedContent(values), TestContext.Current.CancellationToken);
+        Assert.False((await FindUserAsync(factory, email)).TwoFactorEnabled);
     }
 
     private static int CountRecoveryCodes(string page) =>
         Regex.Matches(page, @"<code class=""recovery-code"">").Count;
-
-    private async Task CreateUserAsync(string email)
-    {
-        using var scope = factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var result = await userManager.CreateAsync(new ApplicationUser { UserName = email, Email = email }, Password);
-        Assert.True(result.Succeeded, string.Join(", ", result.Errors.Select(e => e.Description)));
-    }
-
-    private async Task<ApplicationUser> FindUserAsync(string email)
-    {
-        using var scope = factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        return (await userManager.FindByEmailAsync(email))!;
-    }
 
     /// <summary>
     /// Computes the current RFC 6238 code (HMAC-SHA1, 30 second step, 6 digits) the way an
@@ -112,10 +81,8 @@ public class TwoFactorAuthenticationFlowTests(TestApplication factory) : IClassF
     /// </summary>
     private async Task<string> GetCurrentTotpAsync(string email)
     {
-        using var scope = factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var user = await userManager.FindByEmailAsync(email);
-        var key = await userManager.GetAuthenticatorKeyAsync(user!);
+        var key = await UseUserManagerAsync(factory, async userManager =>
+            await userManager.GetAuthenticatorKeyAsync((await userManager.FindByEmailAsync(email))!));
 
         Span<byte> timestep = stackalloc byte[8];
         BinaryPrimitives.WriteInt64BigEndian(timestep, DateTimeOffset.UtcNow.ToUnixTimeSeconds() / 30);

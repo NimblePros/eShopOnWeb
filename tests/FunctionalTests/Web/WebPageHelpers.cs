@@ -1,4 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web;
@@ -38,6 +41,46 @@ public static class WebPageHelpers
 
         return await client.PostAsync("/identity/account/login", formContent, ct);
     }
+
+    /// <summary>
+    /// Posts form fields plus the antiforgery token scraped from <paramref name="pageWithForm"/>.
+    /// </summary>
+    public static Task<HttpResponseMessage> PostFormAsync(HttpClient client, string url, string pageWithForm,
+        params KeyValuePair<string, string>[] fields)
+    {
+        var values = new List<KeyValuePair<string, string>>(fields)
+        {
+            new(TokenTag, GetRequestVerificationToken(pageWithForm))
+        };
+        return client.PostAsync(url, new FormUrlEncodedContent(values), TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>
+    /// Creates a throwaway user with a unique email, so tests that change account state don't
+    /// affect the demo user other tests sign in as. Returns the email.
+    /// </summary>
+    public static async Task<string> CreateUserAsync(TestApplication factory, string password = DemoUserPassword)
+    {
+        var email = $"user-{Guid.NewGuid():N}@example.com";
+        await UseUserManagerAsync(factory, async userManager =>
+        {
+            var result = await userManager.CreateAsync(new ApplicationUser { UserName = email, Email = email }, password);
+            Assert.True(result.Succeeded, string.Join(", ", result.Errors.Select(e => e.Description)));
+            return result;
+        });
+        return email;
+    }
+
+    public static async Task<T> UseUserManagerAsync<T>(TestApplication factory,
+        Func<UserManager<ApplicationUser>, Task<T>> action)
+    {
+        using var scope = factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        return await action(userManager);
+    }
+
+    public static Task<ApplicationUser> FindUserAsync(TestApplication factory, string email) =>
+        UseUserManagerAsync(factory, async userManager => (await userManager.FindByEmailAsync(email))!);
 
     public static string GetId(string input)
     {

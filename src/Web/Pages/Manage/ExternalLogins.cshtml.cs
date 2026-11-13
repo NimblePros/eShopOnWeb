@@ -90,6 +90,14 @@ public class ExternalLoginsModel(UserManager<ApplicationUser> userManager,
             return RedirectToPage();
         }
 
+        // The page only offers Remove when the user can still sign in afterwards; enforce that here too.
+        var canRemove = await userManager.HasPasswordAsync(user) || (await userManager.GetLoginsAsync(user)).Count > 1;
+        if (!canRemove)
+        {
+            StatusMessage = "Error: You can't remove your only way to sign in. Set a password first.";
+            return RedirectToPage();
+        }
+
         var result = await userManager.RemoveLoginAsync(user, loginProvider, providerKey);
         if (!result.Succeeded)
         {

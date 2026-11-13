@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
@@ -21,6 +22,8 @@ public class ManagePagesTests(TestApplication factory) : IClassFixture<TestAppli
     [InlineData("/manage/enable-authenticator")]
     [InlineData("/manage/reset-authenticator")]
     [InlineData("/manage/show-recovery-codes")]
+    [InlineData("/manage/disable-2fa")]
+    [InlineData("/manage/generate-recovery-codes")]
     public async Task RedirectsAnonymousUserToLogin(string url)
     {
         var response = await _client.GetAsync(url, TestContext.Current.CancellationToken);
@@ -57,6 +60,10 @@ public class ManagePagesTests(TestApplication factory) : IClassFixture<TestAppli
         Assert.Contains("href=\"/manage/my-account\"", content);
         Assert.Contains("href=\"/manage/change-password\"", content);
         Assert.Contains("href=\"/manage/two-factor-authentication\"", content);
+
+        // Only the current page's link is marked for screen readers.
+        Assert.Single(Regex.Matches(content, "aria-current=\"page\""));
+        Assert.Matches("<a (?=[^>]*href=\"/manage/my-account\")(?=[^>]*aria-current=\"page\")[^>]*>", content);
     }
 
     [Fact]

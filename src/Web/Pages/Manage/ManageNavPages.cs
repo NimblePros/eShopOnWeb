@@ -23,10 +23,19 @@ public static class ManageNavPages
 
     public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAuthentication);
 
-    public static string PageNavClass(ViewContext viewContext, string page)
+    public static string PageNavClass(ViewContext viewContext, string page) =>
+        IsActive(viewContext, page) ? "active" : string.Empty;
+
+    /// <summary>
+    /// "page" for the active nav link so screen readers announce it; null omits the attribute.
+    /// </summary>
+    public static string? AriaCurrent(ViewContext viewContext, string page) =>
+        IsActive(viewContext, page) ? "page" : null;
+
+    private static bool IsActive(ViewContext viewContext, string page)
     {
-        var activePage = viewContext.ViewData["ActivePage"] as string;
-        return string.Equals(activePage, page, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
+        var activePage = viewContext.ViewData[ActivePageKey] as string;
+        return string.Equals(activePage, page, StringComparison.OrdinalIgnoreCase);
     }
 
     public static void AddActivePage(this ViewDataDictionary viewData, string activePage) => viewData[ActivePageKey] = activePage;
