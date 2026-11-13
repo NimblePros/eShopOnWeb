@@ -1,8 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Threading.Tasks;
-using BlazorInputFile;
 
 namespace BlazorShared.Models;
 
@@ -58,21 +56,6 @@ public class CatalogItem
         }
 
         return null;
-    }
-
-    public static async Task<string> DataToBase64(IFileListEntry fileItem)
-    {
-        using (var reader = new StreamReader(fileItem.Data))
-        {
-            using (var memStream = new MemoryStream())
-            {
-                await reader.BaseStream.CopyToAsync(memStream);
-                var fileData = memStream.ToArray();
-                var encodedBase64 = Convert.ToBase64String(fileData);
-
-                return encodedBase64;
-            }
-        }
     }
 
     private static bool IsExtensionValid(string fileName)
