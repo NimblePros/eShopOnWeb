@@ -29,4 +29,17 @@ public class UpdatePictureUri
 
         Assert.StartsWith("images\\products\\new.png?", catalogItem.PictureUri);
     }
+
+    [Fact]
+    public void AppendsCurrentUtcTicksAsCacheBuster()
+    {
+        var catalogItem = CreateCatalogItem();
+        var ticksBefore = DateTime.UtcNow.Ticks;
+
+        catalogItem.UpdatePictureUri("new.png");
+
+        var ticksAfter = DateTime.UtcNow.Ticks;
+        var cacheBuster = long.Parse(catalogItem.PictureUri.Split('?')[1]);
+        Assert.InRange(cacheBuster, ticksBefore, ticksAfter);
+    }
 }
