@@ -19,6 +19,7 @@
   </Folder>
   <Folder Name="/tests/">
     <File Path="CodeCoverage.runsettings" />
+    <Project Path="tests/AppHostTests/AppHostTests.csproj" />
     <Project Path="tests/FunctionalTests/FunctionalTests.csproj" />
     <Project Path="tests/IntegrationTests/IntegrationTests.csproj" />
     <Project Path="tests/PublicApiIntegrationTests/PublicApiIntegrationTests.csproj" />

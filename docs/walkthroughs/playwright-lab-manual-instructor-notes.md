@@ -54,7 +54,7 @@ dotnet test tests/EndToEndTests/EndToEndTests.csproj
 Start the app for interactive codegen demos (separate terminal):
 
 ```powershell
-dotnet run --project src/Web/Web.csproj
+dotnet run --project src/Web/Web.csproj -- --UseOnlyInMemoryDatabase=true
 ```
 
 Keep this terminal running while you execute codegen steps.
@@ -83,7 +83,7 @@ Live steps:
 1. Ensure the app is running in a separate terminal:
 
 ```powershell
-dotnet run --project src/Web/Web.csproj
+dotnet run --project src/Web/Web.csproj -- --UseOnlyInMemoryDatabase=true
 ```
 
 1. Run codegen:
@@ -247,7 +247,7 @@ gh issue comment <issue-number> --body-file <comment-file>.md
 
 ```powershell
 # Terminal 1 (keep running for codegen demos)
-dotnet run --project src/Web/Web.csproj
+dotnet run --project src/Web/Web.csproj -- --UseOnlyInMemoryDatabase=true
 
 # Terminal 2
 dotnet build tests/EndToEndTests/EndToEndTests.csproj
