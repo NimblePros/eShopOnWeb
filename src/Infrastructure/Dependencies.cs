@@ -11,6 +11,9 @@ namespace Microsoft.eShopWeb.Infrastructure;
 
 public static class Dependencies
 {
+    public const string CATALOG_CONNECTION_NAME = "CatalogConnection";
+    public const string IDENTITY_CONNECTION_NAME = "IdentityConnection";
+
     public static void ConfigureLocalDatabaseContexts(this IServiceCollection services, IConfiguration configuration)
     {
         bool useOnlyInMemoryDatabase = false;
@@ -29,12 +32,12 @@ public static class Dependencies
         }
         else
         {
-            // use real database
-            // Requires LocalDB which can be installed with SQL Server Express 2016
-            // https://www.microsoft.com/en-us/download/details.aspx?id=54284
-            string catalogConnectionString = configuration.GetConnectionString("CatalogConnection")!;
+            // Use a real SQL Server database. Running the eShopWeb.AppHost (.NET Aspire) project
+            // starts SQL Server in a container and supplies these connection strings.
             services.AddDbContext<CatalogContext>((provider, options) =>
             {
+                string? catalogConnectionString = GetSqlConnectionString(configuration, CATALOG_CONNECTION_NAME);
+
                 // why doesn't this extension method work?
                 // see: https://github.com/NimblePros/Metronome/blob/main/src/NimblePros.Metronome/ServiceRegistrationExtensions.cs#L24
                 //options.UseSqlServer(catalogConnectionString).AddMetronomeDbTracking(provider); ;
@@ -45,14 +48,28 @@ public static class Dependencies
             });
 
             // Add Identity DbContext
-            string identityConnectionString = configuration.GetConnectionString("IdentityConnection")!;
             services.AddDbContext<AppIdentityDbContext>((provider, options) =>
             {
+                string? identityConnectionString = GetSqlConnectionString(configuration, IDENTITY_CONNECTION_NAME);
                 options.UseSqlServer(identityConnectionString);
                 // not sure why AddMetronomeDbTracking extension method doesn't work here
                 options.AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
             });
         }
+    }
+
+    // Resolved when a DbContext is first created, not at registration, so tests that swap in
+    // their own DbContextOptions never need a connection string. EF design-time tools
+    // (e.g. "dotnet ef migrations add") don't connect, so they don't need one either.
+    private static string? GetSqlConnectionString(IConfiguration configuration, string name)
+    {
+        string? connectionString = configuration.GetConnectionString(name);
+        if (string.IsNullOrWhiteSpace(connectionString) && !EF.IsDesignTime)
+        {
+            throw new DatabaseNotConfiguredException(name);
+        }
+
+        return connectionString;
     }
 
     public static void AddJwtSettings(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)

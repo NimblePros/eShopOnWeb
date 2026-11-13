@@ -76,7 +76,7 @@ In order to populate the ViewModel, we'll need to get the order status informati
 
 ## Update the Database
 
-Since we're using the EF Core InMemory database, we don't need to update the database just yet. When we're ready to test this with a real database, or before going to production, we would add new migrations using the instructions in [the project README](https://github.com/NimblePros/eShopOnWeb/blob/master/README.md) and then call dotnet ef database update with the appropriate arguments to apply the changes.
+Since we're using the EF Core InMemory database, we don't need to update the database just yet. When we're ready to test this with a real database, or before going to production, we would add new migrations using the instructions in [the project README](https://github.com/NimblePros/eShopOnWeb/blob/main/README.md#working-with-ef-core-migrations). The apps apply pending migrations when they start.
 
 ## Setting the Values
 

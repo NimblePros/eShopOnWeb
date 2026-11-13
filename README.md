@@ -19,7 +19,8 @@ A list of Frequently Asked Questions about this repository can be found [here](h
   - [Windows](#windows)
   - [Linux/MacOS](#linuxmacos)
 - [Running the sample locally](#running-the-sample-locally)
-  - [Configuring the sample to use SQL Server](#configuring-the-sample-to-use-sql-server)
+  - [Running without Aspire](#running-without-aspire)
+  - [Working with EF Core migrations](#working-with-ef-core-migrations)
 - [Dev Containers for the eShopOnWeb repo](#dev-containers-for-the-eshoponweb-repo)
   - [eShopOnWeb App Dev Container](#eshoponweb-app-dev-container)
   - [eShopOnWeb Docs Dev Container](#eshoponweb-docs-dev-container)
@@ -111,58 +112,55 @@ According to the prompt, enter an `env name`, and select `subscription` and `loc
 1. Considering security, we store its related data (id, password) in the **Azure Key Vault** when we create the database, and obtain it from the Key Vault when we use it. This is different from directly deploying applications locally.
 2. The resource group name created in azure portal will be **rg-{env name}**.
 
-You can also run the sample directly locally (See below).
+You can also run the sample locally (see below).
 
 ## Running the sample locally
-Most of the site's functionality works with just the web application running. However, the site's Admin page relies on Blazor WebAssembly running in the browser, and it must communicate with the server using the site's PublicApi web application. You'll need to also run this project. You can configure Visual Studio to start multiple projects, or just go to the PublicApi folder in a terminal window and run `dotnet run` from there. After that from the Web folder you should run `dotnet run --launch-profile https`. Now you should be able to browse to `https://localhost:5001/`. The admin part in Blazor is accessible to `https://localhost:5001/admin`
 
-Note that if you use this approach, you'll need to stop the application manually in order to build the solution (otherwise you'll get file locking errors).
+The easiest way to run the sample on Windows, macOS, or Linux is with [.NET Aspire](https://learn.microsoft.com/dotnet/aspire/). The `eShopWeb.AppHost` project starts everything the site needs:
 
-After cloning or downloading the sample you must setup your database.
-To use the sample with a persistent database, you will need to run its Entity Framework Core migrations before you will be able to run the app.
+- a SQL Server container holding the `Microsoft.eShopOnWeb.CatalogDb` (catalog and shopping cart data) and `Microsoft.eShopOnWeb.Identity` (user credentials) databases
+- a [Seq](https://datalust.co/seq) container for structured logs
+- the `Web` and `PublicApi` projects, with their database connection strings filled in
 
-You can also run the samples in Docker (see below).
+You need the [.NET SDK](https://dotnet.microsoft.com/download) listed in `global.json` and a container runtime such as [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Podman](https://podman.io/). Then, from the root folder:
 
-### Configuring the sample to use SQL Server
+```
+dotnet run --project src/eShopWeb.AppHost
+```
 
-1. By default, the project uses a real database. If you want an in memory database, you can add in the `appsettings.json` file in the Web folder
+Or use the [Aspire CLI](https://learn.microsoft.com/dotnet/aspire/cli/overview) with `aspire run`, or set `eShopWeb.AppHost` as the startup project in Visual Studio or Rider.
 
-    ```json
-   {
-       "UseOnlyInMemoryDatabase": true
-   }
-    ```
+Open the Aspire dashboard link shown in the console to find the Web and PublicApi endpoints. The Web site is at `https://localhost:5001/`, and the admin area (Blazor WebAssembly, which calls PublicApi) is at `https://localhost:5001/admin`.
 
-1. Ensure your connection strings in `appsettings.json` point to a local SQL Server instance.
-1. Ensure the tool EF was already installed. You can find some help [here](https://docs.microsoft.com/ef/core/miscellaneous/cli/dotnet)
+The first run downloads the SQL Server image, which can take a few minutes. When the apps start, they apply the Entity Framework Core migrations and seed both databases, so you should see products in the store and be able to log in with the `demouser@microsoft.com` account. The SQL Server container and its data volume are kept between runs, so your data survives restarts. To start over with empty databases, remove the `sqlserver` container and its volume using your container tool.
 
-    ```
-    dotnet tool update --global dotnet-ef
-    ```
+The SQL Server `sa` password is generated on the first run and stored in the AppHost's [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) as `Parameters:sqlserver-password`. The data volume keeps the password it was created with, so if you clear the AppHost's user secrets, also remove the `sqlserver` container and its volume (or the apps won't be able to log in to SQL Server).
 
-1. Open a command prompt in the Web folder and execute the following commands:
+> **Apple silicon:** The SQL Server image is built for x64 only. On an Apple silicon Mac, enable Rosetta emulation for x86/amd64 images in your container runtime (for example, Docker Desktop's "Use Rosetta for x86_64/amd64 emulation on Apple Silicon" setting).
 
-    ```
-    dotnet restore
-    dotnet tool restore
-    dotnet ef database update -c catalogcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj
-    dotnet ef database update -c appidentitydbcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj
-    ```
+### Running without Aspire
 
-    These commands will create two separate databases, one for the store's catalog data and shopping cart information, and one for the app's user credentials and identity data.
+You can also run the `Web` and `PublicApi` projects directly with `dotnet run`, without containers, by using the EF Core in-memory database. Add the following to the `appsettings.json` file of each project you run, or pass `--UseOnlyInMemoryDatabase=true` on the command line:
 
-1. Run the application.
+```json
+{
+    "UseOnlyInMemoryDatabase": true
+}
+```
 
-    The first time you run the application, it will seed both databases with data such that you should see products in the store, and you should be able to log in using the demouser@microsoft.com account.
+The in-memory data is reseeded every time the app starts, and each app has its own copy, so changes made in the admin area (through PublicApi) don't show up in the store (Web). To use your own SQL Server instead, set the `ConnectionStrings:CatalogConnection` and `ConnectionStrings:IdentityConnection` settings, for example with user secrets.
 
-    Note: If you need to create migrations, you can use these commands:
+Note that if you run the apps this way, you'll need to stop them manually in order to build the solution (otherwise you'll get file locking errors).
 
-    ```
-    -- create migration (from Web folder CLI)
-    dotnet ef migrations add InitialModel --context catalogcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
+### Working with EF Core migrations
 
-    dotnet ef migrations add InitialIdentityModel --context appidentitydbcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Identity/Migrations
-    ```
+The apps apply migrations on startup, so you don't need to run `dotnet ef database update`. If you change the model and need to create migrations, install the [EF Core tools](https://learn.microsoft.com/ef/core/cli/dotnet) (`dotnet tool update --global dotnet-ef`) and run these commands from the Web folder (`migrations add` doesn't need a database; commands that connect to one, such as `dotnet ef migrations list`, need a `--connection` argument):
+
+```
+dotnet ef migrations add InitialModel --context catalogcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
+
+dotnet ef migrations add InitialIdentityModel --context appidentitydbcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Identity/Migrations
+```
 
 ## Dev Containers for the eShopOnWeb repo
 

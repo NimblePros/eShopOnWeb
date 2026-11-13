@@ -30,7 +30,8 @@ public static class WebApplicationExtensions
                 || app.Configuration.GetValue<bool>(AppIdentityDbContextSeed.SEED_DEMO_USERS_CONFIG_NAME);
             await AppIdentityDbContextSeed.SeedAsync(identityContext, userManager, roleManager, seedDemoUsers);
         }
-        catch (Exception ex)
+        // A missing connection string is a setup problem, not a seeding hiccup: let it stop startup.
+        catch (Exception ex) when (ex is not DatabaseNotConfiguredException)
         {
             app.Logger.LogError(ex, "An error occurred seeding the DB.");
         }
