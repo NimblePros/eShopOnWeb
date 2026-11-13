@@ -42,9 +42,16 @@ https://github.com/NimblePros/eShopOnWeb/issues/316
 
 ## Phase 4 — Independent review
 
-- [ ] Separate agent reviews the full diff (correctness, security, performance, accessibility)
-- [ ] Address significant findings, or record here why they were not
+- [x] Separate agent reviews the full diff (correctness, security, performance, accessibility)
+- [x] Address significant findings, or record here why they were not
+  - Fixed: `Logout.razor` now catches a failed token fetch or logout, shows a `role="alert"`
+    message, and only redirects to the login page once logout succeeds.
+  - Fixed: the token endpoint test asserts `Cache-Control: no-store`.
+  - Deferred: a Playwright end-to-end test of the BlazorAdmin logout click. No existing E2E test
+    covers admin logout, and the server contract is covered by functional tests.
+  - Skipped: moving the check into a reusable FastEndpoints pre-processor. Logout is the only
+    endpoint that needs it today.
 
 ## Phase 5 — Verification
 
-- [ ] `dotnet ./BuildTestFormat.cs` passes (build, tests, format)
+- [x] `dotnet ./BuildTestFormat.cs` passes (build, tests, format)
