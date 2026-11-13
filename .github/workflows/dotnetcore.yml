@@ -24,7 +24,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '11.0.x'
-        include-prerelease: true
 
     - name: Build with dotnet
       run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release
@@ -32,6 +31,10 @@ jobs:
       # Browsers install to the shared Playwright cache, so the Release build's script works for the Debug test run.
     - name: Install Playwright browsers
       run: pwsh tests/EndToEndTests/bin/Release/net11.0/playwright.ps1 install --with-deps chromium
+
+      # The EndToEnd tests start the Web app on https://localhost:5001.
+    - name: Create HTTPS development certificate
+      run: dotnet dev-certs https
 
       # Tests run on Microsoft.Testing.Platform (see "test" in global.json).
       # Each test project references coverlet.MTP, which writes one Cobertura report per project.

@@ -116,6 +116,9 @@ public sealed class BrowserFixture : IAsyncLifetime
             RedirectStandardOutput = true,
             RedirectStandardError = true
         };
+        // Use the in-memory database so the site doesn't need SQL Server / LocalDB
+        // (LocalDB doesn't exist on Linux CI runners).
+        startInfo.Environment["UseOnlyInMemoryDatabase"] = "true";
 
         _webProcess = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start Web app process.");
 

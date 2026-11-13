@@ -10,10 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Seq" />
-    <PackageReference Include="NimblePros.Metronome" />
-    <!-- NimblePros.Metronome brings in EF Core 8, whose Microsoft.Extensions.Caching.Memory 8.0.0
-         has a known vulnerability (GHSA-qj66-m88j-hmgj). Pin it to the patched version. -->
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
   </ItemGroup>
 
   <ItemGroup>
