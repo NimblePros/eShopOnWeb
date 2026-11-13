@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -58,14 +59,27 @@ public class CreateCatalogItemEndpointTest
         Assert.AreEqual(_testPrice, model.CatalogItem.Price);
     }
 
-    private StringContent GetValidNewItemJson()
+    [TestMethod]
+    public async Task ReturnsConflictGivenDuplicateItemName()
+    {
+        var duplicateName = $"duplicate test name {Guid.NewGuid()}";
+        var client = HttpClientHelper.GetProductManagerClient();
+        var firstResponse = await client.PostAsync("api/catalog-items", GetValidNewItemJson(duplicateName));
+        firstResponse.EnsureSuccessStatusCode();
+
+        var secondResponse = await client.PostAsync("api/catalog-items", GetValidNewItemJson(duplicateName));
+
+        Assert.AreEqual(HttpStatusCode.Conflict, secondResponse.StatusCode);
+    }
+
+    private StringContent GetValidNewItemJson(string? name = null)
     {
         var request = new CreateCatalogItemRequest()
         {
             CatalogBrandId = _testBrandId,
             CatalogTypeId = _testTypeId,
             Description = _testDescription,
-            Name = _testName,
+            Name = name ?? _testName,
             Price = _testPrice
         };
         var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");

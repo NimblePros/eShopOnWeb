@@ -31,8 +31,8 @@ public class CreateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, 
         var response = new CreateCatalogItemResponse(request.CorrelationId());
 
         var catalogItemNameSpecification = new CatalogItemNameSpecification(request.Name);
-        var existingCatalogItem= await itemRepository.CountAsync(catalogItemNameSpecification, ct);
-        if (existingCatalogItem> 0)
+        var existingCatalogItemCount = await itemRepository.CountAsync(catalogItemNameSpecification, ct);
+        if (existingCatalogItemCount > 0)
         {
             throw new DuplicateException($"A catalogItem with name {request.Name} already exists");
         }
@@ -62,6 +62,6 @@ public class CreateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, 
         };
         response.CatalogItem = dto;
 
-        await Send.CreatedAtAsync<CatalogItemGetByIdEndpoint>(new{ CatalogItemId = dto.Id }, response, cancellation: ct);
+        await Send.CreatedAtAsync<CatalogItemGetByIdEndpoint>(new { CatalogItemId = dto.Id }, response, cancellation: ct);
     }
 }
