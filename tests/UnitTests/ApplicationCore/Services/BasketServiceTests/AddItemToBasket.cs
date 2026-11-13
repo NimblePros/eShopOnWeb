@@ -41,4 +41,36 @@ public class AddItemToBasket
 
         await _mockBasketRepo.Received().UpdateAsync(basket, Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task CreatesAndAddsNewBasketWithItemIfBasketNotFound()
+    {
+        _mockBasketRepo.FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), Arg.Any<CancellationToken>())
+            .Returns((Basket?)null);
+        var basketService = new BasketService(_mockBasketRepo, _mockLogger);
+
+        var result = await basketService.AddItemToBasket(_buyerId, 1, 1.50m, 2);
+
+        Assert.Equal(_buyerId, result.BuyerId);
+        var item = Assert.Single(result.Items);
+        Assert.Equal(1, item.CatalogItemId);
+        Assert.Equal(1.50m, item.UnitPrice);
+        Assert.Equal(2, item.Quantity);
+        await _mockBasketRepo.Received(1).AddAsync(result, Arg.Any<CancellationToken>());
+        await _mockBasketRepo.Received(1).UpdateAsync(result, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task DoesNotAddNewBasketIfBasketExists()
+    {
+        var basket = new Basket(_buyerId);
+        _mockBasketRepo.FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), Arg.Any<CancellationToken>())
+            .Returns(basket);
+        var basketService = new BasketService(_mockBasketRepo, _mockLogger);
+
+        var result = await basketService.AddItemToBasket(_buyerId, 1, 1.50m);
+
+        Assert.Same(basket, result);
+        await _mockBasketRepo.DidNotReceive().AddAsync(Arg.Any<Basket>(), Arg.Any<CancellationToken>());
+    }
 }

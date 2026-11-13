@@ -60,7 +60,8 @@ public class CatalogItem : BaseEntity, IAggregateRoot
             PictureUri = string.Empty;
             return;
         }
-        PictureUri = $"images\\products\\{pictureName}?{new DateTime().Ticks}";
+        // The timestamp query string busts browser/CDN caches when a picture is replaced under the same name.
+        PictureUri = $"images\\products\\{pictureName}?{DateTime.UtcNow.Ticks}";
     }
 
     public readonly record struct CatalogItemDetails
