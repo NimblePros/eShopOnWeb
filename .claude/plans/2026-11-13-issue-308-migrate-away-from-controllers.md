@@ -102,6 +102,22 @@ Sub-issues: #310 Order, #311 User, #312 Manage, #313 cleanup.
 - [x] `dotnet test --solution eShopOnWeb.slnx`: 172 total, 171 passed, 0 failed, 1 skipped
       (the existing skipped EndToEnd test).
 - [x] `dotnet format --verify-no-changes` is clean for every `.cs` file this branch touches.
-      As noted in earlier plans, `main` still fails it repo-wide on line endings in untouched files.
-- Note: `dotnet ./BuildTestFormat.cs` fails on `main` because it calls `dotnet test <project>`
-  without `--project` under the MTP runner. That's pre-existing, so I ran the three steps directly.
+
+## Phase 7 — Repo-wide formatting and BuildTestFormat.cs (follow-up request)
+
+- [x] Line endings: `.gitattributes` says `eol=lf`, but 13 files were committed as CRLF and
+      `.editorconfig` had no `end_of_line`, so `dotnet format` on Windows expected CRLF. Added
+      `end_of_line = lf` and renormalized (line-ending-only commit).
+- [x] Applied `dotnet format whitespace` + `style` across the solution: whitespace, using order,
+      UTF-8 BOM. Did **not** apply `dotnet format analyzers` fixes: those removed
+      `StateHasChanged()` calls and wrapped JS interop in empty try/catch blocks.
+- [x] EF migrations marked `generated_code = true` so the formatter leaves them alone.
+- [x] BlazorAdmin analyzer warnings that `--verify-no-changes` reports:
+  - BL0012 fixed: removed redundant `StateHasChanged()` from EventCallback handlers.
+  - BL0013 fixed: the user list reads the cascading `Task<AuthenticationState>`.
+  - BL0016 lowered to suggestion, only for the one-line wrappers in `BlazorAdmin/JavaScript`.
+- [x] `BuildTestFormat.cs`: uses `dotnet test --project` (MTP), parses MTP's summary, and
+      reports skipped tests.
+- [x] `dotnet ./BuildTestFormat.cs` exits 0: build OK, 171/172 tests pass (1 skipped, existing),
+      and `dotnet format eShopOnWeb.slnx --verify-no-changes` is clean repo-wide.
+- Follow-up issues created: #315 (order detail doesn't check the owner), #316 (logout CSRF).
