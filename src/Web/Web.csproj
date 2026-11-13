@@ -19,6 +19,7 @@
     <PackageReference Include="AspNetCore.Security.OAuth.Extensions" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" />
     <PackageReference Include="Azure.Identity" />
+    <PackageReference Include="FastEndpoints" />
     <PackageReference Include="Mediator.Abstractions" />
     <PackageReference Include="Mediator.SourceGenerator">
       <PrivateAssets>all</PrivateAssets>

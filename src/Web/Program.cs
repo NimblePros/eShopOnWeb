@@ -1,4 +1,5 @@
 ﻿using Ardalis.ListStartupServices;
+using FastEndpoints;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -76,6 +77,14 @@ builder.Services.AddRazorPages(options =>
 });
 builder.Services.AddHttpContextAccessor();
 
+// API endpoints live in Endpoints/. Only scan this assembly: the default scans every loaded
+// assembly, which would also pick up PublicApi's endpoints when both are loaded (e.g. in tests).
+builder.Services.AddFastEndpoints(o =>
+{
+    o.DisableAutoDiscovery = true;
+    o.Assemblies = [typeof(Program).Assembly];
+});
+
 builder.Services.AddCustomHealthChecks();
 
 builder.Services.Configure<ServiceConfig>(config =>
@@ -121,6 +130,7 @@ app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<UserContextEnrichmentMiddleware>();
+app.UseFastEndpoints();
 app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
 app.MapRazorPages();
 app.MapHealthChecks("home_page_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("homePageHealthCheck") });

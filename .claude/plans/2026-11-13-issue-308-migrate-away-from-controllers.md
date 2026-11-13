@@ -34,13 +34,13 @@ Sub-issues: #310 Order, #311 User, #312 Manage, #313 cleanup.
 
 ## Phase 2 — #311 UserController → FastEndpoints
 
-- [ ] Add FastEndpoints to Web, scanning only the Web assembly (same as PublicApi, #281)
-- [ ] `Endpoints/User/GetCurrentUserEndpoint` (`GET /User`, anonymous) and
+- [x] Add FastEndpoints to Web, scanning only the Web assembly (same as PublicApi, #281)
+- [x] `Endpoints/User/GetCurrentUserEndpoint` (`GET /User`, anonymous) and
       `Endpoints/User/LogoutEndpoint` (`POST /User/Logout`)
-- [ ] Delete `UserController`
-- [ ] Functional tests (FunctionalTests/Web/Endpoints): anonymous user info, authenticated
+- [x] Delete `UserController`
+- [x] Functional tests (FunctionalTests/Web/Endpoints): anonymous user info, authenticated
       user info with claims + token, logout returns 200
-- [ ] Verify
+- [x] Verify
 
 ## Phase 3 — #312 ManageController → Razor Pages
 
