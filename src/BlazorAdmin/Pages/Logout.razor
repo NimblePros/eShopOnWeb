@@ -2,12 +2,38 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient HttpClient
 @inherits BlazorAdmin.Helpers.BlazorComponent
+@using BlazorAdmin.Authorization
+
+@if (_failed)
+{
+    <div class="alert alert-danger" role="alert">
+        Sign out failed. Please refresh the page and try again.
+    </div>
+}
 
 @code {
 
+    private bool _failed;
+
     protected override async Task OnInitializedAsync()
     {
-        await HttpClient.PostAsync("User/Logout", null);
+        try
+        {
+            // The Web app rejects logout without an antiforgery token. Get a fresh one so it is
+            // bound to the current user.
+            var antiforgery = await HttpClient.GetFromJsonAsync<AntiforgeryTokenResponse>("User/AntiforgeryToken");
+            using var request = new HttpRequestMessage(HttpMethod.Post, "User/Logout");
+            request.Headers.Add(AntiforgeryTokenResponse.HeaderName, antiforgery?.Token);
+            using var response = await HttpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or System.Text.Json.JsonException)
+        {
+            // Don't send the user to the login page while they are still signed in.
+            _failed = true;
+            return;
+        }
+
         await new Route(JSRuntime).RouteOutside("/Identity/Account/Login");
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using FastEndpoints;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -12,8 +13,11 @@ namespace Microsoft.eShopWeb.Web.Endpoints.UserEndpoints;
 /// <summary>
 /// Signs the current user out. BlazorAdmin calls this from its logout page. The identity cookie
 /// key is cached so <see cref="RevokeAuthenticationEvents"/> rejects that cookie if it is replayed.
+/// Requires an antiforgery token (from <see cref="GetAntiforgeryTokenEndpoint"/>) so other sites
+/// can't sign the user out with a cross-site POST.
 /// </summary>
 public class LogoutEndpoint(SignInManager<ApplicationUser> signInManager,
+    IAntiforgery antiforgery,
     ILogger<LogoutEndpoint> logger,
     IMemoryCache cache)
     : EndpointWithoutRequest
@@ -26,6 +30,13 @@ public class LogoutEndpoint(SignInManager<ApplicationUser> signInManager,
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        if (!await antiforgery.IsRequestValidAsync(HttpContext))
+        {
+            logger.LogWarning("Logout rejected: missing or invalid antiforgery token.");
+            await Send.ErrorsAsync(StatusCodes.Status400BadRequest, ct);
+            return;
+        }
+
         await signInManager.SignOutAsync();
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
