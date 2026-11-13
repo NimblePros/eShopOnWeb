@@ -23,24 +23,28 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '10.0.x'
-        include-prerelease: true
+        dotnet-version: '11.0.x'
 
     - name: Build with dotnet
       run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release
 
-      # See https://josh-ops.com/posts/github-code-coverage/
-      # Add coverlet.collector nuget package to test project - 'dotnet add <TestProject.cspoj> package coverlet
+      # Browsers install to the shared Playwright cache, so the Release build's script works for the Debug test run.
+    - name: Install Playwright browsers
+      run: pwsh tests/EndToEndTests/bin/Release/net11.0/playwright.ps1 install --with-deps chromium
+
+      # The EndToEnd tests start the Web app on https://localhost:5001.
+    - name: Create HTTPS development certificate
+      run: dotnet dev-certs https
+
+      # Tests run on Microsoft.Testing.Platform (see "test" in global.json).
+      # Each test project references coverlet.MTP, which writes one Cobertura report per project.
     - name: Test with dotnet
-      run: dotnet test ${{ env.SOLUTION_FILE }} --no-restore --verbosity normal --collect:"XPlat Code Coverage" --logger trx --results-directory coverage
-      
-    - name: Copy Coverage To Predictable Location
-      run: find coverage -type f -name coverage.cobertura.xml -exec cp -p {} coverage/coverage.cobertura.xml \;
-      
+      run: dotnet test --solution ${{ env.SOLUTION_FILE }} --no-restore --coverlet --coverlet-output-format cobertura --results-directory coverage --results-directory-layout per-module
+
     - name: Code Coverage Summary Report
       uses: irongut/CodeCoverageSummary@v1.3.0
       with:
-        filename: coverage/coverage.cobertura.xml
+        filename: coverage/**/coverage.cobertura*.xml
         badge: true
         format: 'markdown'
         output: 'both'

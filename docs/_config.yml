@@ -1,6 +1,6 @@
 baseurl: "/eShopOnWeb"
 title: eShopOnWeb
-description: "Sample ASP.NET Core 10.0 reference application, powered by Microsoft, demonstrating a domain-centric application architecture with monolithic deployment model."
+description: "Sample ASP.NET Core 11.0 reference application, powered by Microsoft, demonstrating a domain-centric application architecture with monolithic deployment model."
 remote_theme: just-the-docs/just-the-docs
 color_scheme: "dim"
 search_enabled: true

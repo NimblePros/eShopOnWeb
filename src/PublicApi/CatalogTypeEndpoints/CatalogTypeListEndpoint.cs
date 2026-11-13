@@ -11,7 +11,7 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogTypeEndpoints;
 /// <summary>
 /// List Catalog Types
 /// </summary>
-public class CatalogTypeListEndpoint(IRepository<CatalogType> catalogTypeRepository, AutoMapper.IMapper mapper)
+public class CatalogTypeListEndpoint(IRepository<CatalogType> catalogTypeRepository)
     : EndpointWithoutRequest<ListCatalogTypesResponse>
 {
     public override void Configure()
@@ -29,7 +29,7 @@ public class CatalogTypeListEndpoint(IRepository<CatalogType> catalogTypeReposit
 
         var items = await catalogTypeRepository.ListAsync(ct);
 
-        response.CatalogTypes.AddRange(items.Select(mapper.Map<CatalogTypeDto>));
+        response.CatalogTypes.AddRange(items.Select(item => item.ToDto()));
 
         return response;
     }

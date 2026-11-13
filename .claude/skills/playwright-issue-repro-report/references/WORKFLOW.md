@@ -13,7 +13,7 @@ Capture:
 
 ```powershell
 dotnet build tests/EndToEndTests/EndToEndTests.csproj
-pwsh tests/EndToEndTests/bin/Debug/net10.0/playwright.ps1 install
+pwsh tests/EndToEndTests/bin/Debug/net11.0/playwright.ps1 install
 ```
 
 If using interactive codegen, start the app in another terminal:

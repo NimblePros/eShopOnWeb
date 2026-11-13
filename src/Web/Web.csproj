@@ -17,7 +17,6 @@
     <PackageReference Include="Ardalis.Specification" />
     <PackageReference Include="Aspire.Seq" />
     <PackageReference Include="AspNetCore.Security.OAuth.Extensions" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" />
     <PackageReference Include="Azure.Identity" />
     <PackageReference Include="Mediator.Abstractions" />
@@ -41,15 +40,6 @@
     </PackageReference>
     <PackageReference Include="NimblePros.Metronome" />     
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />     
-    <PackageReference Include="System.Text.Encoding.Extensions" />
-    <PackageReference Include="System.Threading" />
-    <PackageReference Include="System.Runtime.InteropServices" />
-    <PackageReference Include="System.Runtime.Handles" />
-    <PackageReference Include="System.Net.Primitives" />
-    <PackageReference Include="System.IO.FileSystem.Primitives" />
-    <PackageReference Include="System.IO.FileSystem" />
-    <PackageReference Include="System.Diagnostics.Debug" />
-    <PackageReference Include="System.Diagnostics.Tracing" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\fonts\" />

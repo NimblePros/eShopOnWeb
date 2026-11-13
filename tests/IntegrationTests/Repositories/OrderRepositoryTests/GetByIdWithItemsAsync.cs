@@ -40,8 +40,8 @@ public class GetByIdWithItemsAsync
 
         var secondOrderItems = new List<OrderItem>
         {
-            new(OrderBuilder.TestCatalogItemOrdered, itemOneUnitPrice, itemOneUnits),
-            new(OrderBuilder.TestCatalogItemOrdered, itemTwoUnitPrice, itemTwoUnits)
+            new(OrderBuilder.CreateCatalogItemOrdered(), itemOneUnitPrice, itemOneUnits),
+            new(OrderBuilder.CreateCatalogItemOrdered(), itemTwoUnitPrice, itemTwoUnits)
         };
         var secondOrder = OrderBuilder.WithItems(secondOrderItems);
         _catalogContext.Orders.Add(secondOrder);

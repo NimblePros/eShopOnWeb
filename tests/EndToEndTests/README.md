@@ -16,7 +16,7 @@ This project contains browser-based end-to-end tests using Playwright for .NET.
 
 2. Install browser binaries:
 
-   pwsh tests/EndToEndTests/bin/Debug/net10.0/playwright.ps1 install
+   pwsh tests/EndToEndTests/bin/Debug/net11.0/playwright.ps1 install
 
 ## Run tests
 
@@ -28,7 +28,7 @@ The smoke test starts the Web app automatically using its normal launch profile 
 
 1. Generate a first draft test:
 
-   pwsh tests/EndToEndTests/bin/Debug/net10.0/playwright.ps1 codegen <https://localhost:5001>
+   pwsh tests/EndToEndTests/bin/Debug/net11.0/playwright.ps1 codegen <https://localhost:5001>
 
 2. Paste the generated code into a test file as a draft.
 
@@ -51,11 +51,11 @@ Use this walkthrough when teaching the full authoring loop. It intentionally end
 1. Build and install browsers (first run only):
 
    dotnet build tests/EndToEndTests/EndToEndTests.csproj
-   pwsh tests/EndToEndTests/bin/Debug/net10.0/playwright.ps1 install
+   pwsh tests/EndToEndTests/bin/Debug/net11.0/playwright.ps1 install
 
 2. Generate a draft with Playwright codegen:
 
-   pwsh tests/EndToEndTests/bin/Debug/net10.0/playwright.ps1 codegen <https://localhost:5001>
+   pwsh tests/EndToEndTests/bin/Debug/net11.0/playwright.ps1 codegen <https://localhost:5001>
 
 3. In the codegen browser, perform this short flow:
 
@@ -112,11 +112,11 @@ This repo includes an intentionally failing basket test scenario in `Playwright/
 
 2. Optional: produce structured test result output:
 
-   dotnet test tests/EndToEndTests/EndToEndTests.csproj --logger "trx;LogFileName=endtoend.trx"
+   dotnet test tests/EndToEndTests/EndToEndTests.csproj --report-xunit-trx --report-xunit-trx-filename endtoend.trx
 
 3. Open trace locally with Playwright:
 
-   pwsh tests/EndToEndTests/bin/Debug/net10.0/playwright.ps1 show-trace TestResults/PlaywrightArtifacts/<folder>/trace.zip
+   pwsh tests/EndToEndTests/bin/Debug/net11.0/playwright.ps1 show-trace TestResults/PlaywrightArtifacts/<folder>/trace.zip
 
 4. Or open trace in hosted viewer:
 

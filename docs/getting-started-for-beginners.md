@@ -2,7 +2,7 @@
 title: Getting Started for Beginners
 ---
 
-If you're new to building applications with ASP.NET Core and Visual Studio, go through [this ASP.NET Razor Pages tutorial](https://learn.microsoft.com/aspnet/core/data/ef-rp/intro?view=aspnetcore-10.0&tabs=visual-studio) or [this ASP.NET MVC tutorial](https://learn.microsoft.com/aspnet/core/data/ef-mvc/intro?view=aspnetcore-10.0) to help get you started. 
+If you're new to building applications with ASP.NET Core and Visual Studio, go through [this ASP.NET Razor Pages tutorial](https://learn.microsoft.com/aspnet/core/data/ef-rp/intro?view=aspnetcore-11.0&tabs=visual-studio) or [this ASP.NET MVC tutorial](https://learn.microsoft.com/aspnet/core/data/ef-mvc/intro?view=aspnetcore-11.0) to help get you started. 
 
 Once you've completed this tutorial, you're ready to learn how to build real world applications using ASP.NET Core and some related technologies, as demonstrated in this eShopOnWeb reference application. Be sure to [download and review the free 100+ page eBook](https://aka.ms/webappebook), which covers high-level concepts and principles for architecting applications. The rest of this guide will provide you with additional resources to make sure you're able to quickly start understand this sample.
 
@@ -84,9 +84,9 @@ ASP.NET Core and this application make heavy use of a technique called [dependen
 
 As noted above, the Web application has authorization configured for the app using [Identity](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity). This is configured with its own EF Core database context (`AppIdentityDbContext`) and when you run the app you work with identity when you register or log in. It's generally a good idea to avoid tightly coupling your authorization process with your business logic, so you'll notice that ApplicationCore has no knowledge of the app's auth strategy.
 
-The BlazorAdmin application uses a [custom AuthenticationStateProvider](https://learn.microsoft.com/en-us/aspnet/core/blazor/security/authentication-state?view=aspnetcore-10.0&pivots=server#implement-a-custom-authenticationstateprovider) for its authorization.
+The BlazorAdmin application uses a [custom AuthenticationStateProvider](https://learn.microsoft.com/en-us/aspnet/core/blazor/security/authentication-state?view=aspnetcore-11.0&pivots=server#implement-a-custom-authenticationstateprovider) for its authorization.
 
-The PublicApi application makes use of [JWT bearer tokens](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-jwt-bearer-authentication?view=aspnetcore-10.0). This uses the same identity database context configuration that the Web application uses.
+The PublicApi application makes use of [JWT bearer tokens](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-jwt-bearer-authentication?view=aspnetcore-11.0). This uses the same identity database context configuration that the Web application uses.
 
 There are three demo accounts to work with:
 

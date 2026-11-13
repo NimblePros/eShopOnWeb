@@ -27,7 +27,7 @@ To deploy the eShopOnWeb sample to an Azure App Service, starting in the Azure P
 
 1. On the **Create Web App** screen, in the **Project Details** section, choose a subscription. Then choose a new resource group name or select an existing one, then select **Review + create**. 
 
-    For the **Instance Details**, enter a name for the web app. Select Publish as **Code**. Select `.NET 9` for the **Runtime stack**. Then, select `Windows` for the **Operating System**. Select an appropriate Region.
+    For the **Instance Details**, enter a name for the web app. Select Publish as **Code**. Select `.NET 11` for the **Runtime stack**. Then, select `Windows` for the **Operating System**. Select an appropriate Region.
 
     In **Pricing plans**, select an appropriate pricing plan.
 

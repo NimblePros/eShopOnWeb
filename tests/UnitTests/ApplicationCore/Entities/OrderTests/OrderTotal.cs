@@ -22,7 +22,7 @@ public class OrderTotal
         var builder = new OrderBuilder();
         var items = new List<OrderItem>
             {
-                new(builder.TestCatalogItemOrdered, _testUnitPrice, 1)
+                new(builder.CreateCatalogItemOrdered(), _testUnitPrice, 1)
             };
         var order = new OrderBuilder().WithItems(items);
         Assert.Equal(_testUnitPrice, order.Total());
