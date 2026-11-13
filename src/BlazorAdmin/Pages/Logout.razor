@@ -2,12 +2,18 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient HttpClient
 @inherits BlazorAdmin.Helpers.BlazorComponent
+@using BlazorAdmin.Authorization
 
 @code {
 
     protected override async Task OnInitializedAsync()
     {
-        await HttpClient.PostAsync("User/Logout", null);
+        // The Web app rejects logout without an antiforgery token. Get a fresh one so it is
+        // bound to the current user.
+        var antiforgery = await HttpClient.GetFromJsonAsync<AntiforgeryTokenResponse>("User/AntiforgeryToken");
+        using var request = new HttpRequestMessage(HttpMethod.Post, "User/Logout");
+        request.Headers.Add(AntiforgeryTokenResponse.HeaderName, antiforgery?.Token);
+        await HttpClient.SendAsync(request);
         await new Route(JSRuntime).RouteOutside("/Identity/Account/Login");
     }
 
