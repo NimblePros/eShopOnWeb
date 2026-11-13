@@ -125,6 +125,9 @@ app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Ind
 app.MapRazorPages();
 app.MapHealthChecks("home_page_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("homePageHealthCheck") });
 app.MapHealthChecks("api_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("apiHealthCheck") });
+// Liveness only (the "self" check from the Aspire service defaults). The AppHost waits on it before
+// starting PublicApi, so it must not depend on PublicApi the way /health does.
+app.MapHealthChecks("/alive", new HealthCheckOptions { Predicate = check => check.Tags.Contains("live") });
 //endpoints.MapBlazorHub("/admin");
 app.MapFallbackToFile("index.html");
 

@@ -1,4 +1,4 @@
-﻿﻿var builder = DistributedApplication.CreateBuilder(args);
+﻿var builder = DistributedApplication.CreateBuilder(args);
 
 var seq = builder.AddSeq("seq")
                  .ExcludeFromManifest()
@@ -23,6 +23,20 @@ var jwtSigningKey = builder.AddParameter("jwt-signing-key",
 const string JwtSigningKeyEnvironmentVariable = "Authentication__Jwt__SigningKey";
 
 // The apps read their databases from the "CatalogConnection" and "IdentityConnection" connection strings.
+// Web applies the EF Core migrations and seeds both databases before it starts listening, so its /alive
+// endpoint only reports healthy once that's done. PublicApi waits for it, so the two apps never seed the
+// same empty database at the same time (which would duplicate the catalog data).
+var web = builder
+    .AddProject<Projects.Web>(nameof(Projects.Web).ToLower())
+        .WithReference(seq)
+        .WithReference(catalogDb, "CatalogConnection")
+        .WithReference(identityDb, "IdentityConnection")
+        .WithEnvironment(JwtSigningKeyEnvironmentVariable, jwtSigningKey)
+        .WithHttpHealthCheck("/alive")
+        .WaitFor(seq)
+        .WaitFor(catalogDb)
+        .WaitFor(identityDb);
+
 builder
     .AddProject<Projects.PublicApi>(nameof(Projects.PublicApi).ToLower())
         .WithReference(seq)
@@ -30,17 +44,6 @@ builder
         .WithReference(identityDb, "IdentityConnection")
         .WithEnvironment(JwtSigningKeyEnvironmentVariable, jwtSigningKey)
         .WaitFor(seq)
-        .WaitFor(catalogDb)
-        .WaitFor(identityDb);
-
-builder
-    .AddProject<Projects.Web>(nameof(Projects.Web).ToLower())
-        .WithReference(seq)
-        .WithReference(catalogDb, "CatalogConnection")
-        .WithReference(identityDb, "IdentityConnection")
-        .WithEnvironment(JwtSigningKeyEnvironmentVariable, jwtSigningKey)
-        .WaitFor(seq)
-        .WaitFor(catalogDb)
-        .WaitFor(identityDb);
+        .WaitFor(web);
 
 builder.Build().Run();

@@ -132,7 +132,9 @@ Or use the [Aspire CLI](https://learn.microsoft.com/dotnet/aspire/cli/overview) 
 
 Open the Aspire dashboard link shown in the console to find the Web and PublicApi endpoints. The Web site is at `https://localhost:5001/`, and the admin area (Blazor WebAssembly, which calls PublicApi) is at `https://localhost:5001/admin`.
 
-The first run downloads the SQL Server image, which can take a few minutes. When the apps start, they apply the Entity Framework Core migrations and seed both databases, so you should see products in the store and be able to log in with the `demouser@microsoft.com` account. The SQL Server container and its data volume are kept between runs, so your data survives restarts. To start over with empty databases, remove the `sqlserver` container and its volume using your container tool. The SQL Server `sa` password is generated on the first run and stored in the AppHost's [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets).
+The first run downloads the SQL Server image, which can take a few minutes. When the apps start, they apply the Entity Framework Core migrations and seed both databases, so you should see products in the store and be able to log in with the `demouser@microsoft.com` account. The SQL Server container and its data volume are kept between runs, so your data survives restarts. To start over with empty databases, remove the `sqlserver` container and its volume using your container tool.
+
+The SQL Server `sa` password is generated on the first run and stored in the AppHost's [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) as `Parameters:sqlserver-password`. The data volume keeps the password it was created with, so if you clear the AppHost's user secrets, also remove the `sqlserver` container and its volume (or the apps won't be able to log in to SQL Server).
 
 > **Apple silicon:** The SQL Server image is built for x64 only. On an Apple silicon Mac, enable Rosetta emulation for x86/amd64 images in your container runtime (for example, Docker Desktop's "Use Rosetta for x86_64/amd64 emulation on Apple Silicon" setting).
 
@@ -146,13 +148,13 @@ You can also run the `Web` and `PublicApi` projects directly with `dotnet run`, 
 }
 ```
 
-The in-memory data is reseeded every time the app starts. To use your own SQL Server instead, set the `ConnectionStrings:CatalogConnection` and `ConnectionStrings:IdentityConnection` settings, for example with user secrets.
+The in-memory data is reseeded every time the app starts, and each app has its own copy, so changes made in the admin area (through PublicApi) don't show up in the store (Web). To use your own SQL Server instead, set the `ConnectionStrings:CatalogConnection` and `ConnectionStrings:IdentityConnection` settings, for example with user secrets.
 
 Note that if you run the apps this way, you'll need to stop them manually in order to build the solution (otherwise you'll get file locking errors).
 
 ### Working with EF Core migrations
 
-The apps apply migrations on startup, so you don't need to run `dotnet ef database update`. If you change the model and need to create migrations, install the [EF Core tools](https://learn.microsoft.com/ef/core/cli/dotnet) (`dotnet tool update --global dotnet-ef`) and run these commands from the Web folder:
+The apps apply migrations on startup, so you don't need to run `dotnet ef database update`. If you change the model and need to create migrations, install the [EF Core tools](https://learn.microsoft.com/ef/core/cli/dotnet) (`dotnet tool update --global dotnet-ef`) and run these commands from the Web folder (`migrations add` doesn't need a database; commands that connect to one, such as `dotnet ef migrations list`, need a `--connection` argument):
 
 ```
 dotnet ef migrations add InitialModel --context catalogcontext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations

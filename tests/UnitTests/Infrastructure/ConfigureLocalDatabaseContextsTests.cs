@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.Infrastructure;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
@@ -20,8 +20,8 @@ public class ConfigureLocalDatabaseContextsTests
     {
         using var provider = BuildServiceProvider(new()
         {
-            ["ConnectionStrings:CatalogConnection"] = CatalogConnectionString,
-            ["ConnectionStrings:IdentityConnection"] = IdentityConnectionString,
+            [$"ConnectionStrings:{Dependencies.CATALOG_CONNECTION_NAME}"] = CatalogConnectionString,
+            [$"ConnectionStrings:{Dependencies.IDENTITY_CONNECTION_NAME}"] = IdentityConnectionString,
         });
         using var scope = provider.CreateScope();
 
@@ -39,13 +39,14 @@ public class ConfigureLocalDatabaseContextsTests
     {
         using var provider = BuildServiceProvider(new()
         {
-            ["ConnectionStrings:IdentityConnection"] = IdentityConnectionString,
+            [$"ConnectionStrings:{Dependencies.IDENTITY_CONNECTION_NAME}"] = IdentityConnectionString,
         });
         using var scope = provider.CreateScope();
 
-        var exception = Assert.Throws<InvalidOperationException>(
+        var exception = Assert.Throws<DatabaseNotConfiguredException>(
             () => scope.ServiceProvider.GetRequiredService<CatalogContext>());
 
+        Assert.Equal("CatalogConnection", exception.ConnectionName);
         Assert.Contains("'CatalogConnection'", exception.Message);
         Assert.Contains("eShopWeb.AppHost", exception.Message);
     }
@@ -55,15 +56,36 @@ public class ConfigureLocalDatabaseContextsTests
     {
         using var provider = BuildServiceProvider(new()
         {
-            ["ConnectionStrings:CatalogConnection"] = CatalogConnectionString,
+            [$"ConnectionStrings:{Dependencies.CATALOG_CONNECTION_NAME}"] = CatalogConnectionString,
         });
         using var scope = provider.CreateScope();
 
-        var exception = Assert.Throws<InvalidOperationException>(
+        var exception = Assert.Throws<DatabaseNotConfiguredException>(
             () => scope.ServiceProvider.GetRequiredService<AppIdentityDbContext>());
 
+        Assert.Equal("IdentityConnection", exception.ConnectionName);
         Assert.Contains("'IdentityConnection'", exception.Message);
         Assert.Contains("eShopWeb.AppHost", exception.Message);
+    }
+
+    [Fact]
+    public void DoesNotRequireConnectionStringsForEfDesignTimeTools()
+    {
+        // "dotnet ef migrations add" builds the contexts without connecting to a database.
+        using var provider = BuildServiceProvider([]);
+        using var scope = provider.CreateScope();
+
+        var wasDesignTime = EF.IsDesignTime;
+        EF.IsDesignTime = true;
+        try
+        {
+            Assert.True(scope.ServiceProvider.GetRequiredService<CatalogContext>().Database.IsSqlServer());
+            Assert.True(scope.ServiceProvider.GetRequiredService<AppIdentityDbContext>().Database.IsSqlServer());
+        }
+        finally
+        {
+            EF.IsDesignTime = wasDesignTime;
+        }
     }
 
     [Fact]

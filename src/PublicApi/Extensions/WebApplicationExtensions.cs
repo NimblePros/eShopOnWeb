@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure;
 using Microsoft.eShopWeb.Infrastructure.Data;
@@ -6,8 +8,6 @@ using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace Microsoft.eShopWeb.PublicApi.Extensions;
 
@@ -31,7 +31,8 @@ public static class WebApplicationExtensions
                 || app.Configuration.GetValue<bool>(AppIdentityDbContextSeed.SEED_DEMO_USERS_CONFIG_NAME);
             await AppIdentityDbContextSeed.SeedAsync(identityContext, userManager, roleManager, seedDemoUsers);
         }
-        catch (Exception ex)
+        // A missing connection string is a setup problem, not a seeding hiccup: let it stop startup.
+        catch (Exception ex) when (ex is not DatabaseNotConfiguredException)
         {
             app.Logger.LogError(ex, "An error occurred seeding the DB.");
         }

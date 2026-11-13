@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Configuration;
@@ -67,11 +66,7 @@ public static class Dependencies
         string? connectionString = configuration.GetConnectionString(name);
         if (string.IsNullOrWhiteSpace(connectionString) && !EF.IsDesignTime)
         {
-            throw new InvalidOperationException(
-                $"Connection string '{name}' is not configured. Run the solution through the eShopWeb.AppHost " +
-                "(.NET Aspire) project, which starts SQL Server in a container and supplies it, set " +
-                $"'ConnectionStrings:{name}' yourself (for example with user secrets), or set " +
-                "'UseOnlyInMemoryDatabase' to true.");
+            throw new DatabaseNotConfiguredException(name);
         }
 
         return connectionString;

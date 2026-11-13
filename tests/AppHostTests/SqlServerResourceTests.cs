@@ -1,4 +1,4 @@
-using Aspire.Hosting;
+﻿using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -60,19 +60,31 @@ public class SqlServerResourceTests
         Assert.Equal("{identitydb.connectionString}", environment["ConnectionStrings__IdentityConnection"]);
     }
 
-    [Theory]
-    [InlineData("web")]
-    [InlineData("publicapi")]
-    public async Task ProjectWaitsForBothDatabases(string projectName)
+    [Fact]
+    public async Task WebWaitsForBothDatabases()
     {
         await using var builder = await CreateAppHostBuilderAsync();
-        var project = GetProject(builder, projectName);
 
-        var waitsFor = project.Annotations.OfType<WaitAnnotation>().Select(a => a.Resource.Name).ToList();
+        var waitsFor = GetWaitDependencies(GetProject(builder, "web"));
 
         Assert.Contains("catalogdb", waitsFor);
         Assert.Contains("identitydb", waitsFor);
     }
+
+    [Fact]
+    public async Task PublicApiWaitsForWebToMigrateAndSeedTheDatabases()
+    {
+        // Both apps seed on startup with check-then-insert logic. If they start against an empty
+        // database at the same time, the catalog data gets inserted twice.
+        await using var builder = await CreateAppHostBuilderAsync();
+        var web = GetProject(builder, "web");
+
+        Assert.Contains("web", GetWaitDependencies(GetProject(builder, "publicapi")));
+        Assert.Contains(web.Annotations.OfType<HealthCheckAnnotation>(), a => a.Key.StartsWith("web_", StringComparison.Ordinal));
+    }
+
+    private static List<string> GetWaitDependencies(ProjectResource project) =>
+        project.Annotations.OfType<WaitAnnotation>().Select(a => a.Resource.Name).ToList();
 
     private static Task<IDistributedApplicationTestingBuilder> CreateAppHostBuilderAsync() =>
         DistributedApplicationTestingBuilder.CreateAsync<Projects.eShopWeb_AppHost>(TestContext.Current.CancellationToken);
