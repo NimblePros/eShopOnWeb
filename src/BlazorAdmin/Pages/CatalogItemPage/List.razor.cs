@@ -63,6 +63,5 @@ public partial class List : BlazorComponent
     private async Task ReloadCatalogItems()
     {
         catalogItems = await CatalogItemService.List();
-        StateHasChanged();
     }
 }

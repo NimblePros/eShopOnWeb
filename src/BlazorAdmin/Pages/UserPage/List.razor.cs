@@ -12,22 +12,22 @@ namespace BlazorAdmin.Pages.UserPage;
 public partial class List : BlazorComponent
 {
     [Microsoft.AspNetCore.Components.Inject]
-    public IUserManagementService UserManagementService{ get; set; }
+    public IUserManagementService UserManagementService { get; set; }
     [Microsoft.AspNetCore.Components.Inject]
     ILogger<List> Logger { get; set; }
-    [Microsoft.AspNetCore.Components.Inject]
-    public AuthenticationStateProvider AuthProvider { get; set; }
+    [Microsoft.AspNetCore.Components.CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
     private List<User> _users = [];
     private ClaimsPrincipal _currentUser = null;
     private Create CreateComponent { get; set; }
     private Delete DeleteComponent { get; set; }
     private Edit EditComponent { get; set; }
-    
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        var getCurrentClaim = await AuthProvider.GetAuthenticationStateAsync();
+        var getCurrentClaim = await AuthenticationStateTask;
         _currentUser = getCurrentClaim.User;
         Logger.LogInformation("Current User: {0}", _currentUser.Identity.Name);
     }
@@ -67,7 +67,6 @@ public partial class List : BlazorComponent
     {
         var usersCall = await UserManagementService.List();
         _users = usersCall.Users;
-        StateHasChanged();
     }
 
 }
