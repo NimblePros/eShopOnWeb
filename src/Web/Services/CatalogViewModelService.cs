@@ -62,7 +62,7 @@ public class CatalogViewModelService : ICatalogViewModelService
                 ActualPage = pageIndex,
                 ItemsPerPage = itemsOnPage.Count,
                 TotalItems = totalItems,
-                TotalPages = (int) Math.Ceiling((decimal)totalItems / itemsPage),
+                TotalPages = (int)Math.Ceiling((decimal)totalItems / itemsPage),
             }
         };
 

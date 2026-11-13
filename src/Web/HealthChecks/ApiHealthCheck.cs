@@ -1,4 +1,4 @@
-using Microsoft.eShopWeb.Web.Configuration;
+﻿using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 

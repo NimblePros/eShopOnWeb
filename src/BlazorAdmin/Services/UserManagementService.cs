@@ -34,7 +34,8 @@ public class UserManagementService(HttpService httpService, ILogger<IUserManagem
     }
 
 
-    public async Task<GetUserResponse> GetByName(string userName) {
+    public async Task<GetUserResponse> GetByName(string userName)
+    {
         return await httpService.HttpGet<GetUserResponse>($"users/name/{userName}");
     }
 
@@ -46,6 +47,6 @@ public class UserManagementService(HttpService httpService, ILogger<IUserManagem
 
     public async Task SaveRolesForUser(SaveRolesForUserRequest request)
     {
-        await httpService.HttpPut($"users/{request.UserId}/roles",request);
+        await httpService.HttpPut($"users/{request.UserId}/roles", request);
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
-public class UpdateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoint<UpdateRoleRequest,Results<Ok<UpdateRoleResponse>,NotFound>>
+public class UpdateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoint<UpdateRoleRequest, Results<Ok<UpdateRoleResponse>, NotFound>>
 {
     public override void Configure()
     {

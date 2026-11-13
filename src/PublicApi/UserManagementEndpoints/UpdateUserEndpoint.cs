@@ -10,7 +10,7 @@ using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
-public class UpdateRoleEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<UpdateUserRequest,Results<Ok<UpdateUserResponse>,NotFound>>
+public class UpdateRoleEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<UpdateUserRequest, Results<Ok<UpdateUserResponse>, NotFound>>
 {
     public override void Configure()
     {

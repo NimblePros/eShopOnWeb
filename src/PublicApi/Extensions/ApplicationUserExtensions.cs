@@ -23,7 +23,7 @@ public static class ApplicationUserExtensions
     }
 
     public static void FromUserDto(this ApplicationUser user, UserDto userChanges, bool copyId = true)
-    {        
+    {
         if (user != null)
         {
             if (copyId)

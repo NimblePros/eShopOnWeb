@@ -13,5 +13,5 @@ public class UserListResponse : BaseResponse
     {
     }
 
-    public List<UserDto> Users{ get; set; } = [];
+    public List<UserDto> Users { get; set; } = [];
 }

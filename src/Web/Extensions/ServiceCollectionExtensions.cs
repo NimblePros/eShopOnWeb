@@ -34,7 +34,7 @@ public static class ServiceCollectionExtensions
                 options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure())
                 .AddInterceptors(provider.GetRequiredService<DbCallCountingInterceptor>());
             });
-            services.AddDbContext<AppIdentityDbContext>((provider,options) =>
+            services.AddDbContext<AppIdentityDbContext>((provider, options) =>
             {
                 var connectionString = configuration[configuration["AZURE_SQL_IDENTITY_CONNECTION_STRING_KEY"] ?? ""];
                 options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure())

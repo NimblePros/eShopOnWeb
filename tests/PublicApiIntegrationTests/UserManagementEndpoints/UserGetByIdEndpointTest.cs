@@ -19,7 +19,7 @@ public class UserGetByIdEndpointTest
         var response = await client.GetAsync($"api/users/name/{userName}");
         var adminUserResponse = await response.Content.ReadAsStringAsync();
         var adminUser = adminUserResponse.FromJson<GetUserResponse>();
-        
+
         var getUserById = await client.GetAsync($"api/users/{adminUser!.User!.Id}");
         getUserById.EnsureSuccessStatusCode();
 

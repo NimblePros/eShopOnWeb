@@ -16,8 +16,8 @@ public class DeleteCatalogItemEndpointTest
         var client = HttpClientHelper.GetProductManagerClient();
         var response = await client.DeleteAsync("api/catalog-items/12");
         response.EnsureSuccessStatusCode();
-        
-        Assert.AreEqual(HttpStatusCode.NoContent,response.StatusCode);
+
+        Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     [TestMethod]

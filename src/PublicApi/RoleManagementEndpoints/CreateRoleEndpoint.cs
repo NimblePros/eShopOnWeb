@@ -9,7 +9,7 @@ using Microsoft.eShopWeb.ApplicationCore.Exceptions;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
-public class CreateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoint<CreateRoleRequest,CreateRoleResponse>
+public class CreateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoint<CreateRoleRequest, CreateRoleResponse>
 {
     public override void Configure()
     {
@@ -26,7 +26,8 @@ public class CreateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoin
     {
         var response = new CreateRoleResponse(request.CorrelationId());
         var existingRole = await roleManager.FindByNameAsync(request.Name);
-        if (existingRole != null) {
+        if (existingRole != null)
+        {
             throw new DuplicateException($"A role with name {request.Name} already exists");
         }
         var newRole = new IdentityRole(request.Name);

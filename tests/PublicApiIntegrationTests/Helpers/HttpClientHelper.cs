@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 
 namespace PublicApiIntegrationTests.Helpers;
+
 internal static class HttpClientHelper
 {
     public static HttpClient GetAdminClient()
@@ -18,7 +19,7 @@ internal static class HttpClientHelper
     }
 
     private static HttpClient CreateClient(string token)
-    {        
+    {
         var client = ProgramTest.NewClient;
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;

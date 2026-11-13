@@ -14,5 +14,5 @@ public class GetUserRolesResponse : BaseResponse
     {
     }
 
-    public List<string> Roles {  get; set; }
+    public List<string> Roles { get; set; }
 }
