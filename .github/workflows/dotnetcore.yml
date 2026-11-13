@@ -38,6 +38,8 @@ jobs:
 
       # Tests run on Microsoft.Testing.Platform (see "test" in global.json).
       # Each test project references coverlet.MTP, which writes one Cobertura report per project.
+      # A test project that runs zero tests exits with code 8, which fails this step. That catches
+      # silent discovery failures (see issue #281), so don't add --ignore-exit-code 8 here.
     - name: Test with dotnet
       run: dotnet test --solution ${{ env.SOLUTION_FILE }} --no-restore --coverlet --coverlet-output-format cobertura --results-directory coverage --results-directory-layout per-module
 

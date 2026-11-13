@@ -2,6 +2,9 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <TargetFramework>net11.0</TargetFramework>
+    <!-- MSTest.TestAdapter and MSTest.TestFramework must stay on the same version,
+         or the adapter silently discovers no tests (see issue #281). -->
+    <MSTestVersion>4.5.3</MSTestVersion>
     <!--<AspNetVersion>8.0.8</AspNetVersion>
     <SystemExtensionVersion>8.0.0</SystemExtensionVersion>
     <EntityFramworkCoreVersion>8.0.10</EntityFramworkCoreVersion>
@@ -16,7 +19,6 @@
     <PackageVersion Include="AspNetCore.Security.OAuth.Extensions" Version="1.0.0" />
     <PackageVersion Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.2" />
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />
-    <PackageVersion Include="BlazorInputFile" Version="0.2.0" />
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageVersion Include="BuildBundlerMinifier" Version="3.2.449" PrivateAssets="All" />
     <PackageVersion Include="FastEndpoints" Version="9.0.0" />
@@ -74,8 +76,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.3" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.5.3" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="$(MSTestVersion)" />
+    <PackageVersion Include="MSTest.TestFramework" Version="$(MSTestVersion)" />
     <PackageVersion Include="coverlet.MTP" Version="10.1.0" />
   </ItemGroup>
 </Project>

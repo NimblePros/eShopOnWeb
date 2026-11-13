@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorInputFile" />
     <PackageReference Include="FluentValidation" />
   </ItemGroup>
 
