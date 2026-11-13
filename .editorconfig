@@ -5,6 +5,8 @@ root = true
 # All files
 [*]
 indent_style = space
+# Matches .gitattributes (eol=lf) so dotnet format agrees with what git stores.
+end_of_line = lf
 
 # XML project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
