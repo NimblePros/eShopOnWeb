@@ -7,6 +7,17 @@ namespace Microsoft.eShopWeb.Web.Extensions;
 
 public static class UserManagerExtensions
 {
+    /// <summary>
+    /// Loads the signed-in user, throwing <see cref="UserNotFoundException"/> if the principal no
+    /// longer maps to a stored user.
+    /// </summary>
+    public static async Task<ApplicationUser> GetRequiredUserAsync(this UserManager<ApplicationUser> userManager,
+        ClaimsPrincipal principal)
+    {
+        var user = await userManager.GetUserAsync(principal);
+        return user ?? throw new UserNotFoundException(userManager.GetUserId(principal) ?? string.Empty);
+    }
+
     public static async Task<bool> SaveClaimsAsync(this UserManager<ApplicationUser> userManager, Dictionary<string, string> claimsToSync, ExternalLoginInfo info, ApplicationUser user)
     {
         Guard.Against.Null(user);

@@ -16,7 +16,7 @@ try
     CommandResult restoreResult = await RunAsync("dotnet", $"restore \"{solutionFile}\"", solutionRoot);
     if (restoreResult.ExitCode != 0)
     {
-        WriteFailureDetails(restoreResult);
+        WriteFailureDetails("Restore", restoreResult);
         return restoreResult.ExitCode;
     }
 
@@ -26,7 +26,7 @@ try
     CommandResult buildResult = await RunAsync("dotnet", $"build \"{solutionFile}\" --no-restore", solutionRoot);
     if (buildResult.ExitCode != 0)
     {
-        WriteFailureDetails(buildResult);
+        WriteFailureDetails("Build", buildResult);
         return buildResult.ExitCode;
     }
 
@@ -38,39 +38,33 @@ try
         string projectName = GetProjectName(projectPath);
         string projectDirectory = Path.GetDirectoryName(projectPath)!;
 
-        CommandResult testResult = await RunAsync("dotnet", $"test --no-build --logger \"console;verbosity=minimal\" \"{projectPath}\"", projectDirectory);
+        // global.json selects Microsoft.Testing.Platform, which requires --project.
+        CommandResult testResult = await RunAsync("dotnet", $"test --no-build --project \"{projectPath}\"", projectDirectory);
 
-        if (testResult.ExitCode != 0)
+        bool succeeded = testResult.ExitCode == 0;
+        TestSummary? summary = ParseTestSummary(testResult.StdOut + Environment.NewLine + testResult.StdErr);
+        string outcome = summary is null
+            ? (succeeded ? "passed" : "failed")
+            : summary.Describe();
+        Console.WriteLine($"  {projectName}... completed in {FormatElapsed(testResult.Elapsed)}: {(succeeded ? "✅" : "❌")} {outcome}");
+
+        if (!succeeded)
         {
-            if (TryParseTestSummary(testResult.StdOut + Environment.NewLine + testResult.StdErr, out int passed, out int failed, out int total))
-            {
-                Console.WriteLine($"  {projectName}... completed in {FormatElapsed(testResult.Elapsed)}: ❌ {passed}/{total} passing, {failed} failed");
-            }
-            else
-            {
-                Console.WriteLine($"  {projectName}... completed in {FormatElapsed(testResult.Elapsed)}: ❌ failed");
-            }
-
-            WriteFailureDetails(testResult);
+            WriteFailureDetails("Test", testResult);
             return testResult.ExitCode;
-        }
-
-        if (TryParseTestSummary(testResult.StdOut + Environment.NewLine + testResult.StdErr, out int passedTests, out _, out int totalTests))
-        {
-            Console.WriteLine($"  {projectName}... completed in {FormatElapsed(testResult.Elapsed)}: ✅ {passedTests}/{totalTests} passing");
-        }
-        else
-        {
-            Console.WriteLine($"  {projectName}... completed in {FormatElapsed(testResult.Elapsed)}: ✅ passed");
         }
     }
 
+    Console.WriteLine("Checking formatting...");
     CommandResult formatResult = await RunAsync("dotnet", $"format \"{solutionFile}\" --verify-no-changes", solutionRoot);
     if (formatResult.ExitCode != 0)
     {
-        WriteFailureDetails(formatResult);
+        Console.WriteLine($"Checking formatting... completed in {FormatElapsed(formatResult.Elapsed)}: ❌ changes needed (run `dotnet format`)");
+        WriteFailureDetails("Format", formatResult);
         return formatResult.ExitCode;
     }
+
+    Console.WriteLine($"Checking formatting... completed in {FormatElapsed(formatResult.Elapsed)}: ✅ clean");
 
     return 0;
 }
@@ -109,31 +103,33 @@ static string FormatElapsed(TimeSpan elapsed)
         ? $"{(int)elapsed.TotalMinutes}m {elapsed.Seconds}s"
         : $"{elapsed.Seconds}s";
 
-static bool TryParseTestSummary(string output, out int passed, out int failed, out int total)
+// Parses the Microsoft.Testing.Platform run summary:
+//   total: 47
+//   failed: 0
+//   succeeded: 47
+//   skipped: 0
+static TestSummary? ParseTestSummary(string output)
 {
-    Match match = Regex.Match(
-        output,
-        @"Failed:\s*(\d+),\s*Passed:\s*(\d+),\s*Skipped:\s*(\d+),\s*Total:\s*(\d+)",
-        RegexOptions.Multiline);
+    int? total = GetCount("total");
+    int? failed = GetCount("failed");
+    int? passed = GetCount("succeeded");
+    int? skipped = GetCount("skipped");
 
-    if (!match.Success)
+    return total is null || failed is null || passed is null
+        ? null
+        : new TestSummary(passed.Value, failed.Value, skipped ?? 0, total.Value);
+
+    int? GetCount(string label)
     {
-        passed = 0;
-        failed = 0;
-        total = 0;
-        return false;
+        Match match = Regex.Match(output, $@"^\s*{label}:\s*(\d+)\s*$", RegexOptions.Multiline);
+        return match.Success ? int.Parse(match.Groups[1].Value) : null;
     }
-
-    failed = int.Parse(match.Groups[1].Value);
-    passed = int.Parse(match.Groups[2].Value);
-    total = int.Parse(match.Groups[4].Value);
-    return true;
 }
 
-static void WriteFailureDetails(CommandResult result)
+static void WriteFailureDetails(string step, CommandResult result)
 {
     Console.WriteLine();
-    Console.WriteLine("Test failure details:");
+    Console.WriteLine($"{step} failure details:");
 
     string combinedOutput = string.Join(Environment.NewLine, new[] { result.StdOut, result.StdErr }
         .Where(text => !string.IsNullOrWhiteSpace(text)));
@@ -168,3 +164,20 @@ static string FindSolutionRoot()
 }
 
 record CommandResult(int ExitCode, TimeSpan Elapsed, string StdOut, string StdErr);
+
+record TestSummary(int Passed, int Failed, int Skipped, int Total)
+{
+    public string Describe()
+    {
+        string text = $"{Passed}/{Total} passing";
+        if (Failed > 0)
+        {
+            text += $", {Failed} failed";
+        }
+        if (Skipped > 0)
+        {
+            text += $", {Skipped} skipped";
+        }
+        return text;
+    }
+}

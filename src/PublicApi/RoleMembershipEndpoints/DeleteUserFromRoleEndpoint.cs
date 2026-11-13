@@ -38,9 +38,9 @@ public class DeleteUserFromRoleEndpoint(RoleManager<IdentityRole> roleManager, U
         {
             return TypedResults.NotFound();
         }
-        
+
         await userManager.RemoveFromRoleAsync(userToUpdate, roleToUpdate.Name);
-        
+
         return TypedResults.NoContent();
 
     }

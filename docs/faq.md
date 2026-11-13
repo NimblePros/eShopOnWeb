@@ -15,10 +15,10 @@ These are the frequently asked questions for eShopOnWeb.
 
 <details markdown="block">
   <summary>
-    <h2>Why do some controllers/Pages use Mediator and some do not?</h2>
+    <h2>Why do some Pages use Mediator and some do not?</h2>
   </summary>
 
-With this being a demo app, we were trying to show a few different ways to approach solutions. For example, the [OrderController](https://github.com/NimblePros/eShopOnWeb/blob/master/src/Web/Controllers/OrderController.cs) was updated to use Mediator while the [ManageController](https://github.com/NimblePros/eShopOnWeb/blob/master/src/Web/Controllers/ManageController.cs) was not. This way you can see the advantages / disadvantages of each approach while staying in the same repo.
+With this being a demo app, we were trying to show a few different ways to approach solutions. For example, the [Order pages](https://github.com/NimblePros/eShopOnWeb/tree/main/src/Web/Pages/Order) use Mediator while the [Manage pages](https://github.com/NimblePros/eShopOnWeb/tree/main/src/Web/Pages/Manage) do not. This way you can see the advantages / disadvantages of each approach while staying in the same repo.
 
 I would definitely recommend for a "real" project that you maintain one approach or the other.
 </details>

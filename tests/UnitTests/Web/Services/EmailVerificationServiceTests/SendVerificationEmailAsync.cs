@@ -1,7 +1,10 @@
 ﻿using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web.Services;
@@ -13,7 +16,7 @@ namespace Microsoft.eShopWeb.UnitTests.Web.Services.EmailVerificationServiceTest
 public class SendVerificationEmailAsync
 {
     private const string Token = "confirmation-token";
-    private const string CallbackUrl = "https://localhost/ConfirmEmail?userId=user-id&code=confirmation-token";
+    private const string CallbackUrl = "https://localhost/Identity/Account/ConfirmEmail?userId=user-id&code=confirmation-token";
     private const string Scheme = "https";
 
     private readonly UserManager<ApplicationUser> _userManager =
@@ -33,7 +36,8 @@ public class SendVerificationEmailAsync
     public SendVerificationEmailAsync()
     {
         _userManager.GenerateEmailConfirmationTokenAsync(_user).Returns(Token);
-        _urlHelper.Action(Arg.Any<UrlActionContext>()).Returns(CallbackUrl);
+        _urlHelper.ActionContext.Returns(new ActionContext(new DefaultHttpContext(), new RouteData(), new ActionDescriptor()));
+        _urlHelper.RouteUrl(Arg.Any<UrlRouteContext>()).Returns(CallbackUrl);
         _service = new EmailVerificationService(_userManager, _emailSender);
     }
 
@@ -53,12 +57,10 @@ public class SendVerificationEmailAsync
     {
         await _service.SendVerificationEmailAsync(_user, _urlHelper, Scheme);
 
-        _urlHelper.Received(1).Action(Arg.Is<UrlActionContext>(ctx =>
-            ctx.Controller == "ConfirmEmail" &&
+        _urlHelper.Received(1).RouteUrl(Arg.Is<UrlRouteContext>(ctx =>
             ctx.Protocol == Scheme &&
             ctx.Values != null &&
-            ctx.Values.ToString()!.Contains(_user.Id) &&
-            ctx.Values.ToString()!.Contains(Token)));
+            HasRouteValues(ctx.Values)));
     }
 
     [Theory]
@@ -78,11 +80,20 @@ public class SendVerificationEmailAsync
     [Fact]
     public async Task ThrowsAndSendsNothingWhenCallbackUrlCannotBeGenerated()
     {
-        _urlHelper.Action(Arg.Any<UrlActionContext>()).Returns((string?)null);
+        _urlHelper.RouteUrl(Arg.Any<UrlRouteContext>()).Returns((string?)null);
 
         await Assert.ThrowsAsync<ArgumentNullException>(
             () => _service.SendVerificationEmailAsync(_user, _urlHelper, Scheme));
 
         await _emailSender.DidNotReceiveWithAnyArgs().SendEmailAsync(default!, default!, default!);
+    }
+
+    private bool HasRouteValues(object values)
+    {
+        var routeValues = new RouteValueDictionary(values);
+        return Equals(routeValues["page"], "/Account/ConfirmEmail") &&
+            Equals(routeValues["area"], "Identity") &&
+            Equals(routeValues["userId"], _user.Id) &&
+            Equals(routeValues["code"], Token);
     }
 }

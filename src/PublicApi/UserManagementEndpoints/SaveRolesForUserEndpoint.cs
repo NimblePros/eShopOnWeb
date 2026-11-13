@@ -46,9 +46,9 @@ public class SaveRolesForUserEndpoint(UserManager<ApplicationUser> userManager) 
         }
 
         if (request.RolesToAdd.Count > 0)
-            await userManager.AddToRolesAsync(userToUpdate,request.RolesToAdd);
+            await userManager.AddToRolesAsync(userToUpdate, request.RolesToAdd);
         if (request.RolesToRemove.Count > 0)
-            await userManager.RemoveFromRolesAsync(userToUpdate,request.RolesToRemove);
+            await userManager.RemoveFromRolesAsync(userToUpdate, request.RolesToRemove);
 
         return TypedResults.Ok();
 

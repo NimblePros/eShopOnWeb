@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
-public class RoleListEndpoint(RoleManager<IdentityRole> roleManager):EndpointWithoutRequest<RoleListResponse>
+public class RoleListEndpoint(RoleManager<IdentityRole> roleManager) : EndpointWithoutRequest<RoleListResponse>
 {
 
     public override void Configure()

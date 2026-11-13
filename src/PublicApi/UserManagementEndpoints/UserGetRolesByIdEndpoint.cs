@@ -11,7 +11,7 @@ using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
-public class UserGetRolesByIdEndpoint (UserManager<ApplicationUser> userManager) : Endpoint <GetRolesByUserIdRequest, Results<Ok<GetUserRolesResponse>,NotFound>>
+public class UserGetRolesByIdEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<GetRolesByUserIdRequest, Results<Ok<GetUserRolesResponse>, NotFound>>
 {
     public override void Configure()
     {
@@ -38,7 +38,7 @@ public class UserGetRolesByIdEndpoint (UserManager<ApplicationUser> userManager)
         {
             return TypedResults.NotFound();
         }
-        
+
         response.Roles = [.. rolesForUser];
         return TypedResults.Ok(response);
     }

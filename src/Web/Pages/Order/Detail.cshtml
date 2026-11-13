@@ -1,0 +1,76 @@
+@page "/order/detail/{orderId:int}"
+@model Microsoft.eShopWeb.Web.Pages.Order.DetailModel
+@{
+    ViewData["Title"] = "Order Detail";
+    var order = Model.Order;
+}
+
+<div class="esh-orders-detail">
+    <div class="container">
+        <section class="esh-orders-detail-section">
+            <article class="esh-orders-detail-titles row">
+                <section class="esh-orders-detail-title col-xs-3">Order number</section>
+                <section class="esh-orders-detail-title col-xs-3">Date</section>
+                <section class="esh-orders-detail-title col-xs-2">Total</section>
+                <section class="esh-orders-detail-title col-xs-3">Status</section>
+            </article>
+
+            <article class="esh-orders-detail-items row">
+                <section class="esh-orders-detail-item col-xs-3">@order.OrderNumber</section>
+                <section class="esh-orders-detail-item col-xs-3">@order.OrderDate</section>
+                <section class="esh-orders-detail-item col-xs-2">$@order.Total.ToString("N2")</section>
+                <section class="esh-orders-detail-item col-xs-3">@order.Status</section>
+            </article>
+        </section>
+
+        <section class="esh-orders-detail-section">
+            <article class="esh-orders-detail-titles row">
+                <section class="esh-orders-detail-title col-xs-12">Shipping Address</section>
+            </article>
+
+            <article class="esh-orders-detail-items row">
+                <section class="esh-orders-detail-item col-xs-12">@order.ShippingAddress?.Street</section>
+            </article>
+
+            <article class="esh-orders-detail-items row">
+                <section class="esh-orders-detail-item col-xs-12">@order.ShippingAddress?.City</section>
+            </article>
+
+            <article class="esh-orders-detail-items row">
+                <section class="esh-orders-detail-item col-xs-12">@order.ShippingAddress?.Country</section>
+            </article>
+        </section>
+
+        <section class="esh-orders-detail-section">
+            <article class="esh-orders-detail-titles row">
+                <section class="esh-orders-detail-title col-xs-12">ORDER DETAILS</section>
+            </article>
+
+            @for (int i = 0; i < order.OrderItems.Count; i++)
+            {
+                var item = order.OrderItems[i];
+                <article class="esh-orders-detail-items esh-orders-detail-items--border row">
+                    <section class="esh-orders-detail-item col-md-4 hidden-md-down">
+                        <img class="esh-orders-detail-image" src="@item.PictureUrl">
+                    </section>
+                    <section class="esh-orders-detail-item esh-orders-detail-item--middle col-xs-3">@item.ProductName</section>
+                    <section class="esh-orders-detail-item esh-orders-detail-item--middle col-xs-1">$ @item.UnitPrice.ToString("N2")</section>
+                    <section class="esh-orders-detail-item esh-orders-detail-item--middle col-xs-1">@item.Units</section>
+                    <section class="esh-orders-detail-item esh-orders-detail-item--middle col-xs-2">$ @Math.Round(item.Units * item.UnitPrice, 2).ToString("N2")</section>
+                </article>
+            }
+        </section>
+
+        <section class="esh-orders-detail-section esh-orders-detail-section--right">
+            <article class="esh-orders-detail-titles esh-basket-titles--clean row">
+                <section class="esh-orders-detail-title col-xs-9"></section>
+                <section class="esh-orders-detail-title col-xs-2">TOTAL</section>
+            </article>
+
+            <article class="esh-orders-detail-items row">
+                <section class="esh-orders-detail-item col-xs-9"></section>
+                <section class="esh-orders-detail-item esh-orders-detail-item--mark col-xs-2">$ @order.Total.ToString("N2")</section>
+            </article>
+        </section>
+    </div>
+</div>

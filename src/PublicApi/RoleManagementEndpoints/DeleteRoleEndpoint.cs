@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using FastEndpoints;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using FastEndpoints;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Threading;
-using Microsoft.eShopWeb.Infrastructure.Identity;
-using System.Linq;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.ApplicationCore.Exceptions;
+using Microsoft.eShopWeb.Infrastructure.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 

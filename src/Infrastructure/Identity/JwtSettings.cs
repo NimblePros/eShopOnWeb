@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.eShopWeb.Infrastructure.Identity;

@@ -28,8 +28,10 @@ There are currently 2 projects for integration tests:
 
 Some of the things seen in the functional tests include:
 
-- [Testing endpoints that are secured by authorization](https://github.com/NimblePros/eShopOnWeb/blob/main/tests/FunctionalTests/Web/Controllers/AccountControllerSignIn.cs)
-- [Testing Redirect on anonymous login](https://github.com/NimblePros/eShopOnWeb/blob/main/tests/FunctionalTests/Web/Controllers/OrderControllerIndex.cs)
+- [Signing in and posting forms with antiforgery tokens](https://github.com/NimblePros/eShopOnWeb/blob/main/tests/FunctionalTests/Web/Pages/Account/AccountSignIn.cs)
+- [Testing Redirect on anonymous login](https://github.com/NimblePros/eShopOnWeb/blob/main/tests/FunctionalTests/Web/Pages/Order/MyOrdersOnGet.cs)
+- [Testing pages that are secured by authorization](https://github.com/NimblePros/eShopOnWeb/blob/main/tests/FunctionalTests/Web/Pages/Manage/ManagePagesTests.cs)
+- [Testing API endpoints in the web project](https://github.com/NimblePros/eShopOnWeb/tree/main/tests/FunctionalTests/Web/Endpoints/UserEndpoints)
 
 ## Architecture Tests
 

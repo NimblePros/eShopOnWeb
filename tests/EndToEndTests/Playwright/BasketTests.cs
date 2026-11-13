@@ -1,6 +1,6 @@
-﻿using static Microsoft.Playwright.Assertions;
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 using Xunit;
+using static Microsoft.Playwright.Assertions;
 
 namespace Microsoft.eShopWeb.EndToEndTests.Playwright;
 

@@ -2,7 +2,7 @@
 
 public class UpdateUserRequest
 {
-    public User User{  get; set; }
+    public User User { get; set; }
 
     public UpdateUserRequest()
     {

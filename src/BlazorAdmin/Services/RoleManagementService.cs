@@ -8,7 +8,8 @@ namespace BlazorAdmin.Services;
 
 public class RoleManagementService(HttpService httpService, ILogger<RoleManagementService> logger) : IRoleManagementService
 {
-    public async Task<RoleListResponse> List(){
+    public async Task<RoleListResponse> List()
+    {
         logger.LogInformation("Fetching roles");
         var response = await httpService.HttpGet<RoleListResponse>($"roles");
         return response;
@@ -27,7 +28,7 @@ public class RoleManagementService(HttpService httpService, ILogger<RoleManageme
 
     public async Task Delete(string id)
     {
-        await httpService.HttpDelete($"roles/{id}");        
+        await httpService.HttpDelete($"roles/{id}");
     }
 
     public async Task<GetByIdRoleResponse> GetById(string id)
@@ -44,6 +45,6 @@ public class RoleManagementService(HttpService httpService, ILogger<RoleManageme
 
     public async Task DeleteUserFromRole(string userId, string roleId)
     {
-        await httpService.HttpDelete($"roles/{roleId}/members/{userId}");        
+        await httpService.HttpDelete($"roles/{roleId}/members/{userId}");
     }
 }

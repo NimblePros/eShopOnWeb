@@ -17,7 +17,7 @@ public partial class List : BlazorComponent
     private Delete DeleteComponent { get; set; }
     private Edit EditComponent { get; set; }
     private Details DetailsComponent { get; set; }
-    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -55,7 +55,6 @@ public partial class List : BlazorComponent
     {
         var roleCall = await RoleManagementService.List();
         _roles = roleCall.Roles;
-        StateHasChanged();
     }
 
 }

@@ -6,5 +6,5 @@ public class GetUserRolesResponse
 {
     public List<string> Roles { get; set; }
 
-    
+
 }

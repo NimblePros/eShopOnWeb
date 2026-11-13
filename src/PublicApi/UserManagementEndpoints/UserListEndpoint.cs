@@ -10,7 +10,7 @@ using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
-public class UserListEndpoint(UserManager<ApplicationUser> userManager):EndpointWithoutRequest<UserListResponse>
+public class UserListEndpoint(UserManager<ApplicationUser> userManager) : EndpointWithoutRequest<UserListResponse>
 {
 
     public override void Configure()
@@ -27,7 +27,7 @@ public class UserListEndpoint(UserManager<ApplicationUser> userManager):Endpoint
         await Task.Delay(1000, ct);
         var response = new UserListResponse();
         var users = userManager.Users.ToList();
-        foreach ( var user in users)
+        foreach (var user in users)
         {
             response.Users.Add(user.ToUserDto());
         }

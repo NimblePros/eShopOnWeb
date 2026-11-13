@@ -11,7 +11,7 @@ using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
-public class UserGetByIdEndpoint (UserManager<ApplicationUser> userManager) : Endpoint <GetByIdUserRequest, Results<Ok<GetUserResponse>,NotFound>>
+public class UserGetByIdEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<GetByIdUserRequest, Results<Ok<GetUserResponse>, NotFound>>
 {
     public override void Configure()
     {

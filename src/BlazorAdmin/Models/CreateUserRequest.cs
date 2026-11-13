@@ -2,7 +2,7 @@
 
 public class CreateUserRequest
 {
-    public User User{  get; set; }
+    public User User { get; set; }
 
     public CreateUserRequest()
     {

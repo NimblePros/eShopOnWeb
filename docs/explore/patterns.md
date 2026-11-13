@@ -18,17 +18,17 @@ The eShopOnWeb reference application employs a number of software design pattern
 
 ## MVC
 
-The front end of the application's web project implements the class Model-View-Controller pattern. It includes a number of controllers in its `Controllers` folder, which work with Views to return rendered HTML to the client, typically a browser. For example, the `OrderController` class includes an action method that returns a Detail view. The view is in the /Views/Order/Detail.cshtml file, and binds to a model of type `OrderViewModel` to render specific data within the razor view template.
-
-The sample also demonstrates the use of alternate flavors of the MVC pattern, including Razor Pages and API Endpoints, described in more detail below.
+The web project is built on ASP.NET Core MVC, but it doesn't use controllers. Pages that render HTML are Razor Pages in the `Pages` folder, and the few APIs the web project exposes (for example `GET /User`, used by the Blazor admin app) are FastEndpoints endpoints in the `Endpoints` folder. Both are described in more detail below.
 
 ## Razor Pages
 
 Razor Pages are an ASP.NET Core feature that reorganizes MVC's controllers, action methods, and views. Instead of having controllers with many often unrelated action methods which in turn were bound to many views in a separate folder structure, Razor Pages replaces views with a page metaphor and uses handlers attached to the page instead of actions. Razor Pages also provide their own strongly typed viewmodel, eliminating the need for a separate folder full of viewmodels in many cases.
 
+For example, `Pages/Order/Detail.cshtml` and its `DetailModel` page model handle `GET /order/detail/{orderId}`. The page model sends a Mediator query for the order and the page renders it.
+
 ## API Endpoints
 
-API Endpoints reorganize APIs in much the same way Razor Pages reorganize controllers and views. Instead of having many unrelated endpoints as separate actions in a controller (or Program) class, each web API endpoint is encapsulated in its own class, along with its associated model types. Many .NET developers already use the mediator pattern (below) to achieve organization; API Endpoints eliminates the need to use a mediator and instead works by simply extending the `ControllerBase` class.
+API Endpoints reorganize APIs in much the same way Razor Pages reorganize controllers and views. Instead of having many unrelated endpoints as separate actions in a controller (or Program) class, each web API endpoint is encapsulated in its own class, along with its associated model types. Many .NET developers already use the mediator pattern (below) to achieve organization; Both the PublicApi project and the web project's `Endpoints` folder use [FastEndpoints](https://fast-endpoints.com/), where each endpoint class derives from `Endpoint<TRequest, TResponse>` (or one of its variants).
 
 ## Mediator
 
