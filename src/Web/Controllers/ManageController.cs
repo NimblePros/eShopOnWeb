@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.Encodings.Web;
-using Ardalis.GuardClauses;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web.Extensions;
-using Microsoft.eShopWeb.Web.Services;
+using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.ViewModels.Manage;
 
 namespace Microsoft.eShopWeb.Web.Controllers;
@@ -20,9 +19,9 @@ public class ManageController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IEmailSender _emailSender;
     private readonly IAppLogger<ManageController> _logger;
     private readonly UrlEncoder _urlEncoder;
+    private readonly IEmailVerificationService _emailVerificationService;
 
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
     private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -30,15 +29,15 @@ public class ManageController : Controller
     public ManageController(
       UserManager<ApplicationUser> userManager,
       SignInManager<ApplicationUser> signInManager,
-      IEmailSender emailSender,
       IAppLogger<ManageController> logger,
-      UrlEncoder urlEncoder)
+      UrlEncoder urlEncoder,
+      IEmailVerificationService emailVerificationService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _emailSender = emailSender;
         _logger = logger;
         _urlEncoder = urlEncoder;
+        _emailVerificationService = emailVerificationService;
     }
 
     [TempData]
@@ -107,16 +106,7 @@ public class ManageController : Controller
 
         var user = await GetCurrentUserAsync();
 
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-        Guard.Against.Null(callbackUrl, nameof(callbackUrl));
-        var email = user.Email;
-        if (email == null)
-        {
-            throw new ApplicationException($"No email associated with user {user.UserName}'.");
-        }
-
-        await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
+        await _emailVerificationService.SendVerificationEmailAsync(user, Url, Request.Scheme);
 
         StatusMessage = "Verification email sent. Please check your email.";
         return RedirectToAction(nameof(MyAccount));
