@@ -11,7 +11,7 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogBrandEndpoints;
 /// <summary>
 /// List Catalog Brands
 /// </summary>
-public class CatalogBrandListEndpoint(IRepository<CatalogBrand> catalogBrandRepository, AutoMapper.IMapper mapper)
+public class CatalogBrandListEndpoint(IRepository<CatalogBrand> catalogBrandRepository)
     : EndpointWithoutRequest<ListCatalogBrandsResponse>
 {
     public override void Configure()
@@ -29,7 +29,7 @@ public class CatalogBrandListEndpoint(IRepository<CatalogBrand> catalogBrandRepo
 
         var items = await catalogBrandRepository.ListAsync(ct);
 
-        response.CatalogBrands.AddRange(items.Select(mapper.Map<CatalogBrandDto>));
+        response.CatalogBrands.AddRange(items.Select(item => item.ToDto()));
 
         return response;
     }

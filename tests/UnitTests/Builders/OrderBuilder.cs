@@ -11,11 +11,12 @@ public class OrderBuilder
     public string TestPictureUri => "http://test.com/image.jpg";
     public decimal TestUnitPrice = 1.23m;
     public int TestUnits = 3;
-    public CatalogItemOrdered TestCatalogItemOrdered { get; }
+    // Owned entity instances can't be shared between OrderItems (EF Core rejects it),
+    // so hand out a new instance each time, the same way OrderService does.
+    public CatalogItemOrdered TestCatalogItemOrdered => new(TestCatalogItemId, TestProductName, TestPictureUri);
 
     public OrderBuilder()
     {
-        TestCatalogItemOrdered = new CatalogItemOrdered(TestCatalogItemId, TestProductName, TestPictureUri);
         _order = WithDefaultValues();
     }
 

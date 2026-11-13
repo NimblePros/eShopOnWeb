@@ -46,9 +46,6 @@ builder.Services.AddCorsPolicy(CORS_POLICY, baseUrlConfig!);
 
 builder.Services.AddControllers();
 
-// TODO: Consider removing AutoMapper dependency (FastEndpoints already has its own Mapper support)
-builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-
 builder.Services.AddSwagger();
 
 builder.Services.AddMetronome();

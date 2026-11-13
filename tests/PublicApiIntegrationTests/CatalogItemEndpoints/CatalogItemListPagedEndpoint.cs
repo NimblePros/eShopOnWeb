@@ -48,7 +48,32 @@ public class CatalogItemListPagedEndpoint
         Assert.AreEqual(totalExpected, model2!.CatalogItems.Count());
     }
 
-    [DataTestMethod]
+    [TestMethod]
+    public async Task MapsEveryCatalogItemFieldTheSameAsGetById()
+    {
+        var client = ProgramTest.NewClient;
+        var listResponse = await client.GetAsync("/api/catalog-items?pageSize=1");
+        listResponse.EnsureSuccessStatusCode();
+        var listed = (await listResponse.Content.ReadAsStringAsync())
+            .FromJson<ListPagedCatalogItemResponse>()!.CatalogItems.Single();
+
+        var byIdResponse = await client.GetAsync($"/api/catalog-items/{listed.Id}");
+        byIdResponse.EnsureSuccessStatusCode();
+        var expected = (await byIdResponse.Content.ReadAsStringAsync())
+            .FromJson<GetByIdCatalogItemResponse>()!.CatalogItem;
+
+        Assert.AreEqual(expected.Id, listed.Id);
+        Assert.AreEqual(expected.Name, listed.Name);
+        Assert.AreEqual(expected.Description, listed.Description);
+        Assert.AreEqual(expected.Price, listed.Price);
+        Assert.AreEqual(expected.PictureUri, listed.PictureUri);
+        Assert.AreEqual(expected.CatalogTypeId, listed.CatalogTypeId);
+        Assert.AreEqual(expected.CatalogBrandId, listed.CatalogBrandId);
+        Assert.IsFalse(string.IsNullOrEmpty(listed.Name));
+        Assert.IsTrue(listed.Price > 0);
+    }
+
+    [TestMethod]
     [DataRow("catalog-items")]
     [DataRow("catalog-brands")]
     [DataRow("catalog-types")]
