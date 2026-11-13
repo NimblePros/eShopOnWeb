@@ -27,6 +27,38 @@ public class CatalogFilterPaginatedSpecification
         Assert.Equal(2, result.ToList().Count);
     }
 
+    [Fact]
+    public void ReturnsAllCatalogItemsGivenTakeOfZero()
+    {
+        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogFilterPaginatedSpecification(0, 0, null, null);
+
+        var result = spec.Evaluate(GetTestCollection()).ToList();
+
+        Assert.Equal(4, result.Count);
+    }
+
+    [Fact]
+    public void ReturnsRequestedPageOfCatalogItems()
+    {
+        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogFilterPaginatedSpecification(1, 2, null, null);
+
+        var result = spec.Evaluate(GetTestCollection()).ToList();
+
+        Assert.Equal(["Item 1.5", "Item 2"], result.Select(i => i.Name));
+    }
+
+    [Theory]
+    [InlineData(2, null, "Item 2")]
+    [InlineData(null, 3, "Item 3")]
+    public void FiltersByBrandOrTypeWhenOnlyOneIsProvided(int? brandId, int? typeId, string expectedName)
+    {
+        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogFilterPaginatedSpecification(0, 10, brandId, typeId);
+
+        var result = spec.Evaluate(GetTestCollection()).ToList();
+
+        Assert.Equal(expectedName, Assert.Single(result).Name);
+    }
+
     private List<CatalogItem> GetTestCollection()
     {
         var catalogItemList = new List<CatalogItem>();
