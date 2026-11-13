@@ -1,0 +1,30 @@
+@page "/order/my-orders"
+@model Microsoft.eShopWeb.Web.Pages.Order.MyOrdersModel
+@{
+    ViewData["Title"] = "My Order History";
+}
+
+<div class="esh-orders">
+    <div class="container">
+        <h1>@ViewData["Title"]</h1>
+        <article class="esh-orders-titles row">
+            <section class="esh-orders-title col-xs-2">Order number</section>
+            <section class="esh-orders-title col-xs-4">Date</section>
+            <section class="esh-orders-title col-xs-2">Total</section>
+            <section class="esh-orders-title col-xs-2">Status</section>
+            <section class="esh-orders-title col-xs-2"></section>
+        </article>
+        @foreach (var item in Model.Orders)
+        {
+            <article class="esh-orders-items row">
+                <section class="esh-orders-item col-xs-2">@item.OrderNumber</section>
+                <section class="esh-orders-item col-xs-4">@item.OrderDate</section>
+                <section class="esh-orders-item col-xs-2">$ @item.Total</section>
+                <section class="esh-orders-item col-xs-2">@item.Status</section>
+                <section class="esh-orders-item col-xs-2">
+                    <a class="esh-orders-link" asp-page="/Order/Detail" asp-route-orderId="@item.OrderNumber">Detail</a>
+                </section>
+            </article>
+        }
+    </div>
+</div>
