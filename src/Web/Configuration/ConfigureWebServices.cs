@@ -11,6 +11,7 @@ public static class ConfigureWebServices
         // Add Mediator support for the services
         services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
         services.AddScoped<IBasketViewModelService, BasketViewModelService>();
+        services.AddScoped<IEmailVerificationService, EmailVerificationService>();
         services.AddScoped<CatalogViewModelService>();
         services.AddScoped<ICatalogItemViewModelService, CatalogItemViewModelService>();
         services.Configure<CatalogSettings>(configuration);
