@@ -44,18 +44,18 @@ Sub-issues: #310 Order, #311 User, #312 Manage, #313 cleanup.
 
 ## Phase 3 — #312 ManageController → Razor Pages
 
-- [ ] `Pages/Manage/*` with `_Layout`, `_ManageNav`, `_StatusMessage`, `ManageNavPages`
-- [ ] Pages: MyAccount (+SendVerificationEmail handler), ChangePassword, SetPassword,
+- [x] `Pages/Manage/*` with `_Layout`, `_ManageNav`, `_StatusMessage`, `ManageNavPages`
+- [x] Pages: MyAccount (+SendVerificationEmail handler), ChangePassword, SetPassword,
       ExternalLogins (+LinkLogin, LinkLoginCallback, RemoveLogin handlers),
       TwoFactorAuthentication, Disable2fa, EnableAuthenticator, ShowRecoveryCodes,
       ResetAuthenticator, GenerateRecoveryCodes
-- [ ] `AuthorizeFolder("/Manage")`
-- [ ] Fix `EmailConfirmationLink` to target the Identity `ConfirmEmail` page
-- [ ] Delete `ManageController`, `Views/Manage`, now-unused view models
-- [ ] Functional tests (FunctionalTests/Web/Pages/Manage): anonymous redirect, each page
+- [x] `AuthorizeFolder("/Manage")`
+- [x] Fix `EmailConfirmationLink` to target the Identity `ConfirmEmail` page
+- [x] Delete `ManageController`, `Views/Manage`, now-unused view models
+- [x] Functional tests (FunctionalTests/Web/Pages/Manage): anonymous redirect, each page
       loads for the demo user, profile update, change-password error path (no state change)
-- [ ] Unit test for `EmailConfirmationLink` / email verification service still passing
-- [ ] Verify
+- [x] Unit test for `EmailConfirmationLink` / email verification service still passing
+- [x] Verify
 
 ## Phase 4 — #313 Remove MVC controller infrastructure
 

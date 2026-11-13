@@ -1,11 +1,12 @@
-﻿@model IndexViewModel
+@page "/manage/my-account"
+@model MyAccountModel
 @{
     ViewData["Title"] = "Profile";
     ViewData.AddActivePage(ManageNavPages.Index);
 }
 
 <h4>@ViewData["Title"]</h4>
-<partial name="_StatusMessage" for="StatusMessage" />
+<partial name="_StatusMessage" model="Model.StatusMessage" />
 <div class="row">
     <div class="col-md-6">
         <form method="post">
@@ -18,15 +19,15 @@
                 <label asp-for="Email"></label>
                 @if (Model.IsEmailConfirmed)
                 {
-                <div class="input-group">
-                    <input asp-for="Email" class="form-control" />
-                    <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
-                </div>
+                    <div class="input-group">
+                        <input asp-for="Email" class="form-control" />
+                        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
+                    </div>
                 }
                 else
                 {
-                <input asp-for="Email" class="form-control" />
-                <button asp-action="SendVerificationEmail" class="btn btn-link">Send verification email</button>
+                    <input asp-for="Email" class="form-control" />
+                    <button asp-page-handler="SendVerificationEmail" class="btn btn-link">Send verification email</button>
                 }
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>

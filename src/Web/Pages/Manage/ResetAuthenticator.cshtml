@@ -1,4 +1,6 @@
-﻿@{
+@page "/manage/reset-authenticator"
+@model ResetAuthenticatorModel
+@{
     ViewData["Title"] = "Reset authenticator key";
     ViewData.AddActivePage(ManageNavPages.TwoFactorAuthentication);
 }
@@ -6,7 +8,7 @@
 <h4>@ViewData["Title"]</h4>
 <div class="alert alert-warning" role="alert">
     <p>
-        <span class="glyphicon glyphicon-warning-sign"></span>
+        <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
         <strong>If you reset your authenticator key your authenticator app will not work until you reconfigure it.</strong>
     </p>
     <p>
@@ -15,7 +17,7 @@
     </p>
 </div>
 <div>
-    <form asp-action="ResetAuthenticator" method="post" class="form-group">
+    <form method="post" class="form-group">
         <button class="btn btn-danger" type="submit">Reset authenticator key</button>
     </form>
 </div>
