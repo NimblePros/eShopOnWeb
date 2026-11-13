@@ -3,12 +3,12 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
-namespace Microsoft.eShopWeb.FunctionalTests.Web.Controllers;
+namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Account;
 
 [Collection("Sequential")]
-public class AccountControllerSignIn : IClassFixture<TestApplication>
+public class AccountSignIn : IClassFixture<TestApplication>
 {
-    public AccountControllerSignIn(TestApplication factory)
+    public AccountSignIn(TestApplication factory)
     {
         Client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {

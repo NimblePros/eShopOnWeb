@@ -59,14 +59,14 @@ Sub-issues: #310 Order, #311 User, #312 Manage, #313 cleanup.
 
 ## Phase 4 — #313 Remove MVC controller infrastructure
 
-- [ ] Delete `BaseApiController`
-- [ ] `Program.cs`: drop `AddMvc` route-token convention, `AddControllersWithViews`,
+- [x] Delete `BaseApiController`
+- [x] `Program.cs`: drop `AddMvc` route-token convention, `AddControllersWithViews`,
       `MapControllerRoute`, slugify constraint; delete `SlugifyParameterTransformer`
-- [ ] Move `Views/Shared/*` and view imports into `Pages/`; delete `Views/` (incl. orphaned
+- [x] Move `Views/Shared/*` and view imports into `Pages/`; delete `Views/` (incl. orphaned
       `Views/Account`), update `Web.csproj` content entries
-- [ ] Update docs (`docs/explore/patterns.md`, `docs/faq.md`, `docs/explore/tests.md`)
-- [ ] Move functional tests out of `Web/Controllers` folder
-- [ ] Verify
+- [x] Update docs (`docs/explore/patterns.md`, `docs/faq.md`, `docs/explore/tests.md`)
+- [x] Move functional tests out of `Web/Controllers` folder
+- [x] Verify
 
 ## Phase 5 — Independent review
 
