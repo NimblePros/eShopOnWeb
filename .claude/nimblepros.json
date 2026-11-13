@@ -1,0 +1,3 @@
+{
+  "verifyCommand": "dotnet ./BuildTestFormat.cs"
+}
