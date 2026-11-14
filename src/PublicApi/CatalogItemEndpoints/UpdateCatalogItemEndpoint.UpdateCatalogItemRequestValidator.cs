@@ -12,6 +12,6 @@ public class UpdateCatalogItemRequestValidator : Validator<UpdateCatalogItemRequ
         RuleFor(x => x.CatalogTypeId).GreaterThan(0);
         RuleFor(x => x.Name).NotEmpty().MaximumLength(CreateCatalogItemRequestValidator.NameMaxLength);
         RuleFor(x => x.Description).NotEmpty();
-        RuleFor(x => x.Price).GreaterThan(0);
+        RuleFor(x => x.Price).GreaterThan(0).LessThan(CreateCatalogItemRequestValidator.PriceUpperBound);
     }
 }

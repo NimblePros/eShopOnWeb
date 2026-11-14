@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
@@ -80,11 +80,14 @@ public class UpdateCatalogItemEndpointTest
     [TestMethod]
     [DataRow(nameof(UpdateCatalogItemRequest.Name), "")]
     [DataRow(nameof(UpdateCatalogItemRequest.Name), null)]
+    [DataRow(nameof(UpdateCatalogItemRequest.Name), "   ")]
     [DataRow(nameof(UpdateCatalogItemRequest.Name), "this name is longer than the fifty character limit!")]
     [DataRow(nameof(UpdateCatalogItemRequest.Description), "")]
     [DataRow(nameof(UpdateCatalogItemRequest.Description), null)]
+    [DataRow(nameof(UpdateCatalogItemRequest.Description), "   ")]
     [DataRow(nameof(UpdateCatalogItemRequest.Price), "0")]
     [DataRow(nameof(UpdateCatalogItemRequest.Price), "-1")]
+    [DataRow(nameof(UpdateCatalogItemRequest.Price), "10000000000000000")]
     [DataRow(nameof(UpdateCatalogItemRequest.CatalogBrandId), "0")]
     [DataRow(nameof(UpdateCatalogItemRequest.CatalogTypeId), "0")]
     [DataRow(nameof(UpdateCatalogItemRequest.Id), "0")]
@@ -97,6 +100,19 @@ public class UpdateCatalogItemEndpointTest
         var response = await client.PutAsync(Route, JsonContent.Create(request));
 
         await AssertBadRequestForFieldAsync(response, field);
+    }
+
+    [TestMethod]
+    public async Task UpdatesItemGivenNameAtMaxLength()
+    {
+        var client = HttpClientHelper.GetProductManagerClient();
+        var itemId = await CreateCatalogItemAsync(client);
+        var request = BuildRequest(itemId);
+        request.Name = $"max {Guid.NewGuid()}".PadRight(50, 'x');
+
+        var response = await client.PutAsync(Route, JsonContent.Create(request));
+
+        response.EnsureSuccessStatusCode();
     }
 
     [TestMethod]

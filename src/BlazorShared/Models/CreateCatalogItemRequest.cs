@@ -9,6 +9,7 @@ public class CreateCatalogItemRequest
     public int CatalogBrandId { get; set; }
 
     [Required(ErrorMessage = "The Name field is required")]
+    [StringLength(50, ErrorMessage = "The Name field must be 50 characters or fewer")]
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "The Description field is required")]

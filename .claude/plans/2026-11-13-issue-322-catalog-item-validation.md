@@ -26,23 +26,37 @@ https://github.com/NimblePros/eShopOnWeb/issues/322
 
 ## Phase 1 — Validation
 
-- [ ] `UpdateCatalogItemRequestValidator`
-- [ ] `CreateCatalogItemRequestValidator`
-- [ ] Remove DataAnnotations from `UpdateCatalogItemRequest`
-- [ ] Brand/type existence checks in update and create endpoints
+- [x] `UpdateCatalogItemRequestValidator`
+- [x] `CreateCatalogItemRequestValidator`
+- [x] Remove DataAnnotations from `UpdateCatalogItemRequest`
+- [x] Brand/type existence checks in update and create endpoints
 
 ## Phase 2 — Tests (`tests/PublicApiIntegrationTests`)
 
-- [ ] `UpdateCatalogItemEndpointTest`: 400 for empty/missing name, empty description,
+- [x] `UpdateCatalogItemEndpointTest`: 400 for empty/missing name, empty description,
       price <= 0, brand id 0, type id 0, id 0, brand id not found, type id not found
-- [ ] `CreateCatalogItemEndpointTest`: 400 for the same field rules and missing brand/type
-- [ ] Existing tests for success, 404, 401/403 and 409 still pass
+- [x] `CreateCatalogItemEndpointTest`: 400 for the same field rules and missing brand/type
+- [x] Existing tests for success, 404, 401/403 and 409 still pass
 
 ## Phase 3 — Independent review
 
-- [ ] A separate agent reviews the full diff (correctness, security, performance, accessibility)
-- [ ] Address significant findings
+- [x] A separate agent reviews the full diff (correctness, security, performance, accessibility)
+- [x] Address significant findings
 
 ## Phase 4 — Verification
 
-- [ ] `dotnet ./BuildTestFormat.cs` passes
+- [x] `dotnet ./BuildTestFormat.cs` passes
+
+## Review findings
+
+- Price had no upper bound, so a value too large for `decimal(18,2)` would still fail
+  with 500 on SQL Server. **Fixed:** both validators now require `Price < 10^16`, and a test
+  covers it.
+- BlazorAdmin `CatalogItemService.Edit` dereferenced a null response on any error (this
+  bug was already there). **Fixed:** it now uses `?.`, like `Create` does.
+- BlazorShared models had no 50-character name limit, so the admin UI couldn't warn first.
+  **Fixed:** added `[StringLength(50)]` to `CatalogItem.Name` and `CreateCatalogItemRequest.Name`.
+- Test gaps: whitespace-only name/description and a name of exactly 50 characters.
+  **Fixed:** tests added.
+- **Deferred:** BlazorAdmin error toasts show only the generic message, not the field-level
+  errors from the 400 body. This was already the case, and it is UI work outside this issue.
