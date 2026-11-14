@@ -12,7 +12,11 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// <summary>
 /// Updates a Catalog Item
 /// </summary>
-public class UpdateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
+public class UpdateCatalogItemEndpoint(
+    IRepository<CatalogItem> itemRepository,
+    IRepository<CatalogBrand> brandRepository,
+    IRepository<CatalogType> typeRepository,
+    IUriComposer uriComposer)
     : Endpoint<UpdateCatalogItemRequest, Results<Ok<UpdateCatalogItemResponse>, NotFound>>
 {
     public override void Configure()
@@ -34,6 +38,16 @@ public class UpdateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, 
         {
             return TypedResults.NotFound();
         }
+
+        if (await brandRepository.GetByIdAsync(request.CatalogBrandId, ct) == null)
+        {
+            AddError(r => r.CatalogBrandId, $"Catalog brand {request.CatalogBrandId} does not exist.");
+        }
+        if (await typeRepository.GetByIdAsync(request.CatalogTypeId, ct) == null)
+        {
+            AddError(r => r.CatalogTypeId, $"Catalog type {request.CatalogTypeId} does not exist.");
+        }
+        ThrowIfAnyErrors();
 
         CatalogItem.CatalogItemDetails details = new(request.Name, request.Description, request.Price);
         existingItem.UpdateDetails(details);

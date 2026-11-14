@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -15,6 +16,7 @@ public class UpdateCatalogItemEndpointTest
 {
     private const string Route = "api/catalog-items";
     private const int NonExistentId = 9999;
+    private const int SeededItemId = 1;
 
     [TestMethod]
     public async Task ReturnsUnauthorizedGivenNoToken()
@@ -75,6 +77,75 @@ public class UpdateCatalogItemEndpointTest
         AssertMatchesRequest(request, persisted);
     }
 
+    [TestMethod]
+    [DataRow(nameof(UpdateCatalogItemRequest.Name), "")]
+    [DataRow(nameof(UpdateCatalogItemRequest.Name), null)]
+    [DataRow(nameof(UpdateCatalogItemRequest.Name), "this name is longer than the fifty character limit!")]
+    [DataRow(nameof(UpdateCatalogItemRequest.Description), "")]
+    [DataRow(nameof(UpdateCatalogItemRequest.Description), null)]
+    [DataRow(nameof(UpdateCatalogItemRequest.Price), "0")]
+    [DataRow(nameof(UpdateCatalogItemRequest.Price), "-1")]
+    [DataRow(nameof(UpdateCatalogItemRequest.CatalogBrandId), "0")]
+    [DataRow(nameof(UpdateCatalogItemRequest.CatalogTypeId), "0")]
+    [DataRow(nameof(UpdateCatalogItemRequest.Id), "0")]
+    public async Task ReturnsBadRequestGivenInvalidField(string field, string? value)
+    {
+        var client = HttpClientHelper.GetProductManagerClient();
+        var request = BuildRequest(SeededItemId);
+        SetField(request, field, value);
+
+        var response = await client.PutAsync(Route, JsonContent.Create(request));
+
+        await AssertBadRequestForFieldAsync(response, field);
+    }
+
+    [TestMethod]
+    public async Task ReturnsBadRequestGivenNonExistentBrand()
+    {
+        var client = HttpClientHelper.GetProductManagerClient();
+        var itemId = await CreateCatalogItemAsync(client);
+        var request = BuildRequest(itemId);
+        request.CatalogBrandId = NonExistentId;
+
+        var response = await client.PutAsync(Route, JsonContent.Create(request));
+
+        await AssertBadRequestForFieldAsync(response, nameof(UpdateCatalogItemRequest.CatalogBrandId));
+    }
+
+    [TestMethod]
+    public async Task ReturnsBadRequestGivenNonExistentType()
+    {
+        var client = HttpClientHelper.GetProductManagerClient();
+        var itemId = await CreateCatalogItemAsync(client);
+        var request = BuildRequest(itemId);
+        request.CatalogTypeId = NonExistentId;
+
+        var response = await client.PutAsync(Route, JsonContent.Create(request));
+
+        await AssertBadRequestForFieldAsync(response, nameof(UpdateCatalogItemRequest.CatalogTypeId));
+    }
+
+    private static void SetField(UpdateCatalogItemRequest request, string field, string? value)
+    {
+        switch (field)
+        {
+            case nameof(UpdateCatalogItemRequest.Name): request.Name = value!; break;
+            case nameof(UpdateCatalogItemRequest.Description): request.Description = value!; break;
+            case nameof(UpdateCatalogItemRequest.Price): request.Price = decimal.Parse(value!, CultureInfo.InvariantCulture); break;
+            case nameof(UpdateCatalogItemRequest.CatalogBrandId): request.CatalogBrandId = int.Parse(value!, CultureInfo.InvariantCulture); break;
+            case nameof(UpdateCatalogItemRequest.CatalogTypeId): request.CatalogTypeId = int.Parse(value!, CultureInfo.InvariantCulture); break;
+            case nameof(UpdateCatalogItemRequest.Id): request.Id = int.Parse(value!, CultureInfo.InvariantCulture); break;
+            default: throw new ArgumentOutOfRangeException(nameof(field), field, null);
+        }
+    }
+
+    private static async Task AssertBadRequestForFieldAsync(HttpResponseMessage response, string field)
+    {
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        StringAssert.Contains(body.ToLowerInvariant(), $"\"{field.ToLowerInvariant()}\"");
+    }
+
     private static void AssertMatchesRequest(UpdateCatalogItemRequest expected, CatalogItemDto actual)
     {
         Assert.AreEqual(expected.Id, actual.Id);
@@ -102,7 +173,7 @@ public class UpdateCatalogItemEndpointTest
         {
             CatalogBrandId = 1,
             CatalogTypeId = 1,
-            Name = $"item to update {Guid.NewGuid()}",
+            Name = $"to update {Guid.NewGuid()}",
             Description = "original description",
             Price = 1.23m
         };
