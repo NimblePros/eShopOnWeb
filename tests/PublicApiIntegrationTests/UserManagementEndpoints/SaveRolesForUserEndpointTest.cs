@@ -87,6 +87,67 @@ public class SaveRolesForUserEndpointTest
         Assert.AreEqual(0, (await GetRolesAsync(client, userId)).Count);
     }
 
+    [TestMethod]
+    public async Task ReturnsBadRequestGivenUnknownRoleAndLeavesRolesUnchanged()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var request = new SaveRolesForUserRequest { RolesToAdd = [Constants.Roles.PRODUCT_MANAGERS, "NoSuchRole"] };
+
+        var response = await client.PutAsync(RolesRoute(userId), JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        StringAssert.Contains(await response.Content.ReadAsStringAsync(), "NoSuchRole");
+        Assert.AreEqual(0, (await GetRolesAsync(client, userId)).Count);
+    }
+
+    [TestMethod]
+    public async Task ReturnsBadRequestGivenRoleAlreadyAssigned()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        (await client.PutAsync(RolesRoute(userId), JsonContent.Create(AddProductManagerRequest()))).EnsureSuccessStatusCode();
+
+        var response = await client.PutAsync(RolesRoute(userId), JsonContent.Create(AddProductManagerRequest()));
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        CollectionAssert.AreEquivalent(new[] { Constants.Roles.PRODUCT_MANAGERS }, await GetRolesAsync(client, userId));
+    }
+
+    [TestMethod]
+    public async Task ReturnsBadRequestGivenRemovingUnassignedRoleAndDoesNotApplyAdd()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var request = new SaveRolesForUserRequest
+        {
+            RolesToAdd = [Constants.Roles.PRODUCT_MANAGERS],
+            RolesToRemove = [Constants.Roles.ADMINISTRATORS]
+        };
+
+        var response = await client.PutAsync(RolesRoute(userId), JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.AreEqual(0, (await GetRolesAsync(client, userId)).Count);
+    }
+
+    [TestMethod]
+    public async Task ReturnsBadRequestGivenSameRoleToAddAndRemove()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var request = new SaveRolesForUserRequest
+        {
+            RolesToAdd = [Constants.Roles.PRODUCT_MANAGERS],
+            RolesToRemove = [Constants.Roles.PRODUCT_MANAGERS]
+        };
+
+        var response = await client.PutAsync(RolesRoute(userId), JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.AreEqual(0, (await GetRolesAsync(client, userId)).Count);
+    }
+
     private static string RolesRoute(string userId) => $"api/users/{userId}/roles";
 
     private static SaveRolesForUserRequest AddProductManagerRequest() =>
