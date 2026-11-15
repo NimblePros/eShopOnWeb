@@ -43,7 +43,7 @@
                                     <tr>
                                         <td>@member.UserName</td>
                                         <td>
-                                            @if (member.UserName != "admin@microsoft.com")
+                                            @if (member.UserName != BlazorShared.Authorization.Constants.DemoUsers.ADMINISTRATOR)
                                             {
                                                 <button @onclick="@(() => DeleteClick(member.Id,member.UserName))" @onclick:stopPropagation="true" class="btn btn-danger">
                                                     Remove from Role

@@ -23,10 +23,10 @@ public class AppIdentityDbContextSeed
         // Demo users share a publicly known password, so only create them when explicitly allowed
         if (!seedDemoUsers) return;
 
-        var defaultUser = new ApplicationUser { UserName = "demouser@microsoft.com", Email = "demouser@microsoft.com" };
+        var defaultUser = new ApplicationUser { UserName = BlazorShared.Authorization.Constants.DemoUsers.DEMO_USER, Email = BlazorShared.Authorization.Constants.DemoUsers.DEMO_USER };
         await userManager.CreateAsync(defaultUser, AuthorizationConstants.DEFAULT_PASSWORD);
 
-        var productManager = new ApplicationUser { UserName = "productmgr@microsoft.com", Email = "productmgr@microsoft.com" };
+        var productManager = new ApplicationUser { UserName = BlazorShared.Authorization.Constants.DemoUsers.PRODUCT_MANAGER, Email = BlazorShared.Authorization.Constants.DemoUsers.PRODUCT_MANAGER };
         await userManager.CreateAsync(productManager, AuthorizationConstants.DEFAULT_PASSWORD);
         productManager = await userManager.FindByNameAsync(productManager.UserName);
         if (productManager != null)

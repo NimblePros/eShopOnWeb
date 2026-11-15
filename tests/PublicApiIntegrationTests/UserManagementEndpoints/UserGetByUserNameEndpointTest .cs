@@ -11,9 +11,9 @@ namespace PublicApiIntegrationTests.UserManagementEndpoints;
 public class UserGetByUserNameEndpointTest
 {
     [TestMethod]
-    [DataRow("admin@microsoft.com")]
-    [DataRow("productmgr@microsoft.com")]
-    [DataRow("demouser@microsoft.com")]
+    [DataRow("admin@eshop.test")]
+    [DataRow("productmgr@eshop.test")]
+    [DataRow("demouser@eshop.test")]
     public async Task ReturnsItemGivenValidName(string userName)
     {
         var client = HttpClientHelper.GetAdminClient();

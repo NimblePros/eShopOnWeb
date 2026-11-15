@@ -11,8 +11,8 @@ public class TransferBasket
 {
     private readonly string _nonexistentAnonymousBasketBuyerId = "nonexistent-anonymous-basket-buyer-id";
     private readonly string _existentAnonymousBasketBuyerId = "existent-anonymous-basket-buyer-id";
-    private readonly string _nonexistentUserBasketBuyerId = "newuser@microsoft.com";
-    private readonly string _existentUserBasketBuyerId = "testuser@microsoft.com";
+    private readonly string _nonexistentUserBasketBuyerId = "newuser@eshop.test";
+    private readonly string _existentUserBasketBuyerId = "testuser@eshop.test";
     private readonly IRepository<Basket> _mockBasketRepo = Substitute.For<IRepository<Basket>>();
     private readonly IAppLogger<BasketService> _mockLogger = Substitute.For<IAppLogger<BasketService>>();
 

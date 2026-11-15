@@ -30,7 +30,7 @@ public class SendVerificationEmailAsync
     {
         Id = "user-id",
         UserName = "demouser",
-        Email = "demouser@microsoft.com"
+        Email = "demouser@eshop.test"
     };
 
     public SendVerificationEmailAsync()

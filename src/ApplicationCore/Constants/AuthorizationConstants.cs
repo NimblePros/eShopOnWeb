@@ -8,5 +8,5 @@ public class AuthorizationConstants
     public const string DEFAULT_PASSWORD = "Pass@word1";
 
     // The seeded root administrator. The user management API refuses to modify or delete it.
-    public const string DEFAULT_ADMIN_USERNAME = "admin@microsoft.com";
+    public const string DEFAULT_ADMIN_USERNAME = BlazorShared.Authorization.Constants.DemoUsers.ADMINISTRATOR;
 }

@@ -132,7 +132,9 @@ Or use the [Aspire CLI](https://learn.microsoft.com/dotnet/aspire/cli/overview) 
 
 Open the Aspire dashboard link shown in the console to find the Web and PublicApi endpoints. The Web site is at `https://localhost:5001/`, and the admin area (Blazor WebAssembly, which calls PublicApi) is at `https://localhost:5001/admin`.
 
-The first run downloads the SQL Server image, which can take a few minutes. When the apps start, they apply the Entity Framework Core migrations and seed both databases, so you should see products in the store and be able to log in with the `demouser@microsoft.com` account. The SQL Server container and its data volume are kept between runs, so your data survives restarts. To start over with empty databases, remove the `sqlserver` container and its volume using your container tool.
+The first run downloads the SQL Server image, which can take a few minutes. When the apps start, they apply the Entity Framework Core migrations and seed both databases, so you should see products in the store and be able to log in with the `demouser@eshop.test` account. The SQL Server container and its data volume are kept between runs, so your data survives restarts. To start over with empty databases, remove the `sqlserver` container and its volume using your container tool.
+
+> **Note:** The demo accounts used to be seeded with `@microsoft.com` addresses. If your identity database was created before they moved to `@eshop.test`, it still contains the old accounts alongside the new ones, and the old `admin@microsoft.com` account is no longer protected from edits. Recreate the identity database to get a clean set of demo users.
 
 The SQL Server `sa` password is generated on the first run and stored in the AppHost's [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) as `Parameters:sqlserver-password`. The data volume keeps the password it was created with, so if you clear the AppHost's user secrets, also remove the `sqlserver` container and its volume (or the apps won't be able to log in to SQL Server).
 

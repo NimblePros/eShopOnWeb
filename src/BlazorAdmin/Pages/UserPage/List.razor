@@ -34,7 +34,7 @@ else
                         @if (_currentUser is null  || _currentUser.Identity is null)
                         {
                             <p>Unknown current user</p>
-                        } else if (user.UserName != _currentUser.Identity.Name && user.UserName != "admin@microsoft.com")
+                        } else if (user.UserName != _currentUser.Identity.Name && user.UserName != BlazorShared.Authorization.Constants.DemoUsers.ADMINISTRATOR)
                         {
                             <button @onclick="@(() => EditClick(user.Id))" @onclick:stopPropagation="true" class="btn btn-primary">
                                 Edit

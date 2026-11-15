@@ -43,7 +43,7 @@ public class DeleteUserEndpointTest
     public async Task ReturnsBadRequestTryingToDeleteAdminUser()
     {
         var client = HttpClientHelper.GetAdminClient();
-        var userName = "admin@microsoft.com";
+        var userName = "admin@eshop.test";
         var response = await client.GetAsync($"api/users/name/{userName}");
 
         var adminUserResponse = await response.Content.ReadAsStringAsync();

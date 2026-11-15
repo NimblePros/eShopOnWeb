@@ -13,9 +13,9 @@ namespace PublicApiIntegrationTests.AuthEndpoints;
 public class AuthenticateEndpoint
 {
     [TestMethod]
-    [DataRow("demouser@microsoft.com", AuthorizationConstants.DEFAULT_PASSWORD, true)]
-    [DataRow("demouser@microsoft.com", "badpassword", false)]
-    [DataRow("baduser@microsoft.com", "badpassword", false)]
+    [DataRow("demouser@eshop.test", AuthorizationConstants.DEFAULT_PASSWORD, true)]
+    [DataRow("demouser@eshop.test", "badpassword", false)]
+    [DataRow("baduser@eshop.test", "badpassword", false)]
     public async Task ReturnsExpectedResultGivenCredentials(string testUsername, string testPassword, bool expectedResult)
     {
         var request = new AuthenticateRequest()

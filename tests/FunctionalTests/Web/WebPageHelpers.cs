@@ -16,7 +16,7 @@ public static class WebPageHelpers
         return RegexSearch(regexpression, input);
     }
 
-    public const string DemoUserEmail = "demouser@microsoft.com";
+    public const string DemoUserEmail = "demouser@eshop.test";
     public const string DemoUserPassword = "Pass@word1";
 
     /// <summary>

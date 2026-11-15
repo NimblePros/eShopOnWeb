@@ -11,7 +11,7 @@ public class ApiTokenHelper
 {
     public static string GetAdminUserToken()
     {
-        var userName = "admin@microsoft.com";
+        var userName = "admin@eshop.test";
         string[] roles = { "Administrators" };
 
         return CreateToken(userName, roles);
@@ -19,7 +19,7 @@ public class ApiTokenHelper
 
     public static string GetProductManagerUserToken()
     {
-        var userName = "productmgr@microsoft.com";
+        var userName = "productmgr@eshop.test";
         string[] roles = { "Product Managers" };
 
         return CreateToken(userName, roles);
@@ -27,7 +27,7 @@ public class ApiTokenHelper
 
     public static string GetNormalUserToken()
     {
-        var userName = "demouser@microsoft.com";
+        var userName = "demouser@eshop.test";
         string[] roles = { };
 
         return CreateToken(userName, roles);
