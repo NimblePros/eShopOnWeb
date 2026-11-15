@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
 using Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -75,6 +77,63 @@ public class UpdateRoleEndpointTest
         Assert.AreEqual(request.Name, persisted.Name);
     }
 
+    [TestMethod]
+    public async Task ReturnsConflictGivenDuplicateNameAndAdminUserToken()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var roleId = await CreateRoleAsync(client);
+        var originalName = await GetRoleNameAsync(client, roleId);
+        var request = new UpdateRoleRequest { Id = roleId, Name = Constants.Roles.ADMINISTRATORS };
+
+        var response = await client.PutAsync(Route, JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.AreEqual(originalName, await GetRoleNameAsync(client, roleId));
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow(null)]
+    [DataRow("   ")]
+    public async Task ReturnsBadRequestGivenInvalidNameAndAdminUserToken(string? name)
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var roleId = await CreateRoleAsync(client);
+        var originalName = await GetRoleNameAsync(client, roleId);
+        var request = new UpdateRoleRequest { Id = roleId, Name = name! };
+
+        var response = await client.PutAsync(Route, JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.AreEqual(originalName, await GetRoleNameAsync(client, roleId));
+    }
+
+    [TestMethod]
+    [DataRow(Constants.Roles.ADMINISTRATORS)]
+    [DataRow(Constants.Roles.PRODUCT_MANAGERS)]
+    public async Task ReturnsBadRequestGivenBuiltInRoleAndAdminUserToken(string roleName)
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var roleId = await GetRoleIdByNameAsync(client, roleName);
+
+        var response = await client.PutAsync(Route, JsonContent.Create(BuildRequest(roleId)));
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.AreEqual(roleName, await GetRoleNameAsync(client, roleId));
+    }
+
+    [TestMethod]
+    public async Task AllowsKeepingSameNameGivenAdminUserToken()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var roleId = await CreateRoleAsync(client);
+        var request = new UpdateRoleRequest { Id = roleId, Name = (await GetRoleNameAsync(client, roleId))! };
+
+        var response = await client.PutAsync(Route, JsonContent.Create(request));
+
+        response.EnsureSuccessStatusCode();
+    }
+
     private static UpdateRoleRequest BuildRequest(string id) => new()
     {
         Id = id,
@@ -88,5 +147,20 @@ public class UpdateRoleEndpointTest
         var response = await client.PostAsync(Route, JsonContent.Create(createRequest));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadAsStringAsync()).FromJson<CreateRoleResponse>()!.Role.Id;
+    }
+
+    private static async Task<string?> GetRoleNameAsync(HttpClient client, string roleId)
+    {
+        var response = await client.GetAsync($"{Route}/{roleId}");
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadAsStringAsync()).FromJson<GetByIdRoleResponse>()!.Role.Name;
+    }
+
+    private static async Task<string> GetRoleIdByNameAsync(HttpClient client, string roleName)
+    {
+        var response = await client.GetAsync(Route);
+        response.EnsureSuccessStatusCode();
+        var roles = (await response.Content.ReadAsStringAsync()).FromJson<RoleListResponse>()!.Roles;
+        return roles.Single(r => r.Name == roleName).Id;
     }
 }
