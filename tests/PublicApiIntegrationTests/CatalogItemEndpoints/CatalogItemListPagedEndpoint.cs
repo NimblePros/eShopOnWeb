@@ -74,6 +74,45 @@ public class CatalogItemListPagedEndpoint
     }
 
     [TestMethod]
+    public async Task ReturnsAllSeededItemsWhenPageSizeIsOmitted()
+    {
+        var client = ProgramTest.NewClient;
+        var response = await client.GetAsync("/api/catalog-items");
+        response.EnsureSuccessStatusCode();
+        var model = (await response.Content.ReadAsStringAsync()).FromJson<ListPagedCatalogItemResponse>();
+
+        // The seeded catalog is smaller than MaxPageSize, so the default page holds every item.
+        Assert.IsTrue(model!.CatalogItems.Count > 0);
+        Assert.IsTrue(model.CatalogItems.Count <= ListPagedCatalogItemRequest.MaxPageSize);
+        Assert.AreEqual(1, model.PageCount);
+    }
+
+    [TestMethod]
+    public async Task ReturnsOkGivenMaxPageSize()
+    {
+        var client = ProgramTest.NewClient;
+        var response = await client.GetAsync($"/api/catalog-items?pageSize={ListPagedCatalogItemRequest.MaxPageSize}");
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [TestMethod]
+    [DataRow("pageSize=0")]
+    [DataRow("pageSize=-1")]
+    [DataRow("pageSize=101")]
+    [DataRow("pageSize=1000000")]
+    [DataRow("pageSize=10&pageIndex=-1")]
+    [DataRow("pageSize=100&pageIndex=100000000")]
+    [DataRow("pageIndex=-5")]
+    public async Task ReturnsBadRequestGivenInvalidPaging(string query)
+    {
+        var client = ProgramTest.NewClient;
+        var response = await client.GetAsync($"/api/catalog-items?{query}");
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [TestMethod]
     [DataRow("catalog-items")]
     [DataRow("catalog-brands")]
     [DataRow("catalog-types")]

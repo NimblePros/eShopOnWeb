@@ -48,14 +48,8 @@ public class CatalogItemListPagedEndpoint(IRepository<CatalogItem> itemRepositor
             item.PictureUri = uriComposer.ComposePicUri(item.PictureUri);
         }
 
-        if (request.PageSize > 0)
-        {
-            response.PageCount = (int)Math.Ceiling((decimal)totalItems / request.PageSize);
-        }
-        else
-        {
-            response.PageCount = totalItems > 0 ? 1 : 0;
-        }
+        // The validator guarantees PageSize is between 1 and MaxPageSize.
+        response.PageCount = (int)Math.Ceiling((decimal)totalItems / request.PageSize);
 
         return response;
     }
