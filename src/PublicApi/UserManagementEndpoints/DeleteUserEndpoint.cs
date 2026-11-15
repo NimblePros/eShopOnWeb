@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
@@ -33,7 +34,7 @@ public class DeleteUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         {
             return TypedResults.NotFound();
         }
-        if (userToDelete.UserName == "admin@microsoft.com")
+        if (userToDelete.IsDefaultAdmin())
         {
             return TypedResults.BadRequest();
         }

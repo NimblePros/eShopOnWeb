@@ -5,8 +5,13 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb;
+using Microsoft.eShopWeb.ApplicationCore.Constants;
+using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
+using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PublicApiIntegrationTests.Helpers;
 
@@ -88,32 +93,106 @@ public class UpdateUserEndpointTest
     }
 
     [TestMethod]
-    public async Task UpdatesSuccessfullyGivenValidChangesAndAdminUserToken()
+    public async Task ReturnsBadRequestGivenDefaultAdminUserAndLeavesItUnchanged()
     {
         var client = HttpClientHelper.GetAdminClient();
-        var userName = "demouser@microsoft.com";
-
-        var response = await client.GetAsync($"api/users/name/{userName}");
-
-        var demoUserResponse = await response.Content.ReadAsStringAsync();
-        var demoUser = demoUserResponse.FromJson<Microsoft.eShopWeb.PublicApi.UserManagementEndpoints.Models.GetUserResponse>();
-
-        var startingEmailConfirmedValue = demoUser!.User.EmailConfirmed;
-        demoUser.User.EmailConfirmed = !startingEmailConfirmedValue;
-
-        UpdateUserRequest request = new UpdateUserRequest()
+        var admin = await GetUserByNameAsync(client, AuthorizationConstants.DEFAULT_ADMIN_USERNAME);
+        var request = new UpdateUserRequest
         {
-            User = demoUser.User
+            User = new UserDto
+            {
+                Id = admin.Id,
+                UserName = $"{Guid.NewGuid()}@example.com",
+                Email = admin.Email,
+                LockoutEnd = DateTimeOffset.MaxValue
+            }
         };
-        var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-        var updateResponse = await client.PutAsync("api/users", jsonContent);
-        Assert.AreEqual(HttpStatusCode.OK, updateResponse.StatusCode);
+        var response = await client.PutAsync("api/users", JsonContent.Create(request));
 
-        var updateResponseJsonString = await updateResponse.Content.ReadAsStringAsync();
-        var updatedItem = updateResponseJsonString.FromJson<UpdateUserResponse>();
-        Assert.IsNotNull(updatedItem);
-        Assert.AreEqual(!startingEmailConfirmedValue, updatedItem.User.EmailConfirmed);
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var adminAfter = await GetUserByNameAsync(client, AuthorizationConstants.DEFAULT_ADMIN_USERNAME);
+        Assert.AreEqual(admin.Id, adminAfter.Id);
+        Assert.IsNull(adminAfter.LockoutEnd);
+    }
+
+    [TestMethod]
+    public async Task IgnoresConfirmationFlagsInRequest()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var request = UpdateRequest(userId);
+        request.User.EmailConfirmed = true;
+        request.User.PhoneNumberConfirmed = true;
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        var stored = await GetUserByIdAsync(client, userId);
+        Assert.IsFalse(stored.EmailConfirmed);
+        Assert.IsFalse(stored.PhoneNumberConfirmed);
+    }
+
+    [TestMethod]
+    public async Task RotatesSecurityStampGivenUserNameChange()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var stampBefore = await GetSecurityStampAsync(userId);
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(UpdateRequest(userId)));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreNotEqual(stampBefore, await GetSecurityStampAsync(userId));
+    }
+
+    [TestMethod]
+    public async Task ReturnsBadRequestGivenDuplicateUserName()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var otherUser = await GetUserByIdAsync(client, await CreateUserAsync(client));
+        var before = await GetUserByIdAsync(client, userId);
+        var request = UpdateRequest(userId);
+        request.User.UserName = otherUser.UserName;
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var after = await GetUserByIdAsync(client, userId);
+        Assert.AreEqual(before.UserName, after.UserName);
+        Assert.AreEqual(before.Email, after.Email);
+    }
+
+    [TestMethod]
+    public async Task UpdatesLockoutEndGivenNormalUser()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var current = await GetUserByIdAsync(client, userId);
+        var lockoutEnd = new DateTimeOffset(2099, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        current.LockoutEnd = lockoutEnd;
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = current }));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(lockoutEnd, (await GetUserByIdAsync(client, userId)).LockoutEnd);
+    }
+
+    [TestMethod]
+    public async Task PersistsChangesGivenValidChangesAndAdminUserToken()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var request = UpdateRequest(userId);
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        var stored = await GetUserByIdAsync(client, userId);
+        Assert.AreEqual(request.User.UserName, stored.UserName);
+        Assert.AreEqual(request.User.Email, stored.Email);
+        Assert.AreEqual(request.User.PhoneNumber, stored.PhoneNumber);
     }
 
     [TestMethod]
@@ -154,5 +233,28 @@ public class UpdateUserEndpointTest
         var response = await client.PostAsync("api/users", JsonContent.Create(createRequest));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadAsStringAsync()).FromJson<CreateUserResponse>()!.UserId;
+    }
+
+    private static async Task<UserDto> GetUserByIdAsync(HttpClient client, string userId)
+    {
+        var response = await client.GetAsync($"api/users/{userId}");
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadAsStringAsync()).FromJson<GetUserResponse>()!.User;
+    }
+
+    private static async Task<UserDto> GetUserByNameAsync(HttpClient client, string userName)
+    {
+        var response = await client.GetAsync($"api/users/name/{userName}");
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadAsStringAsync()).FromJson<GetUserResponse>()!.User;
+    }
+
+    // The security stamp is not part of the API, so read it straight from Identity.
+    private static async Task<string?> GetSecurityStampAsync(string userId)
+    {
+        using var scope = ProgramTest.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await userManager.FindByIdAsync(userId);
+        return user!.SecurityStamp;
     }
 }

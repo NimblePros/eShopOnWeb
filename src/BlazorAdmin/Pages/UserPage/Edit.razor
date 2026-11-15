@@ -57,8 +57,10 @@
 
                                     <div class="form-group row form-check">
                                         <div class="col-md-6">
-                                            <InputCheckbox id="EmailConfirmed" class="form-check-input" @bind-Value="_item.EmailConfirmed" />
+                                            @* Read-only: set by the email confirmation flow, and reset when the email changes. *@
+                                            <InputCheckbox id="EmailConfirmed" class="form-check-input" @bind-Value="_item.EmailConfirmed" disabled aria-describedby="EmailConfirmedHelp" />
                                             <label for="EmailConfirmed" class="form-check-label">Email Confirmed</label>
+                                            <small id="EmailConfirmedHelp" class="form-text text-muted">Set when the user confirms their email.</small>
                                         </div>
                                     </div>
 
