@@ -57,15 +57,19 @@
 
                                     <div class="form-group row form-check">
                                         <div class="col-md-6">
-                                            <InputCheckbox id="EmailConfirmed" class="form-check-input" @bind-Value="_item.EmailConfirmed" />
+                                            @* Read-only: set by the email confirmation flow, and reset when the email changes. *@
+                                            <InputCheckbox id="EmailConfirmed" class="form-check-input" @bind-Value="_item.EmailConfirmed" disabled aria-describedby="EmailConfirmedHelp" />
                                             <label for="EmailConfirmed" class="form-check-label">Email Confirmed</label>
+                                            <small id="EmailConfirmedHelp" class="form-text text-muted">Set when the user confirms their email.</small>
                                         </div>
                                     </div>
 
                                     <div class="form-group row form-check">
                                         <div class="col-md-6">
-                                            <InputCheckbox id="TwoFactorEnabled" class="form-check-input" @bind-Value="_item.TwoFactorEnabled" />
+                                            @* Read-only: users turn two-factor authentication on or off themselves. *@
+                                            <InputCheckbox id="TwoFactorEnabled" class="form-check-input" @bind-Value="_item.TwoFactorEnabled" disabled aria-describedby="TwoFactorEnabledHelp" />
                                             <label for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication Enabled</label>
+                                            <small id="TwoFactorEnabledHelp" class="form-text text-muted">Managed by the user.</small>
                                         </div>
                                     </div>
                                     <div class="form-group row">
@@ -140,7 +144,13 @@
             User = _item
         };
 
-        await UserManagementService.Update(updateRequest);
+        var updated = await UserManagementService.Update(updateRequest);
+        if (updated is null)
+        {
+            // The API rejected the update (an error toast is already shown). Keep the dialog open
+            // and don't save roles for a user whose details were not saved.
+            return;
+        }
 
         var checkedRoles = _selectedRoles.Where(r => r.Value).Select(r => r.Key).ToList();
         var startingRoles = _startingRoles.Where(r => r.Value).Select(r => r.Key).ToList();

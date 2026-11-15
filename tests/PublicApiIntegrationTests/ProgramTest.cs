@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -16,6 +17,8 @@ public class ProgramTest
             return _application.CreateClient();
         }
     }
+
+    public static IServiceProvider Services => _application.Services;
 
     [AssemblyInitialize]
     public static void AssemblyInitialize(TestContext _)

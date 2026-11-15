@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
@@ -42,7 +43,7 @@ public class SaveRolesForUserEndpoint(UserManager<ApplicationUser> userManager, 
         {
             ThrowError(r => r.UserId, "The user has no user name and cannot be updated.");
         }
-        if (userToUpdate.UserName == "admin@microsoft.com")
+        if (userToUpdate.IsDefaultAdmin())
         {
             ThrowError(r => r.UserId, "The roles of the default admin user cannot be changed.");
         }

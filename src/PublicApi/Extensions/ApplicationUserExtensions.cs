@@ -1,10 +1,16 @@
-﻿using Microsoft.eShopWeb.Infrastructure.Identity;
+﻿using System;
+using Microsoft.eShopWeb.ApplicationCore.Constants;
+using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
 namespace Microsoft.eShopWeb.PublicApi.Extensions;
 
 public static class ApplicationUserExtensions
 {
+    // Case-insensitive, like Identity user name lookups, so a case variant cannot slip past.
+    public static bool IsDefaultAdmin(this ApplicationUser user) =>
+        string.Equals(user.UserName, AuthorizationConstants.DEFAULT_ADMIN_USERNAME, StringComparison.OrdinalIgnoreCase);
+
     public static UserDto ToUserDto(this ApplicationUser user)
     {
         UserDto dto = new UserDto();
