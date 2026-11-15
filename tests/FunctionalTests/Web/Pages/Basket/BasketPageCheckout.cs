@@ -8,10 +8,7 @@ public class BasketPageCheckout : IClassFixture<TestApplication>
 {
     public BasketPageCheckout(TestApplication factory)
     {
-        Client = factory.CreateClient(new WebApplicationFactoryClientOptions
-        {
-            AllowAutoRedirect = true
-        });
+        Client = factory.CreateClient(allowAutoRedirect: true);
     }
 
     public HttpClient Client { get; }

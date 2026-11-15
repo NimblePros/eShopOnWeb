@@ -8,10 +8,7 @@ public class IndexTest : IClassFixture<TestApplication>
 {
     public IndexTest(TestApplication factory)
     {
-        Client = factory.CreateClient(new WebApplicationFactoryClientOptions
-        {
-            AllowAutoRedirect = true
-        });
+        Client = factory.CreateClient(allowAutoRedirect: true);
     }
 
     public HttpClient Client { get; }

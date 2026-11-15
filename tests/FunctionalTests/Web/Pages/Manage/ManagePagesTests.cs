@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Manage;
@@ -8,10 +7,7 @@ namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Manage;
 [Collection("Sequential")]
 public class ManagePagesTests(TestApplication factory) : IClassFixture<TestApplication>
 {
-    private readonly HttpClient _client = factory.CreateClient(new WebApplicationFactoryClientOptions
-    {
-        AllowAutoRedirect = false
-    });
+    private readonly HttpClient _client = factory.CreateClient(allowAutoRedirect: false);
 
     [Theory]
     [InlineData("/manage/my-account")]

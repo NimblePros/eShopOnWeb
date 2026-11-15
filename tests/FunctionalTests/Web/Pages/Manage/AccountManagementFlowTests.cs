@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 using static Microsoft.eShopWeb.FunctionalTests.Web.WebPageHelpers;
 
@@ -15,7 +14,7 @@ public class AccountManagementFlowTests(TestApplication factory) : IClassFixture
     private async Task<(HttpClient Client, string Email)> SignInNewUserAsync()
     {
         var email = await CreateUserAsync(factory);
-        var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var client = factory.CreateClient(allowAutoRedirect: false);
         await LoginAsync(client, email);
         return (client, email);
     }
