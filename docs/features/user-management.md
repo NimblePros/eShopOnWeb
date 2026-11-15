@@ -11,9 +11,9 @@ The starting users include:
 
 | Account Name | Password | Role |
 |--------------|----------|------|
-| demouser@microsoft.com | Pass@word1 | |
-| productmgr@microsoft.com | Pass@word1 | Product Manager |
-| admin@microsoft.com | Pass@word1 | Administrator |
+| demouser@eshop.test | Pass@word1 | |
+| productmgr@eshop.test | Pass@word1 | Product Manager |
+| admin@eshop.test | Pass@word1 | Administrator |
 
 - The demouser is the general shopping user. They can add things to a cart, checkout their cart, and view order history.
 - The product manager can add, edit, and delete products in the eShopOnWeb admin portal.
@@ -23,6 +23,6 @@ The starting users include:
 
 When it comes to managing users, this includes managing whether their email is confirmed and being able to remove MFA in case a user is locked out and can't get back in. This assumes there would be a customer service or tech support process for verifying that the user is who they claim to be before taking such an action.
 
-![eShopOnWeb User Management, showing sadukie-admin logged in. sadukie-admin cannot edit their user entry nor the admin@microsoft.com user entry.](../assets/images/features/eShopOnWeb-user-management-no-admin-delete.png)
+![eShopOnWeb User Management, showing sadukie-admin logged in. sadukie-admin cannot edit their user entry nor the admin@eshop.test user entry.](../assets/images/features/eShopOnWeb-user-management-no-admin-delete.png)
 
-There is a feature where the admin users cannot manage themselves. They also cannot manage the `admin@microsoft.com` user. This is intentional for demo purposes. We do not want that account touched.
+There is a feature where the admin users cannot manage themselves. They also cannot manage the `admin@eshop.test` user. This is intentional for demo purposes. We do not want that account touched.

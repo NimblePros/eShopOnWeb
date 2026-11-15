@@ -13,7 +13,7 @@ namespace PublicApiIntegrationTests.UserManagementEndpoints;
 [TestClass]
 public class CreateUserEndpointTest
 {
-    private readonly string _testName = "test@microsoft.com";
+    private readonly string _testName = "test@eshop.test";
 
     [TestMethod]
     public async Task ReturnsForbiddenGivenNormalUserToken()
@@ -44,7 +44,7 @@ public class CreateUserEndpointTest
     [TestMethod]
     public async Task ReturnsConflictForDuplicateUserName()
     {
-        var jsonContent = GetValidNewItemJson("admin@microsoft.com");
+        var jsonContent = GetValidNewItemJson("admin@eshop.test");
         var client = HttpClientHelper.GetAdminClient();
         var response = await client.PostAsync("api/users", jsonContent);
 

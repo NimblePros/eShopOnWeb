@@ -60,7 +60,7 @@ public class SaveRolesForUserEndpointTest
     public async Task ReturnsBadRequestGivenDefaultAdminUser()
     {
         var client = HttpClientHelper.GetAdminClient();
-        var adminId = await GetUserIdByNameAsync(client, "admin@microsoft.com");
+        var adminId = await GetUserIdByNameAsync(client, "admin@eshop.test");
         var request = new SaveRolesForUserRequest { RolesToRemove = [Constants.Roles.ADMINISTRATORS] };
 
         var response = await client.PutAsync(RolesRoute(adminId), JsonContent.Create(request));

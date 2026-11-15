@@ -9,7 +9,7 @@ public class ApiTokenHelper
 {
     public static string GetAdminUserToken()
     {
-        string userName = "admin@microsoft.com";
+        string userName = "admin@eshop.test";
         string[] roles = { "Administrators" };
 
         return CreateToken(userName, roles);
@@ -17,7 +17,7 @@ public class ApiTokenHelper
 
     public static string GetNormalUserToken()
     {
-        string userName = "demouser@microsoft.com";
+        string userName = "demouser@eshop.test";
         string[] roles = { };
 
         return CreateToken(userName, roles);

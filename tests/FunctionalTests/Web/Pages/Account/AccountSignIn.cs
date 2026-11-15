@@ -21,7 +21,7 @@ public class AccountSignIn : IClassFixture<TestApplication>
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
-        Assert.Contains("demouser@microsoft.com", stringResponse);
+        Assert.Contains("demouser@eshop.test", stringResponse);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class AccountSignIn : IClassFixture<TestApplication>
 
         var keyValues = new List<KeyValuePair<string, string>>
         {
-            new("Email", "demouser@microsoft.com"),
+            new("Email", "demouser@eshop.test"),
             new("Password", "Pass@word1"),
             new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringResponse1))
         };

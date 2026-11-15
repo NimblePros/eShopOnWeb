@@ -92,9 +92,9 @@ There are three demo accounts to work with:
 
 | Account Name | Password | Role |
 |--------------|----------|------|
-| demouser@microsoft.com | Pass@word1 | |
-| productmgr@microsoft.com | Pass@word1 | Product Manager |
-| admin@microsoft.com | Pass@word1 | Administrator |
+| demouser@eshop.test | Pass@word1 | |
+| productmgr@eshop.test | Pass@word1 | Product Manager |
+| admin@eshop.test | Pass@word1 | Administrator |
 
 If you want to get into the code with a friendly guide, check out this course from [NimblePros Academy](https://academy.nimblepros.com) on [ASP.NET Identity in Action: Implementing Individual Accounts](https://academy.nimblepros.com/purchase?product_id=6215750). Note: This URL will give you a discounted price on the course, not the full price.
 

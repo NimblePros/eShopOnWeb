@@ -11,9 +11,9 @@ These are the starting accounts and their role assignments:
 
 | Account Name | Password | Role |
 |--------------|----------|------|
-| demouser@microsoft.com | Pass@word1 | |
-| productmgr@microsoft.com | Pass@word1 | Product Manager |
-| admin@microsoft.com | Pass@word1 | Administrator |
+| demouser@eshop.test | Pass@word1 | |
+| productmgr@eshop.test | Pass@word1 | Product Manager |
+| admin@eshop.test | Pass@word1 | Administrator |
 
 ## Managing Role Membership
 
@@ -29,6 +29,6 @@ The code is arranged with the following role membership management:
 
 These are some things to keep in mind:
 
-- A user does not need to have a role assigned. The `demouser@microsoft.com` account can be authenticated and meets the `[Authorize]` check. However, they do not have any roles assigned.
+- A user does not need to have a role assigned. The `demouser@eshop.test` account can be authenticated and meets the `[Authorize]` check. However, they do not have any roles assigned.
 - A user can have multiple role assignments.
 - A role cannot be deleted unless it is unassigned. We have logic in place for this.
