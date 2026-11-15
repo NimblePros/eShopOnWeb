@@ -2,7 +2,6 @@
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 using static Microsoft.eShopWeb.FunctionalTests.Web.WebPageHelpers;
 
@@ -20,7 +19,7 @@ public class TwoFactorAuthenticationFlowTests(TestApplication factory) : IClassF
     {
         var ct = TestContext.Current.CancellationToken;
         var email = await CreateUserAsync(factory);
-        var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var client = factory.CreateClient(allowAutoRedirect: false);
         await LoginAsync(client, email);
 
         // Enable the authenticator with a valid code.
@@ -61,7 +60,7 @@ public class TwoFactorAuthenticationFlowTests(TestApplication factory) : IClassF
     {
         var ct = TestContext.Current.CancellationToken;
         var email = await CreateUserAsync(factory);
-        var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var client = factory.CreateClient(allowAutoRedirect: false);
         await LoginAsync(client, email);
 
         var enablePage = await client.GetStringAsync("/manage/enable-authenticator", ct);

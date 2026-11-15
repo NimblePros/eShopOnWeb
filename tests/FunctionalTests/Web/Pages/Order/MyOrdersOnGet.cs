@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Order;
@@ -11,7 +10,7 @@ public class MyOrdersOnGet(TestApplication factory) : IClassFixture<TestApplicat
     private readonly TestApplication _factory = factory;
 
     private HttpClient CreateClient(bool allowAutoRedirect = false) =>
-        _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = allowAutoRedirect });
+        _factory.CreateClient(allowAutoRedirect: allowAutoRedirect);
 
     [Fact]
     public async Task ReturnsRedirectGivenAnonymousUser()

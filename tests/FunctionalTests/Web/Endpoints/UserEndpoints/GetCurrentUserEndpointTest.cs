@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Json;
 using BlazorAdmin.Authorization;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Endpoints.UserEndpoints;
@@ -25,7 +24,7 @@ public class GetCurrentUserEndpointTest(TestApplication factory) : IClassFixture
     [Fact]
     public async Task ReturnsClaimsAndTokenGivenSignedInUser()
     {
-        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var client = _factory.CreateClient(allowAutoRedirect: false);
         await WebPageHelpers.LoginAsync(client);
 
         var userInfo = await client.GetFromJsonAsync<UserInfo>("/User", TestContext.Current.CancellationToken);

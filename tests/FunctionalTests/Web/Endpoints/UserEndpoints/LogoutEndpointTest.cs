@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using BlazorAdmin.Authorization;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Mvc.Testing.Handlers;
 using Xunit;
 
@@ -16,7 +15,7 @@ public class LogoutEndpointTest(TestApplication factory) : IClassFixture<TestApp
     public async Task SignsOutSignedInUserGivenAntiforgeryToken()
     {
         var ct = TestContext.Current.CancellationToken;
-        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var client = _factory.CreateClient(allowAutoRedirect: false);
         await WebPageHelpers.LoginAsync(client);
         var before = await client.GetFromJsonAsync<UserInfo>("/User", ct);
         Assert.True(before!.IsAuthenticated);
@@ -32,7 +31,7 @@ public class LogoutEndpointTest(TestApplication factory) : IClassFixture<TestApp
     public async Task RejectsLogoutWithoutAntiforgeryToken()
     {
         var ct = TestContext.Current.CancellationToken;
-        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var client = _factory.CreateClient(allowAutoRedirect: false);
         await WebPageHelpers.LoginAsync(client);
 
         var response = await client.PostAsync("/User/Logout", content: null, ct);
@@ -46,7 +45,7 @@ public class LogoutEndpointTest(TestApplication factory) : IClassFixture<TestApp
     public async Task RejectsLogoutWithInvalidAntiforgeryToken()
     {
         var ct = TestContext.Current.CancellationToken;
-        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var client = _factory.CreateClient(allowAutoRedirect: false);
         await WebPageHelpers.LoginAsync(client);
         // Get the antiforgery cookie, then send a token that doesn't match it.
         await GetAntiforgeryTokenAsync(client);
@@ -61,7 +60,7 @@ public class LogoutEndpointTest(TestApplication factory) : IClassFixture<TestApp
     [Fact]
     public async Task RejectsTokenIssuedBeforeSignIn()
     {
-        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var client = _factory.CreateClient(allowAutoRedirect: false);
         var anonymousToken = await GetAntiforgeryTokenAsync(client);
         await WebPageHelpers.LoginAsync(client);
 

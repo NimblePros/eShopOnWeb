@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Account;
@@ -10,10 +9,7 @@ public class AccountSignIn : IClassFixture<TestApplication>
 {
     public AccountSignIn(TestApplication factory)
     {
-        Client = factory.CreateClient(new WebApplicationFactoryClientOptions
-        {
-            AllowAutoRedirect = false
-        });
+        Client = factory.CreateClient(allowAutoRedirect: false);
     }
 
     public HttpClient Client { get; }
@@ -71,5 +67,19 @@ public class AccountSignIn : IClassFixture<TestApplication>
         var postResponse = await Client.PostAsync("/identity/account/login", formContent, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Redirect, postResponse.StatusCode);
         Assert.Equal(new System.Uri("/", UriKind.Relative), postResponse.Headers.Location);
+    }
+
+    [Fact]
+    public async Task IssuesHttpOnlySecureStrictAuthCookieOnSignIn()
+    {
+        var postResponse = await WebPageHelpers.LoginAsync(Client);
+        Assert.Equal(HttpStatusCode.Redirect, postResponse.StatusCode);
+
+        Assert.True(postResponse.Headers.TryGetValues("Set-Cookie", out var setCookies));
+        var authCookie = Assert.Single(setCookies, c => c.StartsWith("EshopIdentifier=", StringComparison.Ordinal));
+        var attributes = authCookie.Split(';').Skip(1).Select(a => a.Trim().ToLowerInvariant()).ToList();
+        Assert.Contains("httponly", attributes);
+        Assert.Contains("secure", attributes);
+        Assert.Contains("samesite=strict", attributes);
     }
 }
