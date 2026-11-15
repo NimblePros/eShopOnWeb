@@ -45,18 +45,14 @@ jobs:
 
       # Each test project writes its own Cobertura report covering every assembly it loads. ReportGenerator
       # merges them into one report (line hits summed across test projects) and keeps only files under src/,
-      # which drops third-party packages and generated code. It also builds a browsable HTML report.
-    - name: Merge code coverage reports
-      if: success() || failure()
-      run: |
-        dotnet tool restore
-        dotnet reportgenerator "-reports:coverage/**/coverage.cobertura*.xml" -targetdir:coverage/report "-reporttypes:Cobertura;HtmlInline" "-assemblyfilters:-Humanizer*;-Mediator*;-HealthChecks*;-Microsoft.*" "-filefilters:+**/src/**;-**/obj/**"
-
-      # Renders the merged report as a per-project folder/file tree for the PR comment and the job summary.
+      # which drops third-party packages and generated code. It writes a Markdown summary for the PR comment
+      # and job summary, plus a browsable HTML report.
     - name: Code Coverage Summary Report
       if: success() || failure()
       run: |
-        dotnet run --file .github/scripts/CoverageReport.cs -- coverage/report/Cobertura.xml code-coverage-results.md
+        dotnet tool restore
+        dotnet reportgenerator "-reports:coverage/**/coverage.cobertura*.xml" -targetdir:coverage/report "-reporttypes:MarkdownSummaryGithub;HtmlInline" "-assemblyfilters:-Humanizer*;-Mediator*;-HealthChecks*;-Microsoft.*" "-filefilters:+**/src/**;-**/obj/**"
+        cp coverage/report/SummaryGithub.md code-coverage-results.md
         cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
 
     - name: Upload code coverage HTML report
