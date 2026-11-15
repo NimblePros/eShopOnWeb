@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 
@@ -15,5 +15,5 @@ public class GetRoleMembershipResponse : BaseResponse
     {
     }
 
-    public List<ApplicationUser> RoleMembers { get; set; }
+    public List<UserDto> RoleMembers { get; set; }
 }

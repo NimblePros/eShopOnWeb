@@ -1,5 +1,7 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,6 +15,78 @@ namespace PublicApiIntegrationTests.UserManagementEndpoints;
 [TestClass]
 public class UpdateUserEndpointTest
 {
+    [TestMethod]
+    public async Task ReturnsUnauthorizedGivenNoToken()
+    {
+        var client = ProgramTest.NewClient;
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(UpdateRequest(Guid.NewGuid().ToString())));
+
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task ReturnsForbiddenGivenNormalUserToken()
+    {
+        var client = HttpClientHelper.GetNormalUserClient();
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(UpdateRequest(Guid.NewGuid().ToString())));
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task ReturnsForbiddenGivenProductManagerUserToken()
+    {
+        var client = HttpClientHelper.GetProductManagerClient();
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(UpdateRequest(Guid.NewGuid().ToString())));
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task ReturnsNotFoundGivenNonExistentUserIdAndAdminUserToken()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(UpdateRequest(Guid.NewGuid().ToString())));
+
+        Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task ReturnsUpdatedUserGivenValidUserAndAdminUserToken()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var request = UpdateRequest(userId);
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        var model = (await response.Content.ReadAsStringAsync()).FromJson<UpdateUserResponse>();
+        Assert.IsNotNull(model?.User);
+        Assert.AreEqual(userId, model.User.Id);
+        Assert.AreEqual(request.User.UserName, model.User.UserName);
+        Assert.AreEqual(request.User.Email, model.User.Email);
+        Assert.AreEqual(request.User.PhoneNumber, model.User.PhoneNumber);
+    }
+
+    [TestMethod]
+    public async Task DoesNotExposeSensitiveIdentityFieldsGivenValidUserAndAdminUserToken()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(UpdateRequest(userId)));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.IsTrue(json.RootElement.TryGetProperty("user", out var user));
+        UserJsonAssert.HasOnlyUserDtoFields(user);
+    }
+
     [TestMethod]
     public async Task UpdatesSuccessfullyGivenValidChangesAndAdminUserToken()
     {
@@ -34,8 +108,7 @@ public class UpdateUserEndpointTest
         var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
         var updateResponse = await client.PutAsync("api/users", jsonContent);
-        updateResponse.EnsureSuccessStatusCode();
-        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(HttpStatusCode.OK, updateResponse.StatusCode);
 
         var updateResponseJsonString = await updateResponse.Content.ReadAsStringAsync();
         var updatedItem = updateResponseJsonString.FromJson<UpdateUserResponse>();
@@ -63,5 +136,23 @@ public class UpdateUserEndpointTest
         var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
         var updateResponse = await client.PutAsync("api/users", jsonContent);
         Assert.AreEqual(HttpStatusCode.NotFound, updateResponse.StatusCode);
+    }
+
+    private static UpdateUserRequest UpdateRequest(string userId)
+    {
+        var userName = $"{Guid.NewGuid()}@example.com";
+        return new UpdateUserRequest
+        {
+            User = new UserDto { Id = userId, UserName = userName, Email = userName, PhoneNumber = "555-0100" }
+        };
+    }
+
+    // Creates a dedicated user so updates don't affect the seeded users other tests rely on.
+    private static async Task<string> CreateUserAsync(HttpClient client)
+    {
+        var createRequest = new CreateUserRequest { User = new UserDto { UserName = $"{Guid.NewGuid()}@example.com" } };
+        var response = await client.PostAsync("api/users", JsonContent.Create(createRequest));
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadAsStringAsync()).FromJson<CreateUserResponse>()!.UserId;
     }
 }

@@ -10,7 +10,7 @@ using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
 
-public class UpdateRoleEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<UpdateUserRequest, Results<Ok<UpdateUserResponse>, NotFound>>
+public class UpdateUserEndpoint(UserManager<ApplicationUser> userManager) : Endpoint<UpdateUserRequest, Results<Ok<UpdateUserResponse>, NotFound>>
 {
     public override void Configure()
     {
@@ -40,7 +40,7 @@ public class UpdateRoleEndpoint(UserManager<ApplicationUser> userManager) : Endp
         existingUser.FromUserDto(request.User);
 
         await userManager.UpdateAsync(existingUser);
-        response.User = (await userManager.FindByIdAsync(existingUser.Id))!;
+        response.User = existingUser.ToUserDto();
         return TypedResults.Ok(response);
     }
 }

@@ -16,6 +16,7 @@ public static class ApplicationUserExtensions
             dto.PhoneNumber = user.PhoneNumber;
             dto.EmailConfirmed = user.EmailConfirmed;
             dto.PhoneNumberConfirmed = user.PhoneNumberConfirmed;
+            dto.TwoFactorEnabled = user.TwoFactorEnabled;
             dto.LockoutEnd = user.LockoutEnd;
 
         }
