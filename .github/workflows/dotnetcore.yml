@@ -43,13 +43,25 @@ jobs:
     - name: Test with dotnet
       run: dotnet test --solution ${{ env.SOLUTION_FILE }} --no-restore --coverlet --coverlet-output-format cobertura --results-directory coverage --results-directory-layout per-module
 
+      # Each test project writes its own Cobertura report covering every assembly it loads. ReportGenerator
+      # merges them into one report (line hits summed across test projects) and keeps only files under src/,
+      # which drops third-party packages and generated code. It writes a Markdown summary for the PR comment
+      # and job summary, plus a browsable HTML report.
     - name: Code Coverage Summary Report
-      uses: irongut/CodeCoverageSummary@v1.3.0
+      if: success() || failure()
+      run: |
+        dotnet tool restore
+        dotnet reportgenerator "-reports:coverage/**/coverage.cobertura*.xml" -targetdir:coverage/report "-reporttypes:MarkdownSummaryGithub;HtmlInline" "-assemblyfilters:-Humanizer*;-Mediator*;-HealthChecks*;-Microsoft.*" "-filefilters:+**/src/**;-**/obj/**"
+        cp coverage/report/SummaryGithub.md code-coverage-results.md
+        cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload code coverage HTML report
+      uses: actions/upload-artifact@v4
+      if: success() || failure()
       with:
-        filename: coverage/**/coverage.cobertura*.xml
-        badge: true
-        format: 'markdown'
-        output: 'both'
+        name: code-coverage-report
+        path: coverage/report
+        retention-days: 7
 
     - name: Upload code coverage results artifact
       uses: actions/upload-artifact@v4
