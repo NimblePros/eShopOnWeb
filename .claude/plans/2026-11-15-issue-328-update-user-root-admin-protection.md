@@ -30,8 +30,8 @@ https://github.com/NimblePros/eShopOnWeb/issues/328
 ## Out of scope
 
 - `POST api/users` still copies `EmailConfirmed` / `PhoneNumberConfirmed` through
-  `FromUserDto`. The issue is about PUT, and the create form sets these on purpose. Worth a
-  follow-up issue.
+  `FromUserDto`. The issue is about PUT, and the create form sets these on purpose.
+  Tracked in #342.
 
 ## Phase 1 — Centralize the protected account
 
@@ -64,9 +64,37 @@ https://github.com/NimblePros/eShopOnWeb/issues/328
 
 ## Phase 5 — Independent review
 
-- [ ] A separate agent reviews the full diff (correctness, security, performance, accessibility)
-- [ ] Address significant findings
+- [x] A separate agent reviews the full diff (correctness, security, performance, accessibility)
+- [x] Address significant findings
 
 ## Phase 6 — Verification
 
-- [ ] `dotnet ./BuildTestFormat.cs` passes
+- [x] `dotnet ./BuildTestFormat.cs` passes
+
+## Review findings
+
+The reviewer found no way left to bypass the default-admin protection. Renaming another user to
+the admin name is rejected as a duplicate; lookalike Unicode names fail the allowed-characters
+check; the Administrators role can't be renamed or deleted while it has members.
+
+- `IgnoresConfirmationFlagsInRequest` also changed email/phone, so the reset branch hid whether
+  the flags were really ignored. **Fixed:** sends the current values with only the flags flipped.
+- No test that `EmailConfirmed` survives an unchanged email or resets on a changed one.
+  **Fixed:** `KeepsEmailConfirmedGivenUnchangedEmail` / `ResetsEmailConfirmedGivenChangedEmail`.
+- The comment said rotating the stamp "ends existing sessions". The API uses JWTs, which are
+  not checked against the stamp. **Fixed:** comment now says only Web cookie sessions are
+  affected. Revoking JWTs is not addressed: it is a broader token-lifetime change.
+- Stamp rotation was only tested for a user name change. **Fixed:** added a lockout-only test,
+  and a no-change test.
+- The admin test would rename and lock out the seeded admin if the guard regressed. **Fixed:**
+  it only changes `LockoutEnd`, to a date in the past. A mutation check (guard disabled) fails
+  only this test.
+- BlazorAdmin saved roles and closed the dialog even when the update failed. **Fixed:** returns
+  early, so the dialog stays open after the error toast. Showing the server's error messages
+  would need `HttpService` changes and is not addressed.
+- `TwoFactorEnabled` checkbox was editable but never saved. **Fixed:** read-only.
+- An empty phone field posts `""` against a stored `null`, so it counted as a change (stamp
+  rotated, phone confirmation reset). **Fixed:** `""` is treated as null.
+  Not addressed: the date-only `InputDate` for `LockoutEnd` drops the time of day. This was
+  already the case before this change.
+- POST api/users mass assignment. **Not addressed:** out of scope, opened #342.

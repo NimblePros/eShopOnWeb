@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -47,8 +48,10 @@ public class UpdateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         }
 
         var changes = request.User;
+        // Forms post "" for an empty field; treat it as null so an untouched field isn't a change.
+        var phoneNumber = string.IsNullOrEmpty(changes.PhoneNumber) ? null : changes.PhoneNumber;
         var identityChanged = existingUser.UserName != changes.UserName || existingUser.Email != changes.Email;
-        var phoneChanged = existingUser.PhoneNumber != changes.PhoneNumber;
+        var phoneChanged = existingUser.PhoneNumber != phoneNumber;
         var lockoutChanged = existingUser.LockoutEnd != changes.LockoutEnd;
 
         // Only these fields are client editable. EmailConfirmed and PhoneNumberConfirmed are
@@ -63,10 +66,11 @@ public class UpdateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
         }
         existingUser.UserName = changes.UserName;
         existingUser.Email = changes.Email;
-        existingUser.PhoneNumber = changes.PhoneNumber;
+        existingUser.PhoneNumber = phoneNumber;
         existingUser.LockoutEnd = changes.LockoutEnd;
 
-        // Rotating the security stamp ends existing sessions. UpdateSecurityStampAsync validates,
+        // A new security stamp signs the user out of Web cookie sessions at the next stamp check.
+        // It does not revoke JWTs already issued for the API. UpdateSecurityStampAsync validates,
         // normalizes and saves the user in one step, so a failure leaves nothing half applied.
         var result = identityChanged || phoneChanged || lockoutChanged
             ? await userManager.UpdateSecurityStampAsync(existingUser)

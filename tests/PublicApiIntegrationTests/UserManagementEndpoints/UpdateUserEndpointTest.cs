@@ -97,23 +97,16 @@ public class UpdateUserEndpointTest
     {
         var client = HttpClientHelper.GetAdminClient();
         var admin = await GetUserByNameAsync(client, AuthorizationConstants.DEFAULT_ADMIN_USERNAME);
-        var request = new UpdateUserRequest
-        {
-            User = new UserDto
-            {
-                Id = admin.Id,
-                UserName = $"{Guid.NewGuid()}@example.com",
-                Email = admin.Email,
-                LockoutEnd = DateTimeOffset.MaxValue
-            }
-        };
+        // Only LockoutEnd changes (to a time already past), so a regression here can't rename
+        // or lock out the seeded admin that other tests sign in as.
+        var lockoutEnd = new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        admin.LockoutEnd = lockoutEnd;
 
-        var response = await client.PutAsync("api/users", JsonContent.Create(request));
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = admin }));
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
         var adminAfter = await GetUserByNameAsync(client, AuthorizationConstants.DEFAULT_ADMIN_USERNAME);
-        Assert.AreEqual(admin.Id, adminAfter.Id);
-        Assert.IsNull(adminAfter.LockoutEnd);
+        Assert.AreNotEqual(lockoutEnd, adminAfter.LockoutEnd);
     }
 
     [TestMethod]
@@ -121,16 +114,45 @@ public class UpdateUserEndpointTest
     {
         var client = HttpClientHelper.GetAdminClient();
         var userId = await CreateUserAsync(client);
-        var request = UpdateRequest(userId);
-        request.User.EmailConfirmed = true;
-        request.User.PhoneNumberConfirmed = true;
+        // Send the current values so only the confirmation flags differ.
+        var user = await GetUserByIdAsync(client, userId);
+        user.EmailConfirmed = true;
+        user.PhoneNumberConfirmed = true;
 
-        var response = await client.PutAsync("api/users", JsonContent.Create(request));
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = user }));
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         var stored = await GetUserByIdAsync(client, userId);
         Assert.IsFalse(stored.EmailConfirmed);
         Assert.IsFalse(stored.PhoneNumberConfirmed);
+    }
+
+    [TestMethod]
+    public async Task KeepsEmailConfirmedGivenUnchangedEmail()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateConfirmedUserAsync(client);
+        var user = await GetUserByIdAsync(client, userId);
+        user.PhoneNumber = "555-0100";
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = user }));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.IsTrue((await GetUserByIdAsync(client, userId)).EmailConfirmed);
+    }
+
+    [TestMethod]
+    public async Task ResetsEmailConfirmedGivenChangedEmail()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateConfirmedUserAsync(client);
+        var user = await GetUserByIdAsync(client, userId);
+        user.Email = $"{Guid.NewGuid()}@example.com";
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = user }));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.IsFalse((await GetUserByIdAsync(client, userId)).EmailConfirmed);
     }
 
     [TestMethod]
@@ -144,6 +166,36 @@ public class UpdateUserEndpointTest
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         Assert.AreNotEqual(stampBefore, await GetSecurityStampAsync(userId));
+    }
+
+    [TestMethod]
+    public async Task RotatesSecurityStampGivenLockoutChangeOnly()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var user = await GetUserByIdAsync(client, userId);
+        user.LockoutEnd = new DateTimeOffset(2099, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var stampBefore = await GetSecurityStampAsync(userId);
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = user }));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreNotEqual(stampBefore, await GetSecurityStampAsync(userId));
+    }
+
+    [TestMethod]
+    public async Task KeepsSecurityStampGivenNoChangesAndEmptyPhoneNumber()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client);
+        var user = await GetUserByIdAsync(client, userId);
+        user.PhoneNumber = ""; // what an untouched form field posts
+        var stampBefore = await GetSecurityStampAsync(userId);
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = user }));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(stampBefore, await GetSecurityStampAsync(userId));
     }
 
     [TestMethod]
@@ -247,6 +299,19 @@ public class UpdateUserEndpointTest
         var response = await client.GetAsync($"api/users/name/{userName}");
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadAsStringAsync()).FromJson<GetUserResponse>()!.User;
+    }
+
+    private static async Task<string> CreateConfirmedUserAsync(HttpClient client)
+    {
+        var userId = await CreateUserAsync(client);
+        using var scope = ProgramTest.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await userManager.FindByIdAsync(userId);
+        user!.Email = $"{Guid.NewGuid()}@example.com";
+        user.EmailConfirmed = true;
+        var result = await userManager.UpdateAsync(user);
+        Assert.IsTrue(result.Succeeded);
+        return userId;
     }
 
     // The security stamp is not part of the API, so read it straight from Identity.
