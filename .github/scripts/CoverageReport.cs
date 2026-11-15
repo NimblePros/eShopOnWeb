@@ -1,14 +1,13 @@
 #!/usr/bin/env dotnet
-// Merges the per-test-project Cobertura reports into one coverage picture of the files under src/,
-// then writes a Markdown report: one summary row per src project, plus a collapsible folder/file tree
-// per project.
+// Renders a merged Cobertura report as Markdown for the PR coverage comment: one summary row per src
+// project, plus a collapsible folder/file tree per project that mirrors src/.
 //
-// Each test project writes its own Cobertura report covering every assembly it loads, so the same
-// src file shows up once per test project (and third-party assemblies like Humanizer show up too).
-// This script merges those reports line by line: a line counts as covered if any test project hit it.
+// ReportGenerator does the merging (one report per test project in, one Cobertura report out). This
+// script only builds the tree, because ReportGenerator's Markdown summaries group by assembly and class,
+// not by folder.
 //
 // Run this with:
-// dotnet run --file .github/scripts/CoverageReport.cs -- <coverage-directory> <output-markdown-file>
+// dotnet run --file .github/scripts/CoverageReport.cs -- <merged-cobertura-file> <output-markdown-file>
 
 using System.Globalization;
 using System.Net;
@@ -21,71 +20,58 @@ const double UpperThreshold = 75;
 // GitHub rejects comments over 65,536 characters; fall back to folders only past this size.
 const int MaxCommentLength = 60_000;
 
-string coverageDirectory = args.Length > 0 ? args[0] : "coverage";
+string reportFile = args.Length > 0 ? args[0] : "coverage/report/Cobertura.xml";
 string outputFile = args.Length > 1 ? args[1] : "code-coverage-results.md";
 string repoRoot = Directory.GetCurrentDirectory();
 
-string[] reportFiles = Directory.Exists(coverageDirectory)
-    ? Directory.GetFiles(coverageDirectory, "coverage.cobertura*.xml", SearchOption.AllDirectories)
-    : [];
-if (reportFiles.Length == 0)
+if (!File.Exists(reportFile))
 {
-    Console.Error.WriteLine($"No Cobertura reports found under '{coverageDirectory}'.");
+    Console.Error.WriteLine($"Cobertura report '{reportFile}' not found.");
     return 1;
 }
 
-// Key: src-relative file path (e.g. "Web/Pages/Index.cshtml.cs"). Value: line number -> merged line coverage.
+// Key: src-relative file path (e.g. "Web/Pages/Index.cshtml.cs"). Value: line number -> line coverage.
 var files = new SortedDictionary<string, Dictionary<int, LineCoverage>>(StringComparer.Ordinal);
 var conditionCoverage = new Regex(@"\((\d+)/(\d+)\)");
 
-foreach (string reportFile in reportFiles)
+XDocument report = XDocument.Load(reportFile);
+string[] sources = report.Descendants("source").Select(s => s.Value).ToArray();
+
+foreach (XElement cls in report.Descendants("class"))
 {
-    XDocument report = XDocument.Load(reportFile);
-    string[] sources = report.Descendants("source").Select(s => s.Value).ToArray();
-
-    foreach (XElement cls in report.Descendants("class"))
+    string? srcPath = ResolveSrcPath((string?)cls.Attribute("filename"), sources);
+    if (srcPath is null)
     {
-        string? srcPath = ResolveSrcPath((string?)cls.Attribute("filename"), sources);
-        if (srcPath is null)
+        continue;
+    }
+
+    // A file can hold several classes (nested or partial), so its lines can come from several <class> elements.
+    if (!files.TryGetValue(srcPath, out var lines))
+    {
+        lines = [];
+        files[srcPath] = lines;
+    }
+
+    // Class-level <lines> repeats every method's lines, so read only those.
+    foreach (XElement line in cls.Elements("lines").Elements("line"))
+    {
+        int number = (int)line.Attribute("number")!;
+        bool hit = long.Parse((string)line.Attribute("hits")!, CultureInfo.InvariantCulture) > 0;
+        int branchesCovered = 0, branchesTotal = 0;
+        Match match = conditionCoverage.Match((string?)line.Attribute("condition-coverage") ?? "");
+        if (match.Success)
         {
-            continue;
+            branchesCovered = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            branchesTotal = int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
         }
 
-        if (!files.TryGetValue(srcPath, out var lines))
-        {
-            lines = [];
-            files[srcPath] = lines;
-        }
-
-        // Class-level <lines> repeats every method's lines, so read only those.
-        foreach (XElement line in cls.Elements("lines").Elements("line"))
-        {
-            int number = (int)line.Attribute("number")!;
-            bool hit = long.Parse((string)line.Attribute("hits")!, CultureInfo.InvariantCulture) > 0;
-            int branchesCovered = 0, branchesTotal = 0;
-            Match match = conditionCoverage.Match((string?)line.Attribute("condition-coverage") ?? "");
-            if (match.Success)
-            {
-                branchesCovered = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
-                branchesTotal = int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
-            }
-
-            // Reports only give branch counts per line, not which branches ran, so the merged count is the
-            // best single report for that line. That can undercount when different test projects take
-            // different branches of the same line.
-            lines[number] = lines.TryGetValue(number, out LineCoverage existing)
-                ? new LineCoverage(
-                    existing.Hit || hit,
-                    Math.Max(existing.BranchesCovered, branchesCovered),
-                    Math.Max(existing.BranchesTotal, branchesTotal))
-                : new LineCoverage(hit, branchesCovered, branchesTotal);
-        }
+        lines.TryAdd(number, new LineCoverage(hit, branchesCovered, branchesTotal));
     }
 }
 
 if (files.Count == 0)
 {
-    Console.Error.WriteLine("The Cobertura reports contained no files under src/.");
+    Console.Error.WriteLine($"'{reportFile}' contained no files under src/.");
     return 1;
 }
 
@@ -116,7 +102,7 @@ if (markdown.Length > MaxCommentLength)
 File.WriteAllText(outputFile, markdown);
 Console.WriteLine(markdown);
 Console.WriteLine(
-    $"Merged {reportFiles.Length} reports covering {files.Count} src files: {Percent(root.Stats.LinesCovered, root.Stats.LinesTotal)} line coverage.");
+    $"Rendered {files.Count} src files: {Percent(root.Stats.LinesCovered, root.Stats.LinesTotal)} line coverage.");
 return 0;
 
 string Render(bool includeFiles)
@@ -127,7 +113,7 @@ string Render(bool includeFiles)
     string badgeColor = totalRate < LowerThreshold ? "critical" : totalRate < UpperThreshold ? "yellow" : "success";
     sb.AppendLine($"![Code Coverage](https://img.shields.io/badge/Code%20Coverage-{totalRate:0}%25-{badgeColor}?style=flat)");
     sb.AppendLine();
-    sb.AppendLine($"Merged from {reportFiles.Length} test project reports. A line counts as covered if any test project ran it.");
+    sb.AppendLine("Merged across all test projects. A line counts as covered if any test project ran it. The full HTML report is in the `code-coverage-report` artifact on the workflow run.");
     sb.AppendLine();
     sb.AppendLine("Project | Line Rate | Branch Rate | Health");
     sb.AppendLine("------- | --------- | ----------- | ------");

@@ -43,14 +43,29 @@ jobs:
     - name: Test with dotnet
       run: dotnet test --solution ${{ env.SOLUTION_FILE }} --no-restore --coverlet --coverlet-output-format cobertura --results-directory coverage --results-directory-layout per-module
 
-      # Each test project writes its own Cobertura report covering every assembly it loads, so
-      # summarizing them as-is lists each project once per test project (plus third-party packages).
-      # This script merges them into one view of src/, grouped by project and folder.
+      # Each test project writes its own Cobertura report covering every assembly it loads. ReportGenerator
+      # merges them into one report (line hits summed across test projects) and keeps only files under src/,
+      # which drops third-party packages and generated code. It also builds a browsable HTML report.
+    - name: Merge code coverage reports
+      if: success() || failure()
+      run: |
+        dotnet tool restore
+        dotnet reportgenerator "-reports:coverage/**/coverage.cobertura*.xml" -targetdir:coverage/report "-reporttypes:Cobertura;HtmlInline" "-assemblyfilters:-Humanizer*;-Mediator*;-HealthChecks*;-Microsoft.*" "-filefilters:+**/src/**;-**/obj/**"
+
+      # Renders the merged report as a per-project folder/file tree for the PR comment and the job summary.
     - name: Code Coverage Summary Report
       if: success() || failure()
       run: |
-        dotnet run --file .github/scripts/CoverageReport.cs -- coverage code-coverage-results.md
+        dotnet run --file .github/scripts/CoverageReport.cs -- coverage/report/Cobertura.xml code-coverage-results.md
         cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload code coverage HTML report
+      uses: actions/upload-artifact@v4
+      if: success() || failure()
+      with:
+        name: code-coverage-report
+        path: coverage/report
+        retention-days: 7
 
     - name: Upload code coverage results artifact
       uses: actions/upload-artifact@v4
