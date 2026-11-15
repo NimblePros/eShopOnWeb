@@ -13,7 +13,11 @@ namespace Microsoft.eShopWeb.PublicApi.CatalogItemEndpoints;
 /// <summary>
 /// Creates a new Catalog Item
 /// </summary>
-public class CreateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, IUriComposer uriComposer)
+public class CreateCatalogItemEndpoint(
+    IRepository<CatalogItem> itemRepository,
+    IRepository<CatalogBrand> brandRepository,
+    IRepository<CatalogType> typeRepository,
+    IUriComposer uriComposer)
     : Endpoint<CreateCatalogItemRequest, CreateCatalogItemResponse>
 {
     public override void Configure()
@@ -29,6 +33,16 @@ public class CreateCatalogItemEndpoint(IRepository<CatalogItem> itemRepository, 
     public override async Task HandleAsync(CreateCatalogItemRequest request, CancellationToken ct)
     {
         var response = new CreateCatalogItemResponse(request.CorrelationId());
+
+        if (await brandRepository.GetByIdAsync(request.CatalogBrandId, ct) == null)
+        {
+            AddError(r => r.CatalogBrandId, $"Catalog brand {request.CatalogBrandId} does not exist.");
+        }
+        if (await typeRepository.GetByIdAsync(request.CatalogTypeId, ct) == null)
+        {
+            AddError(r => r.CatalogTypeId, $"Catalog type {request.CatalogTypeId} does not exist.");
+        }
+        ThrowIfAnyErrors();
 
         var catalogItemNameSpecification = new CatalogItemNameSpecification(request.Name);
         var existingCatalogItemCount = await itemRepository.CountAsync(catalogItemNameSpecification, ct);

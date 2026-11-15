@@ -15,6 +15,7 @@ public class CatalogItem
     public string CatalogBrand { get; set; } = "NotSet";
 
     [Required(ErrorMessage = "The Name field is required")]
+    [StringLength(50, ErrorMessage = "The Name field must be 50 characters or fewer")]
     public string Name { get; set; }
 
     [Required(ErrorMessage = "The Description field is required")]
