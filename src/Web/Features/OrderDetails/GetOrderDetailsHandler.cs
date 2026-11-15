@@ -18,7 +18,7 @@ public class GetOrderDetailsHandler : IRequestHandler<GetOrderDetails, OrderDeta
     public async ValueTask<OrderDetailViewModel?> Handle(GetOrderDetails request,
         CancellationToken cancellationToken)
     {
-        var spec = new OrderWithItemsByIdSpec(request.OrderId);
+        var spec = new CustomerOrderWithItemsByIdSpec(request.UserName, request.OrderId);
         var order = await _orderRepository.FirstOrDefaultAsync(spec, cancellationToken);
 
         if (order == null)

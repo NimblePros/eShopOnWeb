@@ -44,36 +44,60 @@ public class MyOrdersOnGet(TestApplication factory) : IClassFixture<TestApplicat
         var client = CreateClient(allowAutoRedirect: true);
         await WebPageHelpers.LoginAsync(client);
 
-        // Add an item to the signed-in user's basket and check out.
-        var home = await client.GetStringAsync("/", ct);
-        var addResponse = await client.PostAsync("/basket/index", new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
-        {
-            new("id", "2"),
-            new("name", "shirt"),
-            new("price", "19.49"),
-            new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(home))
-        }), ct);
-        addResponse.EnsureSuccessStatusCode();
-        var basketPage = await addResponse.Content.ReadAsStringAsync(ct);
+        var detailUrl = await PlaceOrderAndGetDetailUrlAsync(client);
 
-        var checkoutResponse = await client.PostAsync("/basket/checkout", new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
-        {
-            new("Items[0].Id", WebPageHelpers.GetId(basketPage)),
-            new("Items[0].Quantity", "1"),
-            new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(basketPage))
-        }), ct);
-        Assert.Contains("Thanks for your Order!", await checkoutResponse.Content.ReadAsStringAsync(ct));
-
-        var myOrders = await client.GetStringAsync("/order/my-orders", ct);
-        var detailLink = Regex.Match(myOrders, @"href=""(/order/detail/\d+)""");
-        Assert.True(detailLink.Success, "Expected a link to the order detail page.");
-
-        var detailResponse = await client.GetAsync(detailLink.Groups[1].Value, ct);
+        var detailResponse = await client.GetAsync(detailUrl, ct);
 
         detailResponse.EnsureSuccessStatusCode();
         var detail = await detailResponse.Content.ReadAsStringAsync(ct);
         Assert.Contains("ORDER DETAILS", detail);
         Assert.Contains(".NET Black &amp; White Mug", detail);
+    }
+
+    [Fact]
+    public async Task DetailReturnsBadRequestGivenAnotherUsersOrder()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        // The demo user places an order.
+        var owner = CreateClient(allowAutoRedirect: true);
+        await WebPageHelpers.LoginAsync(owner);
+        var detailUrl = await PlaceOrderAndGetDetailUrlAsync(owner);
+        (await owner.GetAsync(detailUrl, ct)).EnsureSuccessStatusCode();
+
+        // A different user asks for the same order.
+        var otherEmail = await WebPageHelpers.CreateUserAsync(_factory);
+        var other = CreateClient();
+        await WebPageHelpers.LoginAsync(other, otherEmail);
+
+        var response = await other.GetAsync(detailUrl, ct);
+
+        // Same response as for an order that doesn't exist, so the order's existence isn't revealed.
+        var unknownResponse = await other.GetAsync("/order/detail/999999", ct);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(await unknownResponse.Content.ReadAsStringAsync(ct), await response.Content.ReadAsStringAsync(ct));
+    }
+
+    private static async Task<string> PlaceOrderAndGetDetailUrlAsync(HttpClient client)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var home = await client.GetStringAsync("/", ct);
+        var addResponse = await WebPageHelpers.PostFormAsync(client, "/basket/index", home,
+            new("id", "2"), new("name", "shirt"), new("price", "19.49"));
+        addResponse.EnsureSuccessStatusCode();
+        var basketPage = await addResponse.Content.ReadAsStringAsync(ct);
+
+        var checkoutResponse = await WebPageHelpers.PostFormAsync(client, "/basket/checkout", basketPage,
+            new("Items[0].Id", WebPageHelpers.GetId(basketPage)), new("Items[0].Quantity", "1"));
+        Assert.Contains("Thanks for your Order!", await checkoutResponse.Content.ReadAsStringAsync(ct));
+
+        // Order ids are identity values, so the highest one is the order just placed.
+        var myOrders = await client.GetStringAsync("/order/my-orders", ct);
+        var orderIds = Regex.Matches(myOrders, @"href=""/order/detail/(\d+)""")
+            .Select(m => int.Parse(m.Groups[1].Value))
+            .ToList();
+        Assert.NotEmpty(orderIds);
+        return $"/order/detail/{orderIds.Max()}";
     }
 
     [Fact]
