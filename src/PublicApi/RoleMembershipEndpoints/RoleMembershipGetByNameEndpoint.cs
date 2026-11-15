@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.Infrastructure.Identity;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleMembershipEndpoints;
 
@@ -33,7 +34,7 @@ public class RoleMembershipGetByNameEndpoint(UserManager<ApplicationUser> userMa
             return TypedResults.NotFound();
         }
 
-        response.RoleMembers = [.. members];
+        response.RoleMembers = [.. members.Select(m => m.ToUserDto())];
         return TypedResults.Ok(response);
     }
 }
