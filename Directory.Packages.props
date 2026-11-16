@@ -80,6 +80,6 @@
     </PackageVersion>
     <PackageVersion Include="MSTest.TestAdapter" Version="$(MSTestVersion)" />
     <PackageVersion Include="MSTest.TestFramework" Version="$(MSTestVersion)" />
-    <PackageVersion Include="coverlet.MTP" Version="10.1.0" />
+    <PackageVersion Include="coverlet.MTP" Version="10.1.1" />
   </ItemGroup>
 </Project>
