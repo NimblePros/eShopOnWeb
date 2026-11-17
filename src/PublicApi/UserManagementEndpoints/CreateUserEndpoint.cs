@@ -40,8 +40,17 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager, IHostE
             throw new DuplicateException($"User already exists.");
         }
 
-        ApplicationUser newUser = new ApplicationUser();
-        newUser.FromUserDto(request.User, copyId: false);
+        var user = request.User;
+        // Only these fields are client settable. EmailConfirmed and PhoneNumberConfirmed are
+        // ignored and start as false: they are set by the confirmation flows, never by the request.
+        var newUser = new ApplicationUser
+        {
+            UserName = user.UserName,
+            Email = user.Email,
+            // Forms post "" for an empty field; store it as null, like PUT api/users.
+            PhoneNumber = string.IsNullOrEmpty(user.PhoneNumber) ? null : user.PhoneNumber,
+            LockoutEnd = user.LockoutEnd,
+        };
 
         var createUser = await userManager.CreateAsync(newUser);
         if (createUser.Succeeded)
