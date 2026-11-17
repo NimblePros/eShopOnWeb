@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eShopOnWeb — Enterprise Storefront</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .card-hover { transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+
+  <!-- Top Announcement Bar -->
+  <div class="bg-slate-900 text-white text-xs py-2 px-4 shadow-sm">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <i class="fa-solid fa-truck-fast text-indigo-400"></i>
+        <span class="font-medium">Free express shipping on all orders over $50</span>
+      </div>
+      <div class="flex items-center space-x-3 text-[11px] font-mono text-slate-400">
+        <span>24/7 Customer Support</span>
+        <span>•</span>
+        <span>Easy 30-Day Returns</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm backdrop-blur bg-white/95">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-18 py-3.5 flex items-center justify-between gap-4">
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center space-x-3 cursor-pointer">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 font-extrabold text-xl">
+          <i class="fa-solid fa-bag-shopping"></i>
+        </div>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight text-slate-900">eShopOnWeb</span>
+          <p class="text-[11px] text-slate-500 font-medium">Enterprise e-Commerce Storefront</p>
+        </div>
+      </a>
+
+      <!-- Search and Cart Actions -->
+      <div class="flex items-center space-x-3">
+        <a href="/health" target="_blank" class="hidden sm:inline-flex items-center px-2.5 py-1.5 text-xs font-mono font-medium rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> /health
+        </a>
+        <button onclick="toggleCart()" class="relative inline-flex items-center px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition">
+          <i class="fa-solid fa-cart-shopping mr-2 text-indigo-400"></i>
+          <span>Cart</span>
+          <span id="header-cart-badge" class="ml-2 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-indigo-500 text-white">1</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Clean Storefront Banner -->
+  <section class="bg-gradient-to-b from-indigo-50/50 via-white to-slate-50 border-b border-slate-200 py-8 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="max-w-3xl">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+          eShopOnWeb Storefront
+        </h1>
+        <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+          Explore our featured collection of apparel, drinkware, and lifestyle accessories.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notification Toast -->
+  <div id="toast-notification" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center space-x-3 text-xs font-semibold">
+      <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+      <span id="toast-message">Notification message</span>
+    </div>
+  </div>
+
+  <!-- CATALOG VIEW -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full">
+    <!-- Filter & Search Controls -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <!-- Search Input -->
+      <div class="relative flex-1">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          oninput="handleSearch(this.value)"
+          placeholder="Search products by title or description..." 
+          class="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+        >
+      </div>
+
+      <!-- Category Filter -->
+      <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl text-xs">
+        <span class="text-[11px] font-bold text-slate-500 px-2">Category:</span>
+        <button onclick="setTypeFilter(null)" id="filter-type-all" class="px-3 py-1 rounded-lg bg-white text-indigo-600 font-bold shadow-xs">All</button>
+        <button onclick="setTypeFilter('Apparel')" id="filter-type-apparel" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 font-medium">Apparel</button>
+        <button onclick="setTypeFilter('Drinkware')" id="filter-type-drinkware" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 font-medium">Drinkware</button>
+        <button onclick="setTypeFilter('Accessories')" id="filter-type-accessories" class="px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 font-medium">Accessories</button>
+      </div>
+    </div>
+
+    <!-- Product Counter -->
+    <div class="flex items-center justify-between mb-4">
+      <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+        Showing <span id="product-count" class="text-slate-900 font-extrabold">12</span> Products
+      </span>
+      <span class="text-xs text-slate-400 font-mono">
+        API: <a href="/api/catalog/items" target="_blank" class="text-indigo-600 hover:underline">/api/catalog/items</a>
+      </span>
+    </div>
+
+    <!-- Product Grid Container -->
+    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <!-- Product cards rendered dynamically -->
+    </div>
+  </main>
+
+  <!-- Slide-Over Shopping Cart Drawer -->
+  <div id="cart-drawer-backdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden transition-opacity" onclick="toggleCart()"></div>
+  <aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <!-- Cart Header -->
+    <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+      <div class="flex items-center space-x-2">
+        <i class="fa-solid fa-cart-shopping text-indigo-600"></i>
+        <h2 class="font-extrabold text-sm text-slate-900">Shopping Cart</h2>
+        <span id="cart-drawer-count-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-700">1</span>
+      </div>
+      <button onclick="toggleCart()" class="text-slate-400 hover:text-slate-600 p-1">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Cart Items List -->
+    <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 space-y-3">
+      <!-- Rendered dynamically -->
+    </div>
+
+    <!-- Cart Summary & Checkout -->
+    <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-3">
+      <div class="flex justify-between text-xs text-slate-600">
+        <span>Subtotal</span>
+        <span id="cart-subtotal" class="font-bold text-slate-900 font-mono">$34.50</span>
+      </div>
+      <div class="flex justify-between text-xs text-slate-600">
+        <span>Shipping</span>
+        <span class="font-bold text-emerald-600 font-mono">FREE</span>
+      </div>
+      <div class="flex justify-between text-sm font-extrabold text-slate-900 pt-2 border-t border-slate-200">
+        <span>Total</span>
+        <span id="cart-total" class="font-mono text-indigo-600 text-base">$34.50</span>
+      </div>
+
+      <button onclick="openCheckoutModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/20 transition">
+        <i class="fa-solid fa-lock mr-1.5"></i> Proceed to Checkout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-credit-card"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm text-slate-900">Checkout</h3>
+            <p class="text-[11px] text-slate-500">Fast & Secure Order Placement</p>
+          </div>
+        </div>
+        <button onclick="closeCheckoutModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <form id="checkout-form" onsubmit="handleCheckout(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Customer Full Name</label>
+          <input type="text" id="checkout-name" required value="Customer Name" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Shipping Address</label>
+          <input type="text" id="checkout-address" required value="100 Commercial Blvd, Suite 400" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">City</label>
+            <input type="text" id="checkout-city" required value="Austin" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Postal Code</label>
+            <input type="text" id="checkout-zip" required value="78701" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center text-xs font-bold">
+          <span class="text-slate-600">Total Payable:</span>
+          <span id="checkout-modal-total" class="font-mono text-indigo-600 text-sm">$34.50</span>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition">
+          <i class="fa-solid fa-check mr-1.5"></i> Place Order
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-slate-700">eShopOnWeb Enterprise Storefront</span>
+        <span>•</span>
+        <span>All Rights Reserved</span>
+      </div>
+      <div class="flex items-center space-x-3 text-[11px] font-mono">
+        <span>Spring Boot</span>
+        <span>•</span>
+        <span>Cloud Run</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Client-Side Controller -->
+  <script>
+    const state = {
+      items: [],
+      filteredItems: [],
+      search: '',
+      typeFilter: null,
+      cart: [
+        {
+          id: 1,
+          catalogItemId: 1,
+          productName: ".NET Bot Black Sweatshirt",
+          unitPrice: 34.50,
+          quantity: 1,
+          pictureUri: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=400&q=80"
+        }
+      ],
+      isCartOpen: false
+    };
+
+    const initialCatalog = [
+      { id: 1, name: ".NET Bot Black Sweatshirt", description: "Heavyweight crewneck sweatshirt with embroidered .NET Bot logo.", price: 34.50, pictureUri: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=400&q=80", catalogType: "Apparel", unitsInStock: 120 },
+      { id: 2, name: ".NET Blue Foundation Hoodie", description: "Soft fleece lined pullover hoodie in royal blue.", price: 42.00, pictureUri: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=400&q=80", catalogType: "Apparel", unitsInStock: 85 },
+      { id: 3, name: "Developer Edition Cotton Tee", description: "100% ring-spun cotton tee celebrating modern software engineering.", price: 24.00, pictureUri: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80", catalogType: "Apparel", unitsInStock: 200 },
+      { id: 4, name: "Technical Performance Hoodie", description: "Ultra-breathable premium jacket with weather-resistant lining.", price: 54.00, pictureUri: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=400&q=80", catalogType: "Apparel", unitsInStock: 65 },
+      { id: 5, name: "Executive Pique Polo", description: "Executive cotton-piqué polo tailored for enterprise teams.", price: 38.00, pictureUri: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=400&q=80", catalogType: "Apparel", unitsInStock: 90 },
+      { id: 6, name: "Matte Black Ceramic Coffee Mug", description: "15oz matte black ceramic mug with ergonomic heat-safe handle.", price: 16.50, pictureUri: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80", catalogType: "Drinkware", unitsInStock: 310 },
+      { id: 7, name: "Vacuum Insulated Steel Tumbler", description: "20oz stainless steel double-walled tumbler keeping beverages ice cold for 24h.", price: 28.00, pictureUri: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=400&q=80", catalogType: "Drinkware", unitsInStock: 145 },
+      { id: 8, name: "Performance Hydro Sports Bottle", description: "32oz BPA-free sports bottle with leakproof spout.", price: 22.00, pictureUri: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=400&q=80", catalogType: "Drinkware", unitsInStock: 175 },
+      { id: 9, name: "Dual-Compartment Laptop Backpack", description: "Weather-resistant 25L commuter backpack with padded 16\" laptop compartment.", price: 72.00, pictureUri: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=400&q=80", catalogType: "Accessories", unitsInStock: 40 },
+      { id: 10, name: "Collector High-Relief Enamel Pin", description: "High-relief metallic enamel pin with secure butterfly clutch.", price: 9.50, pictureUri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80", catalogType: "Accessories", unitsInStock: 450 },
+      { id: 11, name: "Die-Cut Vinyl Sticker Pack", description: "Set of 6 premium die-cut vinyl stickers for laptop lid.", price: 7.50, pictureUri: "https://images.unsplash.com/photo-1572375992501-4b0892d50c69?auto=format&fit=crop&w=400&q=80", catalogType: "Accessories", unitsInStock: 600 },
+      { id: 12, name: "Hardcover Dot Grid Developer Notebook", description: "Hardcover 200-page dot grid developer notebook with ribbon bookmark.", price: 18.00, pictureUri: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80", catalogType: "Accessories", unitsInStock: 220 }
+    ];
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    function handleSearch(val) {
+      state.search = (val || '').toLowerCase();
+      applyFilters();
+    }
+
+    function setTypeFilter(type) {
+      state.typeFilter = type;
+      ['all', 'apparel', 'drinkware', 'accessories'].forEach(t => {
+        const btn = document.getElementById(`filter-type-${t}`);
+        if (btn) btn.className = "px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900 font-medium";
+      });
+      const activeId = type === null ? 'all' : type.toLowerCase();
+      const activeBtn = document.getElementById(`filter-type-${activeId}`);
+      if (activeBtn) activeBtn.className = "px-3 py-1 rounded-lg bg-white text-indigo-600 font-bold shadow-xs";
+      applyFilters();
+    }
+
+    function applyFilters() {
+      state.filteredItems = state.items.filter(item => {
+        const matchesSearch = !state.search || 
+          item.name.toLowerCase().includes(state.search) || 
+          item.description.toLowerCase().includes(state.search);
+        const matchesType = !state.typeFilter || item.catalogType === state.typeFilter;
+        return matchesSearch && matchesType;
+      });
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('product-grid');
+      document.getElementById('product-count').textContent = state.filteredItems.length;
+      if (state.filteredItems.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200">
+            <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3"></i>
+            <p class="font-bold text-sm">No products found matching filters</p>
+            <button onclick="setTypeFilter(null)" class="mt-2 text-xs text-indigo-600 font-semibold hover:underline">Reset Filter</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.filteredItems.map(item => `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden card-hover flex flex-col">
+          <div class="relative h-48 bg-slate-100 overflow-hidden">
+            <img src="${item.pictureUri}" alt="${item.name}" class="w-full h-full object-cover">
+            <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur text-white">
+              ${item.catalogType}
+            </span>
+          </div>
+
+          <div class="p-4 flex-1 flex flex-col">
+            <h3 class="font-extrabold text-sm text-slate-900 line-clamp-1 mb-1">${item.name}</h3>
+            <p class="text-xs text-slate-500 line-clamp-2 mb-3 flex-1">${item.description}</p>
+            
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
+              <div>
+                <span class="text-xs text-slate-400 font-medium block">Price</span>
+                <span class="text-base font-extrabold text-slate-900 font-mono">$${item.price.toFixed(2)}</span>
+              </div>
+              <button onclick="addToCart(${item.id})" class="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-bold text-xs transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Add</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleCart() {
+      state.isCartOpen = !state.isCartOpen;
+      const drawer = document.getElementById('cart-drawer');
+      const backdrop = document.getElementById('cart-drawer-backdrop');
+      if (state.isCartOpen) {
+        backdrop.classList.remove('hidden');
+        drawer.classList.remove('translate-x-full');
+      } else {
+        backdrop.classList.add('hidden');
+        drawer.classList.add('translate-x-full');
+      }
+      renderCart();
+    }
+
+    function addToCart(itemId) {
+      const product = state.items.find(i => i.id === itemId);
+      if (!product) return;
+      const existing = state.cart.find(c => c.catalogItemId === itemId);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        state.cart.push({
+          id: Date.now(),
+          catalogItemId: product.id,
+          productName: product.name,
+          unitPrice: product.price,
+          quantity: 1,
+          pictureUri: product.pictureUri
+        });
+      }
+      renderCart();
+      showToast(`Added "${product.name}" to cart`);
+    }
+
+    function updateCartQuantity(cartId, delta) {
+      const item = state.cart.find(c => c.id === cartId);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        state.cart = state.cart.filter(c => c.id !== cartId);
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items-container');
+      const totalCount = state.cart.reduce((s, c) => s + c.quantity, 0);
+      const subtotal = state.cart.reduce((s, c) => s + (c.unitPrice * c.quantity), 0);
+
+      document.getElementById('header-cart-badge').textContent = totalCount;
+      document.getElementById('cart-drawer-count-badge').textContent = totalCount;
+      document.getElementById('cart-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+      document.getElementById('cart-total').textContent = `$${subtotal.toFixed(2)}`;
+
+      if (state.cart.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-12">
+            <i class="fa-solid fa-cart-arrow-down text-4xl mb-3 text-slate-300"></i>
+            <p class="font-bold text-xs text-slate-600">Your cart is empty</p>
+            <p class="text-[11px] text-slate-400 mt-1">Browse catalog to add items</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.cart.map(c => `
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center space-x-3">
+          <img src="${c.pictureUri}" alt="${c.productName}" class="w-12 h-12 object-cover rounded-lg border border-slate-200">
+          <div class="flex-1 min-w-0">
+            <h4 class="font-bold text-xs text-slate-900 truncate">${c.productName}</h4>
+            <span class="text-xs font-mono text-indigo-600 font-extrabold">$${c.unitPrice.toFixed(2)}</span>
+          </div>
+          <div class="flex items-center space-x-1.5 bg-white border border-slate-200 rounded-lg p-0.5">
+            <button onclick="updateCartQuantity(${c.id}, -1)" class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-slate-900 text-[10px] font-bold">-</button>
+            <span class="w-6 text-center text-xs font-bold font-mono">${c.quantity}</span>
+            <button onclick="updateCartQuantity(${c.id}, 1)" class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-slate-900 text-[10px] font-bold">+</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openCheckoutModal() {
+      if (state.cart.length === 0) {
+        showToast("Cart is empty!");
+        return;
+      }
+      toggleCart();
+      const subtotal = state.cart.reduce((s, c) => s + (c.unitPrice * c.quantity), 0);
+      document.getElementById('checkout-modal-total').textContent = `$${subtotal.toFixed(2)}`;
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    function handleCheckout(e) {
+      e.preventDefault();
+      state.cart = [];
+      renderCart();
+      closeCheckoutModal();
+      showToast("Order placed successfully! Thank you for shopping with eShopOnWeb.");
+    }
+
+    function fetchCatalog() {
+      fetch('/api/catalog/items')
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.data && res.data.length > 0) {
+            state.items = res.data;
+          } else {
+            state.items = initialCatalog;
+          }
+          applyFilters();
+        })
+        .catch(err => {
+          state.items = initialCatalog;
+          applyFilters();
+        });
+    }
+
+    // Initialization
+    state.items = initialCatalog;
+    applyFilters();
+    renderCart();
+    fetchCatalog();
+  </script>
+</body>
+</html>

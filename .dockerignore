@@ -1,9 +1,6 @@
-.dockerignore
-.env
 .git
-.gitignore
-.vs
-.vscode
-*/bin
-*/obj
-**/.toolstarget
+.github
+target/
+*.class
+*.jar
+.DS_Store
