@@ -106,6 +106,24 @@ public class CreateUserEndpointTest
         Assert.AreEqual(lockoutEnd, stored.LockoutEnd);
     }
 
+    [TestMethod]
+    public async Task ReturnsBadRequestWithErrorsGivenInvalidUserNameAndCreatesNoUser()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        // Identity's default AllowedUserNameCharacters reject the space and the '!'.
+        var userName = $"bad name! {Guid.NewGuid()}";
+        var request = new CreateUserRequest { User = new UserDto { UserName = userName, Email = $"{Guid.NewGuid()}@example.com" } };
+
+        var response = await client.PostAsync("api/users", JsonContent.Create(request));
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        StringAssert.Contains(body, "is invalid, can only contain letters or digits");
+
+        var lookup = await client.GetAsync($"api/users/name/{Uri.EscapeDataString(userName)}");
+        Assert.AreEqual(HttpStatusCode.NotFound, lookup.StatusCode);
+    }
+
     private static async Task<string> CreateUserAsync(HttpClient client, UserDto user)
     {
         var response = await client.PostAsync("api/users", JsonContent.Create(new CreateUserRequest { User = user }));

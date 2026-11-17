@@ -23,14 +23,6 @@ Follow-up to #328, which fixed the same mass assignment for PUT api/users.
   action, and PUT already allows it.
 - `TwoFactorEnabled` was never written by the API on create and stays that way.
 
-## Out of scope
-
-- The create form still shows an editable "Two-Factor Authentication Enabled" checkbox that the
-  API never saves (#328 made the same checkbox read-only in the edit dialog).
-- `CreateUserEndpoint` does not check the `IdentityResult` of `CreateAsync` / `AddPasswordAsync`,
-  so a failed create (e.g. an invalid user name) sends no error response. PUT returns these
-  errors as 400 since #328.
-
 ## Phase 1 — Fix `CreateUserEndpoint`
 
 - [x] Copy only the allowed fields; confirmation flags start as `false`
@@ -54,3 +46,20 @@ Follow-up to #328, which fixed the same mass assignment for PUT api/users.
 - [x] `dotnet build eShopOnWeb.slnx`: no new warnings
 - [x] `dotnet test --project tests/PublicApiIntegrationTests` passes
 - [x] `dotnet test --project tests/UnitTests` passes
+
+## Phase 5 — Review follow-ups
+
+- [x] `CreateUserEndpoint`: return 400 with the Identity errors when the create fails, as PUT does
+      since #328
+- [x] Create the user and its default password in one `CreateAsync(user, password)` call (local
+      development only), so a rejected password leaves no user without one; drop the
+      `AddPasswordAsync` call and the extra `FindByNameAsync` lookup
+- [x] OpenAPI description: 201, 400 (problem details) and 409
+- [x] BlazorAdmin create dialog: stop if the create is rejected (`result` is null; the error toast
+      is already shown) instead of reading `result.UserId`; roles are only saved for a created user
+- [x] Remove the "Two-Factor Authentication Enabled" checkbox from the create dialog (the API never
+      saves it)
+- [x] Test: an invalid user name returns 400 with the Identity error and creates no user
+- [x] No password test: the password is the `DEFAULT_PASSWORD` constant, which passes validation,
+      so a failing password cannot reach Identity from a request
+- [x] Build, PublicApiIntegrationTests, UnitTests and `dotnet format --verify-no-changes` pass

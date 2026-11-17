@@ -54,13 +54,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row form-check">
-                                        <div class="col-md-6">
-                                            <InputCheckbox id="TwoFactorEnabled" class="form-check-input" @bind-Value="_item.User.TwoFactorEnabled" />
-                                            <label for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication Enabled</label>
-                                        </div>
-                                    </div>
-
                                     <div class="form-group row">
                                         <label for="LockoutEnd" class="control-label col-md-6">Lockout Until</label>
                                         <div class="col-md-6">
@@ -128,6 +121,13 @@
         if (_item.User != null)
         {
             var result = await UserManagementService.Create(_item);
+            if (result is null)
+            {
+                // The API rejected the create (an error toast is already shown). Keep the dialog open
+                // and don't save roles for a user that was not created.
+                return;
+            }
+
             var checkedRoles = _selectedRoles.Where(r => r.Value).Select(r => r.Key).ToList();
             if (checkedRoles.Count > 0){
                 SaveRolesForUserRequest rolesForUserRequest = new SaveRolesForUserRequest(){
@@ -137,12 +137,10 @@
 
                 await UserManagementService.SaveRolesForUser(rolesForUserRequest);
             }
-            if (result != null)
-            {
-                Logger.LogInformation("Created User {userId}",result.UserId);
-                await OnSaveClick.InvokeAsync(null);
-                await Close();
-            }
+
+            Logger.LogInformation("Created User {userId}",result.UserId);
+            await OnSaveClick.InvokeAsync(null);
+            await Close();
         }
     }
 

@@ -21,9 +21,12 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager, IHostE
         Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Description(d =>
-            d.Produces<CreateUserResponse>()
-            .WithTags("UserManagementEndpoints")
-        );
+        {
+            d.Produces<CreateUserResponse>(StatusCodes.Status201Created);
+            d.ProducesProblemFE(StatusCodes.Status400BadRequest);
+            d.Produces(StatusCodes.Status409Conflict);
+            d.WithTags("UserManagementEndpoints");
+        });
     }
 
     public override async Task HandleAsync(CreateUserRequest request, CancellationToken ct)
@@ -52,17 +55,22 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager, IHostE
             LockoutEnd = user.LockoutEnd,
         };
 
-        var createUser = await userManager.CreateAsync(newUser);
-        if (createUser.Succeeded)
+        // Outside local development, users are created without a password and must set one themselves.
+        // Creating the user and its password in one call means a rejected password leaves no user behind.
+        var result = environment.IsLocalDevelopment()
+            ? await userManager.CreateAsync(newUser, AuthorizationConstants.DEFAULT_PASSWORD)
+            : await userManager.CreateAsync(newUser);
+
+        if (!result.Succeeded)
         {
-            var createdUser = await userManager.FindByNameAsync(request.User.UserName);
-            // Outside local development, users are created without a password and must set one themselves
-            if (environment.IsLocalDevelopment())
+            foreach (var error in result.Errors)
             {
-                await userManager.AddPasswordAsync(createdUser!, AuthorizationConstants.DEFAULT_PASSWORD);
+                AddError(error.Description, error.Code);
             }
-            response.UserId = createdUser!.Id;
-            await Send.CreatedAtAsync<UserGetByIdEndpoint>(new { UserId = createdUser!.Id }, response, cancellation: ct);
+            ThrowIfAnyErrors();
         }
+
+        response.UserId = newUser.Id;
+        await Send.CreatedAtAsync<UserGetByIdEndpoint>(new { UserId = newUser.Id }, response, cancellation: ct);
     }
 }
