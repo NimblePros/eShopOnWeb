@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
+using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.eShopWeb.Web.ViewModels;
@@ -24,6 +25,9 @@ public class IndexModel : PageModel
     }
 
     public const string StatusMessageKey = nameof(StatusMessage);
+
+    public static readonly string MaxQuantityReachedMessage =
+        $"Your basket can hold at most {BasketItem.MaxQuantity} of each item.";
 
     public BasketViewModel BasketModel { get; set; } = new BasketViewModel();
 
@@ -49,22 +53,29 @@ public class IndexModel : PageModel
         }
 
         var username = GetOrSetBasketCookieAndUserName();
-        var basket = await _basketService.AddItemToBasket(username,
-            productDetails.Id, item.Price);
-
-        BasketModel = await _basketViewModelService.Map(basket);
+        try
+        {
+            await _basketService.AddItemToBasket(username, productDetails.Id, item.Price);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // Adding a single unit only fails when the line is already at BasketItem.MaxQuantity.
+            StatusMessage = MaxQuantityReachedMessage;
+        }
 
         return RedirectToPage();
     }
 
     public async Task OnPostUpdate(IEnumerable<BasketItemViewModel> items)
     {
+        var basketView = await _basketViewModelService.GetOrCreateBasketForUser(GetOrSetBasketCookieAndUserName());
         if (!ModelState.IsValid)
         {
+            // Show the basket as it is, alongside the validation errors.
+            BasketModel = basketView;
             return;
         }
 
-        var basketView = await _basketViewModelService.GetOrCreateBasketForUser(GetOrSetBasketCookieAndUserName());
         var updateModel = items.ToDictionary(b => b.Id.ToString(), b => b.Quantity);
         var basket = await _basketService.SetQuantities(basketView.Id, updateModel);
         BasketModel = await _basketViewModelService.Map(basket);

@@ -102,10 +102,10 @@ public class TransferBasket
     }
 
     [Fact]
-    public async Task ThrowsAndDoesNotSaveIfMergedQuantityWouldOverflow()
+    public async Task CapsMergedQuantityAtMaxInsteadOfThrowing()
     {
         var anonymousBasket = new Basket(_existentAnonymousBasketBuyerId);
-        anonymousBasket.AddItem(1, 10, int.MaxValue);
+        anonymousBasket.AddItem(1, 10, BasketItem.MaxQuantity);
         var userBasket = new Basket(_existentUserBasketBuyerId);
         userBasket.AddItem(1, 10, 1);
 
@@ -115,12 +115,11 @@ public class TransferBasket
         _mockBasketRepo.FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), Arg.Any<CancellationToken>()).Returns(x => results.Next());
         var basketService = new BasketService(_mockBasketRepo, _mockLogger);
 
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
-            () => basketService.TransferBasketAsync(_existentAnonymousBasketBuyerId, _existentUserBasketBuyerId));
+        await basketService.TransferBasketAsync(_existentAnonymousBasketBuyerId, _existentUserBasketBuyerId);
 
-        Assert.Equal(1, userBasket.Items.Single().Quantity);
-        await _mockBasketRepo.DidNotReceive().UpdateAsync(Arg.Any<Basket>(), Arg.Any<CancellationToken>());
-        await _mockBasketRepo.DidNotReceive().DeleteAsync(Arg.Any<Basket>(), Arg.Any<CancellationToken>());
+        Assert.Equal(BasketItem.MaxQuantity, userBasket.Items.Single().Quantity);
+        await _mockBasketRepo.Received(1).UpdateAsync(userBasket, Arg.Any<CancellationToken>());
+        await _mockBasketRepo.Received(1).DeleteAsync(anonymousBasket, Arg.Any<CancellationToken>());
     }
 
     [Fact]

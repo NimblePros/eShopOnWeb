@@ -88,7 +88,8 @@ public class BasketService : IBasketService
         }
         foreach (var item in anonymousBasket.Items)
         {
-            userBasket.AddItem(item.CatalogItemId, item.UnitPrice, item.Quantity);
+            // Clamp rather than throw: an over-full merged line must not fail the user's login.
+            userBasket.MergeItem(item.CatalogItemId, item.UnitPrice, item.Quantity);
         }
         await _basketRepository.UpdateAsync(userBasket);
         await _basketRepository.DeleteAsync(anonymousBasket);

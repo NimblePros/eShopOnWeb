@@ -72,12 +72,12 @@ public class BasketAddItem
     }
 
     [Fact]
-    public void CantIncrementQuantityPastIntMaxValue()
+    public void CantIncrementQuantityPastMaxQuantity()
     {
         var basket = new Basket(_buyerId);
         basket.AddItem(_testCatalogItemId, _testUnitPrice, _testQuantity);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => basket.AddItem(_testCatalogItemId, _testUnitPrice, int.MaxValue));
+        Assert.Throws<ArgumentOutOfRangeException>(() => basket.AddItem(_testCatalogItemId, _testUnitPrice, BasketItem.MaxQuantity));
         Assert.Equal(_testQuantity, basket.Items.Single().Quantity);
     }
 }

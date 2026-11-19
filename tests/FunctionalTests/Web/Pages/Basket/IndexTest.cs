@@ -1,4 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
+using Microsoft.eShopWeb.Web.Pages.Basket;
 using Xunit;
 using static Microsoft.eShopWeb.FunctionalTests.Web.WebPageHelpers;
 
@@ -77,6 +79,44 @@ public class IndexTest(TestApplication factory)
         var reloaded = await _client.GetStringAsync("/basket", ct);
         Assert.Contains(MugProductNameHtml, reloaded);
         Assert.Equal("1", GetFirstBasketItemQuantity(reloaded));
+    }
+
+    [Fact]
+    public async Task OnPostUpdateToMaxQuantitySucceeds()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var basketPage = await AddItemToBasketAsync(_client);
+
+        await UpdateFirstBasketItemQuantityAsync(_client, basketPage, BasketItem.MaxQuantity);
+
+        Assert.Equal(BasketItem.MaxQuantity.ToString(), GetFirstBasketItemQuantity(await _client.GetStringAsync("/basket", ct)));
+    }
+
+    [Fact]
+    public async Task OnPostUpdateKeepsQuantityAndShowsErrorGivenQuantityAboveMax()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var basketPage = await AddItemToBasketAsync(_client);
+
+        var updateResponse = await UpdateFirstBasketItemQuantityAsync(_client, basketPage, BasketItem.MaxQuantity + 1);
+
+        var updatedPage = await updateResponse.Content.ReadAsStringAsync(ct);
+        Assert.Contains($"Quantity must be between 0 and {BasketItem.MaxQuantity}.", updatedPage);
+        // The basket is still rendered alongside the error, not replaced by an empty one.
+        Assert.Contains(MugProductNameHtml, updatedPage);
+        Assert.Equal("1", GetFirstBasketItemQuantity(await _client.GetStringAsync("/basket", ct)));
+    }
+
+    [Fact]
+    public async Task AddingItemAlreadyAtMaxQuantityShowsMessageAndKeepsQuantity()
+    {
+        var basketPage = await AddItemToBasketAsync(_client);
+        await UpdateFirstBasketItemQuantityAsync(_client, basketPage, BasketItem.MaxQuantity);
+
+        var afterAdd = await AddItemToBasketAsync(_client);
+
+        Assert.Contains(IndexModel.MaxQuantityReachedMessage, afterAdd);
+        Assert.Equal(BasketItem.MaxQuantity.ToString(), GetFirstBasketItemQuantity(afterAdd));
     }
 
     [Fact]

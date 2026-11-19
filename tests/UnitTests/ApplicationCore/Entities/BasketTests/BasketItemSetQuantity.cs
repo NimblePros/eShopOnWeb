@@ -10,8 +10,8 @@ public class BasketItemSetQuantity
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
-    [InlineData(int.MaxValue)]
-    public void SetsQuantityGivenNonNegativeValue(int quantity)
+    [InlineData(BasketItem.MaxQuantity)]
+    public void SetsQuantityGivenValueWithinRange(int quantity)
     {
         var item = CreateItem();
 
@@ -29,10 +29,23 @@ public class BasketItemSetQuantity
         Assert.Equal(3, item.Quantity);
     }
 
-    [Fact]
-    public void ConstructorThrowsGivenNegativeQuantity()
+    [Theory]
+    [InlineData(BasketItem.MaxQuantity + 1)]
+    [InlineData(int.MaxValue)]
+    public void ThrowsGivenQuantityAboveMax(int quantity)
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => CreateItem(quantity: -1));
+        var item = CreateItem(quantity: 3);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => item.SetQuantity(quantity));
+        Assert.Equal(3, item.Quantity);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(BasketItem.MaxQuantity + 1)]
+    public void ConstructorThrowsGivenQuantityOutOfRange(int quantity)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => CreateItem(quantity));
     }
 
     [Fact]
@@ -54,22 +67,48 @@ public class BasketItemSetQuantity
         Assert.Equal(2, item.Quantity);
     }
 
-    [Fact]
-    public void AddQuantityThrowsGivenResultThatWouldOverflow()
+    [Theory]
+    [InlineData(BasketItem.MaxQuantity)]
+    [InlineData(int.MaxValue)]
+    public void AddQuantityThrowsGivenResultAboveMax(int quantity)
     {
         var item = CreateItem(quantity: 1);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => item.AddQuantity(int.MaxValue));
+        Assert.Throws<ArgumentOutOfRangeException>(() => item.AddQuantity(quantity));
         Assert.Equal(1, item.Quantity);
     }
 
     [Fact]
-    public void AddQuantityAllowsResultOfExactlyIntMaxValue()
+    public void AddQuantityAllowsResultOfExactlyMax()
     {
         var item = CreateItem(quantity: 1);
 
-        item.AddQuantity(int.MaxValue - 1);
+        item.AddQuantity(BasketItem.MaxQuantity - 1);
 
-        Assert.Equal(int.MaxValue, item.Quantity);
+        Assert.Equal(BasketItem.MaxQuantity, item.Quantity);
+    }
+
+    [Theory]
+    [InlineData(2, 3, 5)]
+    [InlineData(1, BasketItem.MaxQuantity - 1, BasketItem.MaxQuantity)]
+    [InlineData(1, BasketItem.MaxQuantity, BasketItem.MaxQuantity)]
+    [InlineData(BasketItem.MaxQuantity, 1, BasketItem.MaxQuantity)]
+    [InlineData(500, int.MaxValue, BasketItem.MaxQuantity)]
+    public void AddQuantityUpToMaxCapsResultAtMax(int initial, int added, int expected)
+    {
+        var item = CreateItem(initial);
+
+        item.AddQuantityUpToMax(added);
+
+        Assert.Equal(expected, item.Quantity);
+    }
+
+    [Fact]
+    public void AddQuantityUpToMaxThrowsGivenNegativeQuantity()
+    {
+        var item = CreateItem(quantity: 2);
+
+        Assert.Throws<ArgumentException>(() => item.AddQuantityUpToMax(-1));
+        Assert.Equal(2, item.Quantity);
     }
 }
