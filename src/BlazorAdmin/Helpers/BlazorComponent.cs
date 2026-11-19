@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorAdmin.Helpers;
 
-public class BlazorComponent : ComponentBase
+public class BlazorComponent : ComponentBase, IDisposable
 {
     private readonly RefreshBroadcast _refresh = RefreshBroadcast.Instance;
 
@@ -22,4 +23,19 @@ public class BlazorComponent : ComponentBase
         StateHasChanged();
     }
 
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // RefreshBroadcast is a process-wide singleton; without this the component
+            // (and everything it references) stays alive and keeps re-rendering.
+            _refresh.RefreshRequested -= DoRefresh;
+        }
+    }
 }
