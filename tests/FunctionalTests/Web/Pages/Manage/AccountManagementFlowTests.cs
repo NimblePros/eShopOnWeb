@@ -8,8 +8,8 @@ namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Manage;
 /// <summary>
 /// Profile, password and external login flows, each run as a throwaway user.
 /// </summary>
-[Collection("Sequential")]
-public class AccountManagementFlowTests(TestApplication factory) : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class AccountManagementFlowTests(TestApplication factory)
 {
     private async Task<(HttpClient Client, string Email)> SignInNewUserAsync()
     {

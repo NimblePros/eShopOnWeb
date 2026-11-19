@@ -1,5 +1,5 @@
 ﻿using Microsoft.eShopWeb.ApplicationCore.Entities;
-using NSubstitute;
+using Microsoft.eShopWeb.UnitTests.Builders;
 using Xunit;
 
 namespace Microsoft.eShopWeb.UnitTests.ApplicationCore.Specifications;
@@ -9,40 +9,44 @@ public class CatalogItemsSpecification
     [Fact]
     public void MatchesSpecificCatalogItem()
     {
-        var catalogItemIds = new int[] { 1 };
-        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogItemsSpecification(catalogItemIds);
+        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogItemsSpecification(1);
 
         var result = spec.Evaluate(GetTestCollection()).ToList();
 
-        Assert.NotNull(result);
-        Assert.Single(result.ToList());
+        Assert.Equal(1, Assert.Single(result).Id);
     }
 
     [Fact]
     public void MatchesAllCatalogItems()
     {
-        var catalogItemIds = new int[] { 1, 3 };
-        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogItemsSpecification(catalogItemIds);
+        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogItemsSpecification(1, 3);
 
         var result = spec.Evaluate(GetTestCollection()).ToList();
 
-        Assert.NotNull(result);
-        Assert.Equal(2, result.ToList().Count);
+        Assert.Equal([1, 3], result.Select(i => i.Id));
     }
 
-    private List<CatalogItem> GetTestCollection()
+    [Fact]
+    public void MatchesNothingGivenNoIds()
     {
-        var catalogItems = new List<CatalogItem>();
+        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogItemsSpecification();
 
-        var mockCatalogItem1 = Substitute.For<CatalogItem>(1, 1, "Item 1 description", "Item 1", 1.5m, "Item1Uri");
-        mockCatalogItem1.Id.Returns(1);
-
-        var mockCatalogItem3 = Substitute.For<CatalogItem>(3, 3, "Item 3 description", "Item 3", 3.5m, "Item3Uri");
-        mockCatalogItem3.Id.Returns(3);
-
-        catalogItems.Add(mockCatalogItem1);
-        catalogItems.Add(mockCatalogItem3);
-
-        return catalogItems;
+        Assert.Empty(spec.Evaluate(GetTestCollection()));
     }
+
+    [Fact]
+    public void IgnoresUnknownIds()
+    {
+        var spec = new eShopWeb.ApplicationCore.Specifications.CatalogItemsSpecification(3, 99);
+
+        var result = spec.Evaluate(GetTestCollection()).ToList();
+
+        Assert.Equal(3, Assert.Single(result).Id);
+    }
+
+    private static List<CatalogItem> GetTestCollection() =>
+    [
+        new CatalogItem(1, 1, "Item 1 description", "Item 1", 1.5m, "Item1Uri").WithId(1),
+        new CatalogItem(3, 3, "Item 3 description", "Item 3", 3.5m, "Item3Uri").WithId(3)
+    ];
 }

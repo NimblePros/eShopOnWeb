@@ -2,8 +2,8 @@
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages;
 
-[Collection("Sequential")]
-public class HomePageOnGet(TestApplication factory) : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class HomePageOnGet(TestApplication factory)
 {
     public HttpClient Client { get; } = factory.CreateClient();
 

@@ -29,6 +29,20 @@ public class OrderTotal
     }
 
     [Fact]
+    public void SumsEachLineUnitPriceTimesUnits()
+    {
+        var builder = new OrderBuilder();
+        var order = builder.WithItems(
+        [
+            new(builder.CreateCatalogItemOrdered(), 2.50m, 2),
+            new(builder.CreateCatalogItemOrdered(), 10.00m, 1),
+            new(builder.CreateCatalogItemOrdered(), 0.99m, 3)
+        ]);
+
+        Assert.Equal(17.97m, order.Total());
+    }
+
+    [Fact]
     public void IsCorrectGiven3Items()
     {
         var builder = new OrderBuilder();

@@ -1,7 +1,6 @@
 ﻿using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Services;
-//using Moq;
 using NSubstitute;
 using Xunit;
 
@@ -26,5 +25,28 @@ public class DeleteBasket
         await basketService.DeleteBasketAsync(1);
 
         await _mockBasketRepo.Received().DeleteAsync(Arg.Any<Basket>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task DeletesTheBasketWithTheGivenId()
+    {
+        var basket = new Basket(_buyerId);
+        _mockBasketRepo.GetByIdAsync(7, Arg.Any<CancellationToken>()).Returns(basket);
+        var basketService = new BasketService(_mockBasketRepo, _mockLogger);
+
+        await basketService.DeleteBasketAsync(7);
+
+        await _mockBasketRepo.Received(1).DeleteAsync(basket, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ThrowsWithoutDeletingGivenMissingBasket()
+    {
+        _mockBasketRepo.GetByIdAsync(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns((Basket?)null);
+        var basketService = new BasketService(_mockBasketRepo, _mockLogger);
+
+        await Assert.ThrowsAsync<ArgumentNullException>(() => basketService.DeleteBasketAsync(1));
+
+        await _mockBasketRepo.DidNotReceive().DeleteAsync(Arg.Any<Basket>(), Arg.Any<CancellationToken>());
     }
 }

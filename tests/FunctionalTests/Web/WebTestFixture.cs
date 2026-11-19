@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Identity;
@@ -34,6 +35,15 @@ public class TestApplication : WebApplicationFactory<IBasketViewModelService>
     {
         base.ConfigureClient(client);
         client.BaseAddress = HttpsBaseAddress;
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // No Seq server runs during tests, so the Seq OTLP exporters' final flush at host shutdown
+        // keeps retrying until it times out (10s by default). A short timeout lets the host stop
+        // promptly; these settings are read while Program.cs builds the app.
+        builder.UseSetting("Aspire:Seq:Logs:TimeoutMilliseconds", "100");
+        builder.UseSetting("Aspire:Seq:Traces:TimeoutMilliseconds", "100");
     }
 
     protected override IHost CreateHost(IHostBuilder builder)

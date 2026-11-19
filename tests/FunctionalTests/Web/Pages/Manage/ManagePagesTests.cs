@@ -4,8 +4,8 @@ using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Manage;
 
-[Collection("Sequential")]
-public class ManagePagesTests(TestApplication factory) : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class ManagePagesTests(TestApplication factory)
 {
     private readonly HttpClient _client = factory.CreateClient(allowAutoRedirect: false);
 

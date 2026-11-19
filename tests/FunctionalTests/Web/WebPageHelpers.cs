@@ -82,9 +82,38 @@ public static class WebPageHelpers
     public static Task<ApplicationUser> FindUserAsync(TestApplication factory, string email) =>
         UseUserManagerAsync(factory, async userManager => (await userManager.FindByEmailAsync(email))!);
 
+    /// <summary>The seeded ".NET Black &amp; White Mug" (as HTML-encoded on the page).</summary>
+    public const int MugCatalogItemId = 2;
+    public const string MugProductNameHtml = ".NET Black &amp; White Mug";
+    public const decimal MugUnitPrice = 8.50m;
+
+    /// <summary>
+    /// Adds a catalog item to the client's basket from the home page and returns the basket page
+    /// the client lands on. The client must follow redirects.
+    /// </summary>
+    public static async Task<string> AddItemToBasketAsync(HttpClient client, int catalogItemId = MugCatalogItemId)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var home = await client.GetStringAsync("/", ct);
+        var response = await PostFormAsync(client, "/basket/index", home, KeyValuePair.Create("id", catalogItemId.ToString()));
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync(ct);
+    }
+
+    /// <summary>
+    /// Posts new quantities for the basket's first line, using the basket page's form.
+    /// </summary>
+    public static Task<HttpResponseMessage> UpdateFirstBasketItemQuantityAsync(HttpClient client, string basketPage, int quantity) =>
+        PostFormAsync(client, "/basket/update", basketPage,
+            new("Items[0].Id", GetId(basketPage)),
+            new("Items[0].Quantity", quantity.ToString()));
+
+    public static string GetFirstBasketItemQuantity(string basketPage) =>
+        RegexSearch(@"name=""Items\[0\].Quantity"" value=""(\d+)""", basketPage);
+
     public static string GetId(string input)
     {
-        string regexpression = @"name=""Items\[0\].Id"" value=""(\d)""";
+        string regexpression = @"name=""Items\[0\].Id"" value=""(\d+)""";
         return RegexSearch(regexpression, input);
     }
 
