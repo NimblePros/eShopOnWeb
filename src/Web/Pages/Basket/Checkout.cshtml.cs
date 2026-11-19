@@ -14,6 +14,10 @@ namespace Microsoft.eShopWeb.Web.Pages.Basket;
 [Authorize]
 public class CheckoutModel : PageModel
 {
+    public const string UnavailableItemsRemovedMessage =
+        "Some items in your basket are no longer available and were removed. Please review your basket and check out again.";
+
+
     private readonly IBasketService _basketService;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IOrderService _orderService;
@@ -61,6 +65,13 @@ public class CheckoutModel : PageModel
         {
             //Redirect to Empty Basket page
             _logger.LogWarning(emptyBasketOnCheckoutException.Message);
+            return RedirectToPage("/Basket/Index");
+        }
+        catch (UnavailableBasketItemsException unavailableBasketItemsException)
+        {
+            _logger.LogWarning(unavailableBasketItemsException.Message);
+            await _basketService.RemoveItemsForCatalogItemsAsync(BasketModel.Id, unavailableBasketItemsException.CatalogItemIds);
+            TempData[IndexModel.StatusMessageKey] = UnavailableItemsRemovedMessage;
             return RedirectToPage("/Basket/Index");
         }
 

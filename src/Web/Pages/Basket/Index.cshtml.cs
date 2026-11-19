@@ -23,7 +23,12 @@ public class IndexModel : PageModel
         _itemRepository = itemRepository;
     }
 
+    public const string StatusMessageKey = nameof(StatusMessage);
+
     public BasketViewModel BasketModel { get; set; } = new BasketViewModel();
+
+    [TempData]
+    public string? StatusMessage { get; set; }
 
     public async Task OnGet()
     {

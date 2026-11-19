@@ -53,11 +53,13 @@ public class BasketViewModelService : IBasketViewModelService
     private async Task<List<BasketItemViewModel>> GetBasketItems(IReadOnlyCollection<BasketItem> basketItems)
     {
         var catalogItemsSpecification = new CatalogItemsSpecification(basketItems.Select(b => b.CatalogItemId).ToArray());
-        var catalogItems = await _itemRepository.ListAsync(catalogItemsSpecification);
+        var catalogItems = (await _itemRepository.ListAsync(catalogItemsSpecification)).ToDictionary(c => c.Id);
 
-        var items = basketItems.Select(basketItem =>
+        // A product can be deleted after a shopper adds it to their basket. Leave its line out of
+        // the view; checkout removes it from the basket and tells the shopper.
+        var items = basketItems.Where(basketItem => catalogItems.ContainsKey(basketItem.CatalogItemId)).Select(basketItem =>
         {
-            var catalogItem = catalogItems.First(c => c.Id == basketItem.CatalogItemId);
+            var catalogItem = catalogItems[basketItem.CatalogItemId];
 
             var basketItemViewModel = new BasketItemViewModel
             {

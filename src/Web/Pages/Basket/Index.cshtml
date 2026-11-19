@@ -11,6 +11,11 @@
 
 <div class="container">
 
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert alert-warning" role="alert">@Model.StatusMessage</div>
+    }
+
     @if (Model.BasketModel.Items.Any())
     {
         <form method="post">

@@ -88,6 +88,26 @@ public class CreateOrderAsync
             Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task ThrowsWithMissingCatalogItemIdsGivenBasketItemWhoseCatalogItemWasDeleted()
+    {
+        const int deletedCatalogItemId = 99;
+        // The repository only returns the catalog item that still exists.
+        ArrangeBasketWithOneItemAndMatchingCatalogItem();
+        var basket = new Basket(TestBuyerId);
+        basket.AddItem(TestCatalogItemId, TestUnitPrice, TestQuantity);
+        basket.AddItem(deletedCatalogItemId, TestUnitPrice, TestQuantity);
+        ArrangeBasket(basket);
+        var orderService = CreateOrderService();
+
+        var exception = await Assert.ThrowsAsync<UnavailableBasketItemsException>(
+            () => orderService.CreateOrderAsync(TestBasketId, _shippingAddress));
+
+        Assert.Equal([deletedCatalogItemId], exception.CatalogItemIds);
+        await _mockOrderRepo.DidNotReceive().AddAsync(Arg.Any<Order>(), Arg.Any<CancellationToken>());
+        await _mockMediator.DidNotReceive().Publish(Arg.Any<OrderCreatedEvent>(), Arg.Any<CancellationToken>());
+    }
+
     private OrderService CreateOrderService() =>
         new(_mockBasketRepo, _mockItemRepo, _mockOrderRepo, _mockUriComposer, _mockMediator);
 

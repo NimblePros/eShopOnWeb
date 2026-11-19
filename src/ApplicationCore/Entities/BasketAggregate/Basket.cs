@@ -34,6 +34,12 @@ public class Basket : BaseEntity, IAggregateRoot
         _items.RemoveAll(i => i.Quantity == 0);
     }
 
+    public void RemoveItemsForCatalogItems(IEnumerable<int> catalogItemIds)
+    {
+        var idsToRemove = catalogItemIds.ToHashSet();
+        _items.RemoveAll(i => idsToRemove.Contains(i.CatalogItemId));
+    }
+
     public void SetNewBuyerId(string buyerId)
     {
         BuyerId = buyerId;
