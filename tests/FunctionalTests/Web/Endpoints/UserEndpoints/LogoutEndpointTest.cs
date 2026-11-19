@@ -6,8 +6,8 @@ using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Endpoints.UserEndpoints;
 
-[Collection("Sequential")]
-public class LogoutEndpointTest(TestApplication factory) : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class LogoutEndpointTest(TestApplication factory)
 {
     private readonly TestApplication _factory = factory;
 

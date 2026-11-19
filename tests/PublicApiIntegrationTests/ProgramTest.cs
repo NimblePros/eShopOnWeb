@@ -8,22 +8,12 @@ namespace PublicApiIntegrationTests;
 [TestClass]
 public class ProgramTest
 {
-    private static WebApplicationFactory<Program> _application = new();
+    // One host for the whole assembly; it starts on first use. It is deliberately not disposed:
+    // stopping it waits on the Seq exporters' final flush, which keeps retrying for ~10s when no
+    // Seq server is running, and the test process exits right after the run anyway.
+    private static readonly WebApplicationFactory<Program> s_application = new();
 
-    public static HttpClient NewClient
-    {
-        get
-        {
-            return _application.CreateClient();
-        }
-    }
+    public static HttpClient NewClient => s_application.CreateClient();
 
-    public static IServiceProvider Services => _application.Services;
-
-    [AssemblyInitialize]
-    public static void AssemblyInitialize(TestContext _)
-    {
-        _application = new WebApplicationFactory<Program>();
-
-    }
+    public static IServiceProvider Services => s_application.Services;
 }

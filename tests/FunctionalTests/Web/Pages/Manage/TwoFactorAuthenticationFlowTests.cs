@@ -11,8 +11,8 @@ namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Manage;
 /// Walks the authenticator / recovery code / disable pages end to end with a throwaway user, so
 /// enabling 2FA doesn't affect the demo user that other tests sign in as.
 /// </summary>
-[Collection("Sequential")]
-public class TwoFactorAuthenticationFlowTests(TestApplication factory) : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class TwoFactorAuthenticationFlowTests(TestApplication factory)
 {
     [Fact]
     public async Task EnablesAuthenticatorThenRegeneratesRecoveryCodesThenDisables2fa()

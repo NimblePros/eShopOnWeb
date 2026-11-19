@@ -1,47 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using System.Net;
 using Xunit;
+using static Microsoft.eShopWeb.FunctionalTests.Web.WebPageHelpers;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Basket;
 
-[Collection("Sequential")]
-public class BasketPageCheckout : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class BasketPageCheckout(TestApplication factory)
 {
-    public BasketPageCheckout(TestApplication factory)
-    {
-        Client = factory.CreateClient(allowAutoRedirect: true);
-    }
-
-    public HttpClient Client { get; }
-
     [Fact]
     public async Task RedirectsToLoginIfNotAuthenticated()
     {
+        var client = factory.CreateClient(allowAutoRedirect: true);
+        await AddItemToBasketAsync(client);
 
-        // Load Home Page
-        var response = await Client.GetAsync("/", TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
-        var stringResponse1 = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var response = await client.PostAsync("/Basket/Checkout", new FormUrlEncodedContent([]),
+            TestContext.Current.CancellationToken);
 
-        string token = WebPageHelpers.GetRequestVerificationToken(stringResponse1);
+        Assert.Contains("/Identity/Account/Login", response.RequestMessage!.RequestUri!.ToString());
+    }
 
-        // Add Item to Cart
-        var keyValues = new List<KeyValuePair<string, string>>
-        {
-            new("id", "2"),
-            new("name", "shirt"),
-            new("price", "19.49"),
-            new("__RequestVerificationToken", token)
-        };
-        var formContent = new FormUrlEncodedContent(keyValues);
-        var postResponse = await Client.PostAsync("/basket/index", formContent, TestContext.Current.CancellationToken);
-        postResponse.EnsureSuccessStatusCode();
-        var stringResponse = await postResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        Assert.Contains(".NET Black &amp; White Mug", stringResponse);
+    [Fact]
+    public async Task GetRedirectsToLoginIfNotAuthenticated()
+    {
+        var client = factory.CreateClient(allowAutoRedirect: false);
 
-        keyValues.Clear();
+        var response = await client.GetAsync("/Basket/Checkout", TestContext.Current.CancellationToken);
 
-        formContent = new FormUrlEncodedContent(keyValues);
-        var postResponse2 = await Client.PostAsync("/Basket/Checkout", formContent, TestContext.Current.CancellationToken);
-        Assert.Contains("/Identity/Account/Login", postResponse2!.RequestMessage!.RequestUri!.ToString()!);
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Contains("/Account/Login", response.Headers.Location!.OriginalString);
     }
 }
