@@ -199,6 +199,40 @@ public class UpdateUserEndpointTest
     }
 
     [TestMethod]
+    public async Task KeepsSecurityStampGivenNoChangesAndEmptyEmail()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateUserAsync(client); // created without an email
+        var user = await GetUserByIdAsync(client, userId);
+        user.Email = ""; // what an untouched form field posts
+        var stampBefore = await GetSecurityStampAsync(userId);
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = user }));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual(stampBefore, await GetSecurityStampAsync(userId));
+    }
+
+    [TestMethod]
+    public async Task StoresClearedEmailAsNull()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var userId = await CreateConfirmedUserAsync(client);
+        var user = await GetUserByIdAsync(client, userId);
+        user.Email = "";
+
+        var response = await client.PutAsync("api/users", JsonContent.Create(new UpdateUserRequest { User = user }));
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        using var scope = ProgramTest.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var stored = await userManager.FindByIdAsync(userId);
+        Assert.IsNull(stored!.Email);
+        Assert.IsNull(stored.NormalizedEmail);
+        Assert.IsFalse(stored.EmailConfirmed);
+    }
+
+    [TestMethod]
     public async Task ReturnsBadRequestGivenDuplicateUserName()
     {
         var client = HttpClientHelper.GetAdminClient();

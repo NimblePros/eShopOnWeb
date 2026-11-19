@@ -47,8 +47,8 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager, IHostE
         var newUser = new ApplicationUser
         {
             UserName = request.User.UserName,
-            Email = request.User.Email,
-            // Forms post "" for an empty field; store it as no phone number.
+            // Forms post "" for an empty field; store it as no email or phone number.
+            Email = string.IsNullOrEmpty(request.User.Email) ? null : request.User.Email,
             PhoneNumber = string.IsNullOrEmpty(request.User.PhoneNumber) ? null : request.User.PhoneNumber,
             LockoutEnd = request.User.LockoutEnd,
         };
