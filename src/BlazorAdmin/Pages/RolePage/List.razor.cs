@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using BlazorAdmin.Helpers;
 using BlazorAdmin.Interfaces;
 using BlazorAdmin.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace BlazorAdmin.Pages.RolePage;
 
@@ -12,7 +11,7 @@ public partial class List : BlazorComponent
     [Microsoft.AspNetCore.Components.Inject]
     public IRoleManagementService RoleManagementService { get; set; }
 
-    private List<IdentityRole> _roles = [];
+    private List<Role> _roles = [];
     private Create CreateComponent { get; set; }
     private Delete DeleteComponent { get; set; }
     private Edit EditComponent { get; set; }

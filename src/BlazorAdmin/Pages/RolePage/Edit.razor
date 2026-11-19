@@ -7,7 +7,6 @@
 @namespace BlazorAdmin.Pages.RolePage
 @using BlazorAdmin.Interfaces
 @using BlazorAdmin.Models
-@using Microsoft.AspNetCore.Identity
 
 <div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
     <div class="modal-dialog" role="document">
@@ -71,7 +70,7 @@
     private string _modalDisplay = "none;";
     private string _modalClass = "";
     private bool _showEditModal = false;
-    private IdentityRole _item = new IdentityRole();
+    private Role _item = new Role();
 
     private async Task SaveClick()
     {

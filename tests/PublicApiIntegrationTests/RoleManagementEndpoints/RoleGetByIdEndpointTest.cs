@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
@@ -32,6 +33,9 @@ public class RoleGetByIdEndpointTest
         Assert.IsNotNull(adminModel);
         Assert.IsNotNull(adminModel.Role);
         Assert.AreEqual(Constants.Roles.ADMINISTRATORS, adminModel.Role.Name);
+
+        using var json = JsonDocument.Parse(adminRoleResponse);
+        RoleJsonAssert.HasOnlyRoleDtoFields(json.RootElement.GetProperty("role"));
     }
 
     [TestMethod]

@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using BlazorAdmin.Interfaces;
 using BlazorAdmin.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace BlazorAdmin.Services;
@@ -21,9 +20,9 @@ public class RoleManagementService(HttpService httpService, ILogger<RoleManageme
         return response;
     }
 
-    public async Task<IdentityRole> Edit(IdentityRole role)
+    public async Task<UpdateRoleResponse> Edit(Role role)
     {
-        return await httpService.HttpPut<IdentityRole>($"roles", role);
+        return await httpService.HttpPut<UpdateRoleResponse>($"roles", role);
     }
 
     public async Task Delete(string id)

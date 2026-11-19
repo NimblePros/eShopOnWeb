@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
@@ -30,7 +31,7 @@ public class RoleGetByIdEndpoint(RoleManager<IdentityRole> roleManager) : Endpoi
             return TypedResults.NotFound();
         }
 
-        response.Role = role;
+        response.Role = role.ToRoleDto();
         return TypedResults.Ok(response);
     }
 }

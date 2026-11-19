@@ -1,6 +1,5 @@
 ﻿@using BlazorAdmin.Interfaces
 @using BlazorAdmin.Models
-@using Microsoft.AspNetCore.Identity
 @inject ILogger<Create> Logger
 @inject IJSRuntime JSRuntime
 @inject IUserManagementService UserManagementService
@@ -128,7 +127,7 @@
     private CreateUserRequest _item;
 
     private Dictionary<string, bool> _selectedRoles = new();
-    private List<IdentityRole>  _roles;
+    private List<Role> _roles;
 
     private async Task CreateClick()
     {

@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
@@ -11,5 +10,5 @@ public class CreateRoleResponse : BaseResponse
     }
     public CreateRoleResponse() { }
 
-    public IdentityRole Role { get; set; }
+    public RoleDto Role { get; set; }
 }
