@@ -52,8 +52,10 @@ public class CatalogContextSeed
             retryForAvailability++;
 
             logger.LogError(ex.Message);
+
+            // Discard entities left tracked by the failed attempt so the retry doesn't insert duplicates.
+            catalogContext.ChangeTracker.Clear();
             await SeedAsync(catalogContext, logger, retryForAvailability);
-            throw;
         }
     }
 
