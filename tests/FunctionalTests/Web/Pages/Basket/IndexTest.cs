@@ -243,6 +243,27 @@ public class IndexTest(TestApplication factory)
     }
 
     [Fact]
+    public async Task OnPostUpdateShowsSummaryErrorAndSavesNothingGivenRepeatedLineIdWithValidQuantities()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var basketPage = await AddItemToBasketAsync(_client);
+        var itemId = GetId(basketPage);
+
+        var updateResponse = await PostFormAsync(_client, "/basket/update", basketPage,
+            new("Items[0].Id", itemId),
+            new("Items[0].Quantity", "2"),
+            new("Items[1].Id", itemId),
+            new("Items[1].Quantity", "3"));
+
+        updateResponse.EnsureSuccessStatusCode();
+        var updatedPage = await updateResponse.Content.ReadAsStringAsync(ct);
+        Assert.Contains($"<li>{IndexModel.UpdateFailedMessage}</li>", updatedPage);
+        Assert.Contains("<title>Error: Basket - ", updatedPage);
+        Assert.Equal("1", GetFirstBasketItemQuantity(updatedPage));
+        Assert.Equal("1", GetFirstBasketItemQuantity(await _client.GetStringAsync("/basket", ct)));
+    }
+
+    [Fact]
     public async Task OnPostUpdateShowsSummaryErrorGivenInvalidLineId()
     {
         var basketPage = await AddItemToBasketAsync(_client);

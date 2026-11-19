@@ -97,6 +97,15 @@ public partial class IndexModel : PageModel
             return;
         }
 
+        // The rendered form never repeats a line id, so a repeat means a tampered post. Reject it
+        // rather than guess which of the quantities the shopper meant.
+        if (items.GroupBy(item => item.Id).Any(lines => lines.Count() > 1))
+        {
+            BasketModel = basketView;
+            ModelState.AddModelError(string.Empty, UpdateFailedMessage);
+            return;
+        }
+
         var updateModel = items.ToDictionary(b => b.Id.ToString(), b => b.Quantity);
         var basket = await _basketService.SetQuantities(basketView.Id, updateModel);
         BasketModel = await _basketViewModelService.Map(basket);
