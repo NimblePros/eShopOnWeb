@@ -102,6 +102,28 @@ public class TransferBasket
     }
 
     [Fact]
+    public async Task ThrowsAndDoesNotSaveIfMergedQuantityWouldOverflow()
+    {
+        var anonymousBasket = new Basket(_existentAnonymousBasketBuyerId);
+        anonymousBasket.AddItem(1, 10, int.MaxValue);
+        var userBasket = new Basket(_existentUserBasketBuyerId);
+        userBasket.AddItem(1, 10, 1);
+
+        var results = new Results<Basket>(anonymousBasket)
+                        .Then(userBasket);
+
+        _mockBasketRepo.FirstOrDefaultAsync(Arg.Any<BasketWithItemsSpecification>(), Arg.Any<CancellationToken>()).Returns(x => results.Next());
+        var basketService = new BasketService(_mockBasketRepo, _mockLogger);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => basketService.TransferBasketAsync(_existentAnonymousBasketBuyerId, _existentUserBasketBuyerId));
+
+        Assert.Equal(1, userBasket.Items.Single().Quantity);
+        await _mockBasketRepo.DidNotReceive().UpdateAsync(Arg.Any<Basket>(), Arg.Any<CancellationToken>());
+        await _mockBasketRepo.DidNotReceive().DeleteAsync(Arg.Any<Basket>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task RemovesAnonymousBasketAfterUpdatingUserBasket()
     {
         var anonymousBasket = new Basket(_existentAnonymousBasketBuyerId);

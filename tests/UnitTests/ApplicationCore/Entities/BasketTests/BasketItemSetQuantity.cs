@@ -53,4 +53,23 @@ public class BasketItemSetQuantity
         Assert.Throws<ArgumentOutOfRangeException>(() => item.AddQuantity(-1));
         Assert.Equal(2, item.Quantity);
     }
+
+    [Fact]
+    public void AddQuantityThrowsGivenResultThatWouldOverflow()
+    {
+        var item = CreateItem(quantity: 1);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => item.AddQuantity(int.MaxValue));
+        Assert.Equal(1, item.Quantity);
+    }
+
+    [Fact]
+    public void AddQuantityAllowsResultOfExactlyIntMaxValue()
+    {
+        var item = CreateItem(quantity: 1);
+
+        item.AddQuantity(int.MaxValue - 1);
+
+        Assert.Equal(int.MaxValue, item.Quantity);
+    }
 }
