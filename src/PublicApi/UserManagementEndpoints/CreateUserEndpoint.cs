@@ -8,7 +8,6 @@ using Microsoft.eShopWeb.ApplicationCore.Constants;
 using Microsoft.eShopWeb.ApplicationCore.Exceptions;
 using Microsoft.eShopWeb.Infrastructure;
 using Microsoft.eShopWeb.Infrastructure.Identity;
-using Microsoft.eShopWeb.PublicApi.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.eShopWeb.PublicApi.UserManagementEndpoints;
@@ -21,9 +20,12 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager, IHostE
         Roles(BlazorShared.Authorization.Constants.Roles.ADMINISTRATORS);
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Description(d =>
-            d.Produces<CreateUserResponse>()
-            .WithTags("UserManagementEndpoints")
-        );
+        {
+            d.Produces<CreateUserResponse>(StatusCodes.Status201Created);
+            d.ProducesProblemFE(StatusCodes.Status400BadRequest);
+            d.Produces(StatusCodes.Status409Conflict);
+            d.WithTags("UserManagementEndpoints");
+        });
     }
 
     public override async Task HandleAsync(CreateUserRequest request, CancellationToken ct)
@@ -40,20 +42,33 @@ public class CreateUserEndpoint(UserManager<ApplicationUser> userManager, IHostE
             throw new DuplicateException($"User already exists.");
         }
 
-        ApplicationUser newUser = new ApplicationUser();
-        newUser.FromUserDto(request.User, copyId: false);
+        // Only these fields are client settable. EmailConfirmed, PhoneNumberConfirmed and
+        // TwoFactorEnabled are ignored: they are set by the confirmation and 2FA flows.
+        var newUser = new ApplicationUser
+        {
+            UserName = request.User.UserName,
+            Email = request.User.Email,
+            // Forms post "" for an empty field; store it as no phone number.
+            PhoneNumber = string.IsNullOrEmpty(request.User.PhoneNumber) ? null : request.User.PhoneNumber,
+            LockoutEnd = request.User.LockoutEnd,
+        };
 
         var createUser = await userManager.CreateAsync(newUser);
-        if (createUser.Succeeded)
+        if (!createUser.Succeeded)
         {
-            var createdUser = await userManager.FindByNameAsync(request.User.UserName);
-            // Outside local development, users are created without a password and must set one themselves
-            if (environment.IsLocalDevelopment())
+            foreach (var error in createUser.Errors)
             {
-                await userManager.AddPasswordAsync(createdUser!, AuthorizationConstants.DEFAULT_PASSWORD);
+                AddError(error.Description, error.Code);
             }
-            response.UserId = createdUser!.Id;
-            await Send.CreatedAtAsync<UserGetByIdEndpoint>(new { UserId = createdUser!.Id }, response, cancellation: ct);
+            ThrowIfAnyErrors();
         }
+
+        // Outside local development, users are created without a password and must set one themselves
+        if (environment.IsLocalDevelopment())
+        {
+            await userManager.AddPasswordAsync(newUser, AuthorizationConstants.DEFAULT_PASSWORD);
+        }
+        response.UserId = newUser.Id;
+        await Send.CreatedAtAsync<UserGetByIdEndpoint>(new { UserId = newUser.Id }, response, cancellation: ct);
     }
 }
