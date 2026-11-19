@@ -111,6 +111,12 @@ public static class WebPageHelpers
     public static string GetFirstBasketItemQuantity(string basketPage) =>
         RegexSearch(@"name=""Items\[0\].Quantity"" value=""(\d+)""", basketPage);
 
+    /// <summary>
+    /// Reads the item count shown in the header's basket badge.
+    /// </summary>
+    public static string GetBasketBadgeCount(string page) =>
+        RegexSearch(@"class=""esh-basketstatus-badge"">\s*(\d+)\s*</div>", page);
+
     public static string GetId(string input)
     {
         string regexpression = @"name=""Items\[0\].Id"" value=""(\d+)""";

@@ -34,6 +34,24 @@ public class DeletedCatalogItemTest(TestApplication factory)
     }
 
     [Fact]
+    public async Task BasketBadgeCountExcludesLineGivenItsCatalogItemWasDeleted()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = factory.CreateClient(allowAutoRedirect: true);
+        var (catalogItemId, _) = await AddCatalogItemAsync();
+        await AddItemToBasketAsync(client, catalogItemId);
+        await AddItemToBasketAsync(client, catalogItemId);
+        await AddItemToBasketAsync(client);
+        Assert.Equal("3", GetBasketBadgeCount(await client.GetStringAsync("/basket", ct)));
+        await DeleteCatalogItemAsync(catalogItemId);
+
+        var basketPage = await client.GetStringAsync("/basket", ct);
+
+        Assert.Equal("1", GetBasketBadgeCount(basketPage));
+        Assert.Equal("1", GetFirstBasketItemQuantity(basketPage));
+    }
+
+    [Fact]
     public async Task CheckoutRemovesDeletedItemAndRedirectsToBasketWithoutPlacingOrder()
     {
         var ct = TestContext.Current.CancellationToken;
