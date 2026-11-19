@@ -63,6 +63,17 @@ public class BasketService : IBasketService
         return basket;
     }
 
+    public async Task<Result<Basket>> RemoveItemsForCatalogItemsAsync(int basketId, IEnumerable<int> catalogItemIds)
+    {
+        var basketSpec = new BasketWithItemsSpecification(basketId);
+        var basket = await _basketRepository.FirstOrDefaultAsync(basketSpec);
+        if (basket == null) return Result<Basket>.NotFound();
+
+        basket.RemoveItemsForCatalogItems(catalogItemIds);
+        await _basketRepository.UpdateAsync(basket);
+        return basket;
+    }
+
     public async Task TransferBasketAsync(string anonymousId, string userName)
     {
         var anonymousBasketSpec = new BasketWithItemsSpecification(anonymousId);
