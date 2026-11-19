@@ -19,7 +19,9 @@ public class BasketItem : BaseEntity
 
     public void AddQuantity(int quantity)
     {
-        Guard.Against.OutOfRange(quantity, nameof(quantity), 0, int.MaxValue);
+        // Quantity is never negative, so int.MaxValue - Quantity can't overflow.
+        // Bounding the addition this way keeps the resulting Quantity <= int.MaxValue.
+        Guard.Against.OutOfRange(quantity, nameof(quantity), 0, int.MaxValue - Quantity);
 
         Quantity += quantity;
     }
