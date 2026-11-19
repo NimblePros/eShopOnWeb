@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -142,6 +143,24 @@ public class CreateUserEndpointTest
     }
 
     [TestMethod]
+    public async Task StoresEmptyEmailAsNull()
+    {
+        var client = HttpClientHelper.GetAdminClient();
+        var request = new CreateUserRequest
+        {
+            User = new UserDto { UserName = UniqueUserName(), Email = "" } // what an untouched form field posts
+        };
+
+        var userId = await CreateUserAsync(client, request);
+
+        using var scope = ProgramTest.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var stored = await userManager.FindByIdAsync(userId);
+        Assert.IsNull(stored!.Email);
+        Assert.IsNull(stored.NormalizedEmail);
+    }
+
+    [TestMethod]
     public async Task ReturnsBadRequestGivenUserNameIdentityRejects()
     {
         var client = HttpClientHelper.GetAdminClient();
@@ -151,6 +170,10 @@ public class CreateUserEndpointTest
         var response = await client.PostAsync("api/users", GetValidNewItemJson(userName));
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        // BlazorAdmin shows the first of these errors, so the Identity error must be in them.
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var errors = json.RootElement.GetProperty("errors").EnumerateObject().SelectMany(e => e.Value.EnumerateArray()).Select(e => e.GetString());
+        Assert.IsTrue(errors.Any(e => e!.Contains("invalid", StringComparison.OrdinalIgnoreCase)), string.Join("; ", errors));
         using var scope = ProgramTest.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         Assert.IsNull(await userManager.FindByNameAsync(userName));
