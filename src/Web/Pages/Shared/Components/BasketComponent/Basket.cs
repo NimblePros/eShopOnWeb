@@ -36,24 +36,10 @@ public class Basket : ViewComponent
             return await _basketService.CountTotalBasketItems(User.Identity.Name);
         }
 
-        string? anonymousId = GetAnnonymousIdFromCookie();
+        string? anonymousId = BasketCookie.GetAnonymousId(Request);
         if (anonymousId == null)
             return 0;
 
         return await _basketService.CountTotalBasketItems(anonymousId);
-    }
-
-    private string? GetAnnonymousIdFromCookie()
-    {
-        if (Request.Cookies.ContainsKey(Constants.BASKET_COOKIENAME))
-        {
-            var id = Request.Cookies[Constants.BASKET_COOKIENAME];
-
-            if (Guid.TryParse(id, out var _))
-            {
-                return id;
-            }
-        }
-        return null;
     }
 }
