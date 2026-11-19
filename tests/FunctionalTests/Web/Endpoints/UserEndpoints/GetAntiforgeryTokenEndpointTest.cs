@@ -4,8 +4,8 @@ using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Endpoints.UserEndpoints;
 
-[Collection("Sequential")]
-public class GetAntiforgeryTokenEndpointTest(TestApplication factory) : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class GetAntiforgeryTokenEndpointTest(TestApplication factory)
 {
     private readonly TestApplication _factory = factory;
 

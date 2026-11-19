@@ -63,6 +63,17 @@ public class BasketService : IBasketService
         return basket;
     }
 
+    public async Task<Result<Basket>> RemoveItemsForCatalogItemsAsync(int basketId, IEnumerable<int> catalogItemIds)
+    {
+        var basketSpec = new BasketWithItemsSpecification(basketId);
+        var basket = await _basketRepository.FirstOrDefaultAsync(basketSpec);
+        if (basket == null) return Result<Basket>.NotFound();
+
+        basket.RemoveItemsForCatalogItems(catalogItemIds);
+        await _basketRepository.UpdateAsync(basket);
+        return basket;
+    }
+
     public async Task TransferBasketAsync(string anonymousId, string userName)
     {
         var anonymousBasketSpec = new BasketWithItemsSpecification(anonymousId);
@@ -77,7 +88,8 @@ public class BasketService : IBasketService
         }
         foreach (var item in anonymousBasket.Items)
         {
-            userBasket.AddItem(item.CatalogItemId, item.UnitPrice, item.Quantity);
+            // Clamp rather than throw: an over-full merged line must not fail the user's login.
+            userBasket.MergeItem(item.CatalogItemId, item.UnitPrice, item.Quantity);
         }
         await _basketRepository.UpdateAsync(userBasket);
         await _basketRepository.DeleteAsync(anonymousBasket);

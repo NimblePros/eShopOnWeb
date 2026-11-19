@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
@@ -14,5 +13,5 @@ public class GetByIdRoleResponse : BaseResponse
     {
     }
 
-    public IdentityRole Role { get; set; }
+    public RoleDto Role { get; set; }
 }

@@ -49,14 +49,15 @@ public class UpdateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
 
         var changes = request.User;
         // Forms post "" for an empty field; treat it as null so an untouched field isn't a change.
+        var email = string.IsNullOrEmpty(changes.Email) ? null : changes.Email;
         var phoneNumber = string.IsNullOrEmpty(changes.PhoneNumber) ? null : changes.PhoneNumber;
-        var identityChanged = existingUser.UserName != changes.UserName || existingUser.Email != changes.Email;
+        var identityChanged = existingUser.UserName != changes.UserName || existingUser.Email != email;
         var phoneChanged = existingUser.PhoneNumber != phoneNumber;
         var lockoutChanged = existingUser.LockoutEnd != changes.LockoutEnd;
 
         // Only these fields are client editable. EmailConfirmed and PhoneNumberConfirmed are
         // ignored: they are set by the confirmation flows, never by the request.
-        if (existingUser.Email != changes.Email)
+        if (existingUser.Email != email)
         {
             existingUser.EmailConfirmed = false;
         }
@@ -65,7 +66,7 @@ public class UpdateUserEndpoint(UserManager<ApplicationUser> userManager) : Endp
             existingUser.PhoneNumberConfirmed = false;
         }
         existingUser.UserName = changes.UserName;
-        existingUser.Email = changes.Email;
+        existingUser.Email = email;
         existingUser.PhoneNumber = phoneNumber;
         existingUser.LockoutEnd = changes.LockoutEnd;
 

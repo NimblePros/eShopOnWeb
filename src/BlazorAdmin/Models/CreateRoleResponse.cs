@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace BlazorAdmin.Models;
+﻿namespace BlazorAdmin.Models;
 
 public class CreateRoleResponse
 {
-    public IdentityRole Role { get; set; }
+    public Role Role { get; set; }
 }

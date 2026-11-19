@@ -33,6 +33,13 @@ public class OrderBuilder
         return _order;
     }
 
+    public Order WithBuyer(string buyerId)
+    {
+        var orderItem = new OrderItem(CreateCatalogItemOrdered(), TestUnitPrice, TestUnits);
+        _order = new Order(buyerId, new AddressBuilder().WithDefaultValues(), [orderItem]);
+        return _order;
+    }
+
     public Order WithNoItems()
     {
         _order = new Order(TestBuyerId, new AddressBuilder().WithDefaultValues(), new List<OrderItem>());

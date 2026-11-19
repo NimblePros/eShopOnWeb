@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.eShopWeb.ApplicationCore.Exceptions;
+using Microsoft.eShopWeb.PublicApi.Extensions;
 using AuthRoles = BlazorShared.Authorization.Constants.Roles;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
@@ -65,7 +66,7 @@ public class UpdateRoleEndpoint(RoleManager<IdentityRole> roleManager) : Endpoin
             ThrowIfAnyErrors();
         }
 
-        response.Role = (await roleManager.FindByIdAsync(existingRole.Id))!;
+        response.Role = (await roleManager.FindByIdAsync(existingRole.Id))!.ToRoleDto();
         return TypedResults.Ok(response);
     }
 }

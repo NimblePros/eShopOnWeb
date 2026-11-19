@@ -1,7 +1,9 @@
 ﻿@page "{handler?}"
 @model IndexModel
 @{
-    ViewData["Title"] = "Basket";
+    // Lead the page title with the failure so screen readers announce it after a rejected update.
+    ViewData["Title"] = ViewData.ModelState.IsValid ? "Basket" : "Error: Basket";
+    var focusedFirstError = false;
 }
 <section class="esh-catalog-hero">
     <div class="container">
@@ -10,6 +12,11 @@
 </section>
 
 <div class="container">
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert alert-warning" role="alert">@Model.StatusMessage</div>
+    }
 
     @if (Model.BasketModel.Items.Any())
     {
@@ -23,10 +30,18 @@
                 <section class="esh-basket-title col-xs-2">Cost</section>
             </article>
             <div class="esh-catalog-items row">
-                <div asp-validation-summary="All" class="text-danger"></div>
+                @* Field errors render next to their inputs; the summary lists one error per invalid line, by product. *@
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                 @for (int i = 0; i < Model.BasketModel.Items.Count; i++)
                 {
                     var item = Model.BasketModel.Items[i];
+                    var quantityId = $"basket-quantity-{item.Id}";
+                    var quantityErrorId = $"{quantityId}-error";
+                    var quantityError = Model.QuantityErrors.GetValueOrDefault(item.Id);
+                    // Move focus to the first invalid line, so its label, state, and message are announced.
+                    var autofocus = quantityError != null && !focusedFirstError;
+                    focusedFirstError |= autofocus;
+                    var quantityValue = Model.PostedQuantities.TryGetValue(item.Id, out var posted) ? posted : item.Quantity.ToString();
                     <article class="esh-basket-items row">
                         <div>
                             <section class="esh-basket-item esh-basket-item--middle col-lg-3 hidden-lg-down">
@@ -36,7 +51,15 @@
                             <section class="esh-basket-item esh-basket-item--middle col-xs-2">$ @item.UnitPrice.ToString("N2")</section>
                             <section class="esh-basket-item esh-basket-item--middle col-xs-2">
                                 <input type="hidden" name="@("Items[" + i + "].Id")" value="@item.Id" />
-                                <input type="number" class="esh-basket-input" min="0" name="@("Items[" + i + "].Quantity")" value="@item.Quantity" />
+                                <label for="@quantityId" class="sr-only">Quantity for @item.ProductName</label>
+                                <input type="number" id="@quantityId" class="esh-basket-input" min="0" max="@Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate.BasketItem.MaxQuantity"
+                                       aria-invalid="@(quantityError != null ? "true" : null)" aria-describedby="@(quantityError != null ? quantityErrorId : null)"
+                                       autofocus="@(autofocus ? "autofocus" : null)"
+                                       name="@("Items[" + i + "].Quantity")" value="@quantityValue" />
+                                @if (quantityError != null)
+                                {
+                                    <span id="@quantityErrorId" class="text-danger">@quantityError</span>
+                                }
                             </section>
                             <section class="esh-basket-item esh-basket-item--middle esh-basket-item--mark col-xs-2">$ @Math.Round(item.Quantity * item.UnitPrice, 2).ToString("N2")</section>
                         </div>

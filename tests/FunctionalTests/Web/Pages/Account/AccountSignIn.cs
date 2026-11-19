@@ -1,18 +1,15 @@
 ﻿using System.Net;
-using System.Text.RegularExpressions;
 using Xunit;
+using static Microsoft.eShopWeb.FunctionalTests.Web.WebPageHelpers;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Account;
 
-[Collection("Sequential")]
-public class AccountSignIn : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class AccountSignIn(TestApplication factory)
 {
-    public AccountSignIn(TestApplication factory)
-    {
-        Client = factory.CreateClient(allowAutoRedirect: false);
-    }
+    private const string AuthCookieName = "EshopIdentifier";
 
-    public HttpClient Client { get; }
+    public HttpClient Client { get; } = factory.CreateClient(allowAutoRedirect: false);
 
     [Fact]
     public async Task ReturnsSignInScreenOnGet()
@@ -21,21 +18,16 @@ public class AccountSignIn : IClassFixture<TestApplication>
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
-        Assert.Contains("demouser@eshop.test", stringResponse);
+        Assert.Contains(DemoUserEmail, stringResponse);
     }
 
     [Fact]
-    public void RegexMatchesValidRequestVerificationToken()
+    public void GetRequestVerificationTokenExtractsTokenFromHiddenInput()
     {
-        // TODO: Move to a unit test
-        // TODO: Move regex to a constant in test project
-        var input = @"<input name=""__RequestVerificationToken"" type=""hidden"" value=""CfDJ8Obhlq65OzlDkoBvsSX0tgxFUkIZ_qDDSt49D_StnYwphIyXO4zxfjopCWsygfOkngsL6P0tPmS2HTB1oYW-p_JzE0_MCFb7tF9Ol_qoOg_IC_yTjBNChF0qRgoZPmKYOIJigg7e2rsBsmMZDTdbnGo"" /><input name=""RememberMe"" type=""hidden"" value=""false"" /></form>";
-        string regexpression = @"name=""__RequestVerificationToken"" type=""hidden"" value=""([-A-Za-z0-9+=/\\_]+?)""";
-        var regex = new Regex(regexpression);
-        var match = regex.Match(input);
-        var group = match.Groups.Values.LastOrDefault();
-        Assert.NotNull(group);
-        Assert.True(group.Value.Length > 50);
+        const string token = "CfDJ8Obhlq65OzlDkoBvsSX0tgxFUkIZ_qDDSt49D_StnYwphIyXO4zxfjopCWsygfOkngsL6P0tPmS2HTB1oYW-p_JzE0_MCFb7tF9Ol_qoOg_IC_yTjBNChF0qRgoZPmKYOIJigg7e2rsBsmMZDTdbnGo";
+        var input = $@"<input name=""__RequestVerificationToken"" type=""hidden"" value=""{token}"" /><input name=""RememberMe"" type=""hidden"" value=""false"" /></form>";
+
+        Assert.Equal(token, GetRequestVerificationToken(input));
     }
 
     [Fact]
@@ -45,41 +37,59 @@ public class AccountSignIn : IClassFixture<TestApplication>
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
-        string token = WebPageHelpers.GetRequestVerificationToken(stringResponse);
+        string token = GetRequestVerificationToken(stringResponse);
         Assert.True(token.Length > 50);
     }
 
     [Fact]
     public async Task ReturnsSuccessfulSignInOnPostWithValidCredentials()
     {
-        var getResponse = await Client.GetAsync("/identity/account/login", TestContext.Current.CancellationToken);
-        getResponse.EnsureSuccessStatusCode();
-        var stringResponse1 = await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var postResponse = await LoginAsync(Client);
 
-        var keyValues = new List<KeyValuePair<string, string>>
-        {
-            new("Email", "demouser@eshop.test"),
-            new("Password", "Pass@word1"),
-            new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringResponse1))
-        };
-        var formContent = new FormUrlEncodedContent(keyValues);
-
-        var postResponse = await Client.PostAsync("/identity/account/login", formContent, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Redirect, postResponse.StatusCode);
-        Assert.Equal(new System.Uri("/", UriKind.Relative), postResponse.Headers.Location);
+        Assert.Equal(new Uri("/", UriKind.Relative), postResponse.Headers.Location);
+    }
+
+    [Theory]
+    [InlineData(DemoUserEmail, "not-the-password")]
+    [InlineData("nobody@eshop.test", DemoUserPassword)]
+    public async Task ShowsErrorWithoutSigningInGivenInvalidCredentials(string email, string password)
+    {
+        var postResponse = await LoginAsync(Client, email, password);
+
+        Assert.Equal(HttpStatusCode.OK, postResponse.StatusCode);
+        Assert.Contains("Invalid login attempt.", await postResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.False(IssuesAuthCookie(postResponse));
+    }
+
+    [Fact]
+    public async Task RejectsPostWithoutAntiforgeryToken()
+    {
+        var response = await Client.PostAsync("/identity/account/login", new FormUrlEncodedContent(
+        [
+            new("Email", DemoUserEmail),
+            new("Password", DemoUserPassword)
+        ]), TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.False(IssuesAuthCookie(response));
     }
 
     [Fact]
     public async Task IssuesHttpOnlySecureStrictAuthCookieOnSignIn()
     {
-        var postResponse = await WebPageHelpers.LoginAsync(Client);
+        var postResponse = await LoginAsync(Client);
         Assert.Equal(HttpStatusCode.Redirect, postResponse.StatusCode);
 
         Assert.True(postResponse.Headers.TryGetValues("Set-Cookie", out var setCookies));
-        var authCookie = Assert.Single(setCookies, c => c.StartsWith("EshopIdentifier=", StringComparison.Ordinal));
+        var authCookie = Assert.Single(setCookies, c => c.StartsWith($"{AuthCookieName}=", StringComparison.Ordinal));
         var attributes = authCookie.Split(';').Skip(1).Select(a => a.Trim().ToLowerInvariant()).ToList();
         Assert.Contains("httponly", attributes);
         Assert.Contains("secure", attributes);
         Assert.Contains("samesite=strict", attributes);
     }
+
+    private static bool IssuesAuthCookie(HttpResponseMessage response) =>
+        response.Headers.TryGetValues("Set-Cookie", out var setCookies)
+        && setCookies.Any(c => c.StartsWith($"{AuthCookieName}=", StringComparison.Ordinal));
 }

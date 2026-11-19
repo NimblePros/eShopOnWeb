@@ -1,65 +1,64 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
-using Xunit;
+﻿using Xunit;
+using static Microsoft.eShopWeb.FunctionalTests.Web.WebPageHelpers;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Basket;
 
-[Collection("Sequential")]
-public class CheckoutTest : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class CheckoutTest(TestApplication factory)
 {
-    public CheckoutTest(TestApplication factory)
-    {
-        Client = factory.CreateClient(allowAutoRedirect: true);
-    }
-
-    public HttpClient Client { get; }
-
     [Fact]
     public async Task SucessfullyPay()
     {
+        var ct = TestContext.Current.CancellationToken;
+        var client = factory.CreateClient(allowAutoRedirect: true);
+        await AddItemToBasketAsync(client);
 
-        // Load Home Page
-        var response = await Client.GetAsync("/", TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
-        var stringResponse = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        // Signing in transfers the anonymous basket to the user, then returns to checkout.
+        var loginPage = await client.GetStringAsync("/Identity/Account/Login", ct);
+        var checkoutPageResponse = await PostFormAsync(client, "/Identity/Account/Login?ReturnUrl=%2FBasket%2FCheckout", loginPage,
+            new("email", DemoUserEmail),
+            new("password", DemoUserPassword));
+        var checkoutPage = await checkoutPageResponse.Content.ReadAsStringAsync(ct);
+        Assert.Contains(MugProductNameHtml, checkoutPage);
 
-        // Add Item to Cart
-        var keyValues = new List<KeyValuePair<string, string>>
-        {
-           new("id", "2"),
-           new("name", "shirt"),
-           new("price", "19.49"),
-           new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(stringResponse))
-        };
-        var formContent = new FormUrlEncodedContent(keyValues);
-        var postResponse = await Client.PostAsync("/basket/index", formContent, TestContext.Current.CancellationToken);
-        postResponse.EnsureSuccessStatusCode();
-        var stringPostResponse = await postResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        Assert.Contains(".NET Black &amp; White Mug", stringPostResponse);
-
-        //Load login page
-        var loginResponse = await Client.GetAsync("/Identity/Account/Login", TestContext.Current.CancellationToken);
-        var longinKeyValues = new List<KeyValuePair<string, string>>
-        {
-           new("email", "demouser@eshop.test"),
-           new("password", "Pass@word1"),
-           new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(await loginResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)))
-        };
-        var loginFormContent = new FormUrlEncodedContent(longinKeyValues);
-        var loginPostResponse = await Client.PostAsync("/Identity/Account/Login?ReturnUrl=%2FBasket%2FCheckout", loginFormContent, TestContext.Current.CancellationToken);
-        var loginStringResponse = await loginPostResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        //Basket checkout (Pay now)
-        var checkOutKeyValues = new List<KeyValuePair<string, string>>
-        {
-           new("Items[0].Id", "2"),
-           new("Items[0].Quantity", "1"),
-           new(WebPageHelpers.TokenTag, WebPageHelpers.GetRequestVerificationToken(loginStringResponse))
-        };
-        var checkOutContent = new FormUrlEncodedContent(checkOutKeyValues);
-        var checkOutResponse = await Client.PostAsync("/basket/checkout", checkOutContent, TestContext.Current.CancellationToken);
-        var stringCheckOutResponse = await checkOutResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var checkOutResponse = await PostFormAsync(client, "/basket/checkout", checkoutPage,
+            new("Items[0].Id", GetId(checkoutPage)),
+            new("Items[0].Quantity", "1"));
 
         Assert.Contains("/Basket/Success", checkOutResponse.RequestMessage!.RequestUri!.ToString());
-        Assert.Contains("Thanks for your Order!", stringCheckOutResponse);
+        Assert.Contains("Thanks for your Order!", await checkOutResponse.Content.ReadAsStringAsync(ct));
+    }
+
+    [Fact]
+    public async Task EmptiesBasketAfterSuccessfulCheckout()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var email = await CreateUserAsync(factory);
+        var client = factory.CreateClient(allowAutoRedirect: true);
+        await LoginAsync(client, email);
+        var basketPage = await AddItemToBasketAsync(client);
+
+        var checkOutResponse = await PostFormAsync(client, "/basket/checkout", basketPage,
+            new("Items[0].Id", GetId(basketPage)),
+            new("Items[0].Quantity", "1"));
+        Assert.Contains("Thanks for your Order!", await checkOutResponse.Content.ReadAsStringAsync(ct));
+
+        Assert.Contains("Basket is empty", await client.GetStringAsync("/basket", ct));
+    }
+
+    [Fact]
+    public async Task RedirectsToBasketWithoutPlacingOrderGivenEmptyBasket()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var email = await CreateUserAsync(factory);
+        var client = factory.CreateClient(allowAutoRedirect: true);
+        await LoginAsync(client, email);
+        var checkoutPage = await client.GetStringAsync("/basket/checkout", ct);
+
+        var response = await PostFormAsync(client, "/basket/checkout", checkoutPage);
+
+        Assert.Equal("/Basket", response.RequestMessage!.RequestUri!.AbsolutePath);
+        Assert.Contains("Basket is empty", await response.Content.ReadAsStringAsync(ct));
+        Assert.DoesNotContain("href=\"/order/detail/", await client.GetStringAsync("/order/my-orders", ct));
     }
 }

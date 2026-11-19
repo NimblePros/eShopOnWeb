@@ -17,4 +17,30 @@ public class BasketRemoveEmptyItems
         basket.RemoveEmptyItems();
         Assert.Empty(basket.Items);
     }
+
+    [Fact]
+    public void KeepsItemsThatStillHaveAQuantity()
+    {
+        var basket = new Basket(_buyerId);
+        basket.AddItem(_testCatalogItemId, _testUnitPrice, 0);
+        basket.AddItem(_testCatalogItemId + 1, _testUnitPrice, 2);
+
+        basket.RemoveEmptyItems();
+
+        var remaining = Assert.Single(basket.Items);
+        Assert.Equal(_testCatalogItemId + 1, remaining.CatalogItemId);
+        Assert.Equal(2, remaining.Quantity);
+    }
+
+    [Fact]
+    public void RemovesItemWhoseQuantityWasSetToZero()
+    {
+        var basket = new Basket(_buyerId);
+        basket.AddItem(_testCatalogItemId, _testUnitPrice, 3);
+        basket.Items.Single().SetQuantity(0);
+
+        basket.RemoveEmptyItems();
+
+        Assert.Empty(basket.Items);
+    }
 }

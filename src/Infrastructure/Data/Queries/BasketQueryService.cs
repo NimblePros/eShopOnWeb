@@ -15,7 +15,8 @@ public class BasketQueryService : IBasketQueryService
     }
 
     /// <summary>
-    /// This method performs the sum on the database rather than in memory
+    /// This method performs the sum on the database rather than in memory.
+    /// Lines whose catalog item no longer exists are not counted, matching the basket page.
     /// </summary>
     /// <param name="username"></param>
     /// <returns></returns>
@@ -24,6 +25,7 @@ public class BasketQueryService : IBasketQueryService
         var totalItems = await _dbContext.Baskets
             .Where(basket => basket.BuyerId == username)
             .SelectMany(item => item.Items)
+            .Where(basketItem => _dbContext.CatalogItems.Any(catalogItem => catalogItem.Id == basketItem.CatalogItemId))
             .SumAsync(sum => sum.Quantity);
 
         return totalItems;

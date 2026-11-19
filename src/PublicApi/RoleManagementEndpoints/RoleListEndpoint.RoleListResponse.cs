@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
 
@@ -14,5 +13,5 @@ public class RoleListResponse : BaseResponse
     {
     }
 
-    public List<IdentityRole> Roles { get; set; } = new List<IdentityRole>();
+    public List<RoleDto> Roles { get; set; } = [];
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,7 +24,7 @@ public class RoleListEndpoint(RoleManager<IdentityRole> roleManager) : EndpointW
     public override async Task<RoleListResponse> ExecuteAsync(CancellationToken ct)
     {
         var response = new RoleListResponse();
-        response.Roles = await roleManager.Roles.ToListAsync(ct);
+        response.Roles = await roleManager.Roles.Select(r => new RoleDto { Id = r.Id, Name = r.Name }).ToListAsync(ct);
         return response;
     }
 }

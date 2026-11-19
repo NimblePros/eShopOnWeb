@@ -39,7 +39,7 @@ public class CatalogItemListPagedEndpoint
         var totalItem = model!.CatalogItems.Count();
 
         var response2 = await client.GetAsync($"/api/catalog-items?pageSize={pageSize}&pageIndex={pageIndex}");
-        response.EnsureSuccessStatusCode();
+        response2.EnsureSuccessStatusCode();
         var stringResponse2 = await response2.Content.ReadAsStringAsync();
         var model2 = stringResponse2.FromJson<ListPagedCatalogItemResponse>();
 
@@ -85,6 +85,36 @@ public class CatalogItemListPagedEndpoint
         Assert.IsTrue(model!.CatalogItems.Count > 0);
         Assert.IsTrue(model.CatalogItems.Count <= ListPagedCatalogItemRequest.MaxPageSize);
         Assert.AreEqual(1, model.PageCount);
+    }
+
+    [TestMethod]
+    public async Task ReturnsEmptyPageGivenPageIndexPastTheLastPage()
+    {
+        var client = ProgramTest.NewClient;
+        var response = await client.GetAsync("/api/catalog-items?pageSize=10&pageIndex=1000");
+        response.EnsureSuccessStatusCode();
+        var model = (await response.Content.ReadAsStringAsync()).FromJson<ListPagedCatalogItemResponse>();
+
+        Assert.AreEqual(0, model!.CatalogItems.Count);
+    }
+
+    [TestMethod]
+    public async Task FiltersByBrandAndType()
+    {
+        var client = ProgramTest.NewClient;
+        var all = (await client.GetStringAsync("/api/catalog-items"))
+            .FromJson<ListPagedCatalogItemResponse>()!.CatalogItems;
+        var sample = all.First();
+
+        var filtered = (await client.GetStringAsync(
+                $"/api/catalog-items?catalogBrandId={sample.CatalogBrandId}&catalogTypeId={sample.CatalogTypeId}"))
+            .FromJson<ListPagedCatalogItemResponse>()!.CatalogItems;
+
+        Assert.IsTrue(filtered.Count > 0);
+        Assert.IsTrue(filtered.All(i => i.CatalogBrandId == sample.CatalogBrandId && i.CatalogTypeId == sample.CatalogTypeId));
+        Assert.AreEqual(
+            all.Count(i => i.CatalogBrandId == sample.CatalogBrandId && i.CatalogTypeId == sample.CatalogTypeId),
+            filtered.Count);
     }
 
     [TestMethod]

@@ -1,5 +1,5 @@
-﻿using Microsoft.eShopWeb.ApplicationCore.Entities;
-using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
+﻿using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
+using Microsoft.eShopWeb.UnitTests.Builders;
 using Xunit;
 
 namespace Microsoft.eShopWeb.UnitTests.ApplicationCore.Specifications;
@@ -51,9 +51,7 @@ public class CustomerOrderWithItemsByIdSpec
 
     private Order CreateOrder(int id, string buyerId)
     {
-        var order = new Order(buyerId, _shipToAddress,
-            [new OrderItem(new CatalogItemOrdered(id, $"Product{id}", "testurl"), 10.50m, 1)]);
-        typeof(BaseEntity).GetProperty(nameof(BaseEntity.Id))!.SetValue(order, id);
-        return order;
+        return new Order(buyerId, _shipToAddress,
+            [new OrderItem(new CatalogItemOrdered(id, $"Product{id}", "testurl"), 10.50m, 1)]).WithId(id);
     }
 }

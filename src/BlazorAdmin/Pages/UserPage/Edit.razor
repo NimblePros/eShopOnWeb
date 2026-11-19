@@ -8,7 +8,6 @@
 @namespace BlazorAdmin.Pages.UserPage
 @using BlazorAdmin.Interfaces
 @using BlazorAdmin.Models
-@using Microsoft.AspNetCore.Identity
 
 <div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
     <div class="modal-dialog" role="document">
@@ -134,7 +133,7 @@
 
     private Dictionary<string, bool> _selectedRoles = new();
     private Dictionary<string, bool> _startingRoles = new();
-    private List<IdentityRole> _roles;
+    private List<Role> _roles;
 
     private async Task SaveClick()
     {

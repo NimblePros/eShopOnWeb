@@ -28,20 +28,4 @@ public static class ApplicationUserExtensions
         }
         return dto;
     }
-
-    public static void FromUserDto(this ApplicationUser user, UserDto userChanges, bool copyId = true)
-    {
-        if (user != null)
-        {
-            if (copyId)
-                user.Id = userChanges.Id;
-            user.UserName = userChanges.UserName;
-            user.Email = userChanges.Email;
-            user.PhoneNumber = userChanges.PhoneNumber;
-            user.EmailConfirmed = userChanges.EmailConfirmed;
-            user.PhoneNumberConfirmed = userChanges.PhoneNumberConfirmed;
-            user.LockoutEnd = userChanges.LockoutEnd;
-
-        }
-    }
 }

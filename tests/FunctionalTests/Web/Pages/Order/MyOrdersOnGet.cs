@@ -4,8 +4,8 @@ using Xunit;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Order;
 
-[Collection("Sequential")]
-public class MyOrdersOnGet(TestApplication factory) : IClassFixture<TestApplication>
+[Collection(WebTestCollection.Name)]
+public class MyOrdersOnGet(TestApplication factory)
 {
     private readonly TestApplication _factory = factory;
 
@@ -80,11 +80,7 @@ public class MyOrdersOnGet(TestApplication factory) : IClassFixture<TestApplicat
     private static async Task<string> PlaceOrderAndGetDetailUrlAsync(HttpClient client)
     {
         var ct = TestContext.Current.CancellationToken;
-        var home = await client.GetStringAsync("/", ct);
-        var addResponse = await WebPageHelpers.PostFormAsync(client, "/basket/index", home,
-            new("id", "2"), new("name", "shirt"), new("price", "19.49"));
-        addResponse.EnsureSuccessStatusCode();
-        var basketPage = await addResponse.Content.ReadAsStringAsync(ct);
+        var basketPage = await WebPageHelpers.AddItemToBasketAsync(client);
 
         var checkoutResponse = await WebPageHelpers.PostFormAsync(client, "/basket/checkout", basketPage,
             new("Items[0].Id", WebPageHelpers.GetId(basketPage)), new("Items[0].Quantity", "1"));
