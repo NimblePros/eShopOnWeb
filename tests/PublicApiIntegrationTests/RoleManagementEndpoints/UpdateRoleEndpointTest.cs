@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BlazorShared.Authorization;
 using Microsoft.eShopWeb;
@@ -67,9 +68,14 @@ public class UpdateRoleEndpointTest
         var response = await client.PutAsync(Route, JsonContent.Create(request));
 
         response.EnsureSuccessStatusCode();
-        var updated = (await response.Content.ReadAsStringAsync()).FromJson<UpdateRoleResponse>()!.Role;
+        var responseJson = await response.Content.ReadAsStringAsync();
+        var updated = responseJson.FromJson<UpdateRoleResponse>()!.Role;
         Assert.AreEqual(roleId, updated.Id);
         Assert.AreEqual(request.Name, updated.Name);
+        using (var json = JsonDocument.Parse(responseJson))
+        {
+            RoleJsonAssert.HasOnlyRoleDtoFields(json.RootElement.GetProperty("role"));
+        }
 
         var getResponse = await client.GetAsync($"{Route}/{roleId}");
         getResponse.EnsureSuccessStatusCode();

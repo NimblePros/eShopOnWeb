@@ -38,6 +38,9 @@ public class CreateRoleEndpointTest
         Assert.IsNotNull(model);
         Assert.IsNotNull(model.Role);
         Assert.AreEqual(_testName, model.Role.Name);
+
+        using var json = JsonDocument.Parse(stringResponse);
+        RoleJsonAssert.HasOnlyRoleDtoFields(json.RootElement.GetProperty("role"));
     }
 
 

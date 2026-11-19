@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.eShopWeb;
 using Microsoft.eShopWeb.PublicApi.RoleManagementEndpoints;
@@ -40,5 +41,11 @@ public class RoleListEndpointTest
         Assert.IsNotNull(model);
         Assert.IsNotNull(model.Roles);
         Assert.IsTrue(model.Roles.Count > 0);
+
+        using var json = JsonDocument.Parse(stringResponse);
+        foreach (var role in json.RootElement.GetProperty("roles").EnumerateArray())
+        {
+            RoleJsonAssert.HasOnlyRoleDtoFields(role);
+        }
     }
 }
