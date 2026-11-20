@@ -8,36 +8,64 @@ on:
     types:
       - completed
 
+permissions:
+  actions: read
+  pull-requests: write
+
 jobs:
   comment:
     runs-on: ubuntu-latest
 
-    # Only comment on the PR if this is a PR event
-    if: github.event.workflow_run.event == 'pull_request'
+    # Only comment on the PR if this is a PR event. A cancelled build (superseded by a newer
+    # push, see the concurrency group in dotnetcore.yml) has no artifacts to read.
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
 
     steps:
+      # Downloads come from the exact run that triggered this workflow. The artifacts were
+      # produced by untrusted PR code, so they are only read as data, never executed.
     - name: Get the PR Number artifact
-      uses: dawidd6/action-download-artifact@v6
+      uses: actions/download-artifact@v8
       with:
-        workflow: ${{ github.event.workflow_run.workflow_id }}
-        workflow_conclusion: ""
         name: pr-number
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Read PR Number into GitHub environment variables
-      run: echo "PR_NUMBER=$(cat pr-number.txt)" >> $GITHUB_ENV
-
-    - name: Confirm the PR Number (Debugging)
-      run: echo $PR_NUMBER
+      # The PR build writes pr-number.txt, so a fork PR controls its contents. Accept the number
+      # only if it is numeric and that PR's head commit is the commit the build ran on. A
+      # mismatch also happens when a newer push lands before this runs; that push's own build
+      # will post the comment, so skip rather than fail.
+    - name: Read and verify the PR Number
+      id: pr
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: |
+        PR_NUMBER=$(cat pr-number.txt)
+        if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+          echo "pr-number.txt does not contain a PR number" >&2
+          exit 1
+        fi
+        PR_HEAD_SHA=$(gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER" --jq .head.sha)
+        if [ "$PR_HEAD_SHA" != "$RUN_HEAD_SHA" ]; then
+          echo "::notice::PR #$PR_NUMBER head is $PR_HEAD_SHA, but the build ran on $RUN_HEAD_SHA. Skipping the coverage comment."
+          echo "verified=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        echo "Commenting on PR #$PR_NUMBER"
+        echo "PR_NUMBER=$PR_NUMBER" >> "$GITHUB_ENV"
+        echo "verified=true" >> "$GITHUB_OUTPUT"
 
     - name: Get the code coverage results file
-      uses: dawidd6/action-download-artifact@v6
+      if: steps.pr.outputs.verified == 'true'
+      uses: actions/download-artifact@v8
       with:
-        workflow: ${{ github.event.workflow_run.workflow_id }}
-        workflow_conclusion: ""
         name: code-coverage-results
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add Coverage PR Comment
-      uses: marocchino/sticky-pull-request-comment@v2
+      if: steps.pr.outputs.verified == 'true'
+      uses: marocchino/sticky-pull-request-comment@v3
       with:
         number: ${{ env.PR_NUMBER }}
         recreate: true

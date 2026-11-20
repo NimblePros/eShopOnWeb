@@ -7,6 +7,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
@@ -19,9 +22,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: '11.0.x'
 
@@ -56,7 +59,7 @@ jobs:
         cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
 
     - name: Upload code coverage HTML report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: success() || failure()
       with:
         name: code-coverage-report
@@ -64,7 +67,7 @@ jobs:
         retention-days: 7
 
     - name: Upload code coverage results artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: success() || failure()
       with:
         name: code-coverage-results
@@ -79,7 +82,7 @@ jobs:
       run: echo $PR_NUMBER > pr-number.txt
   
     - name: Upload the PR number
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: github.event_name == 'pull_request' &&  (success() || failure())
       with:
         name: pr-number
