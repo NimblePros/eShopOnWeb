@@ -22,7 +22,7 @@ public static class SqlServerSchema
         WHERE t.name <> '__EFMigrationsHistory'
         """;
 
-    // DEFAULT stays last on each column line: the drift test matches known defaults by suffix.
+    // DEFAULT stays last on each column line, so a test can read a column's default by suffix.
     private const string ColumnsQuery = """
         SELECT CONCAT(t.name, '.', c.name, ': ', ty.name COLLATE DATABASE_DEFAULT,
             '(', c.max_length, ',', c.precision, ',', c.scale, ')',
