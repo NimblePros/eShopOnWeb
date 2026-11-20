@@ -9,7 +9,7 @@ namespace Microsoft.eShopWeb.FunctionalTests.Web.Pages.Basket;
 public class BasketCookieTest(TestApplication factory)
 {
     [Fact]
-    public async Task IssuesHttpOnlySecureStrictCookieForAnonymousBasket()
+    public async Task IssuesHttpOnlySecureLaxCookieForAnonymousBasket()
     {
         var client = factory.CreateClient(allowAutoRedirect: false);
 
@@ -21,8 +21,8 @@ public class BasketCookieTest(TestApplication factory)
         Assert.True(Guid.TryParse(attributes[0][(Constants.BASKET_COOKIENAME.Length + 1)..], out _), setCookie);
         Assert.Contains("httponly", attributes, StringComparer.OrdinalIgnoreCase);
         Assert.Contains("secure", attributes, StringComparer.OrdinalIgnoreCase);
-        // The cookie policy's MinimumSameSitePolicy raises the cookie's own Lax to Strict.
-        Assert.Contains("samesite=strict", attributes, StringComparer.OrdinalIgnoreCase);
+        // Lax, so the cookie is still sent when a shopper follows a link from another site.
+        Assert.Contains("samesite=lax", attributes, StringComparer.OrdinalIgnoreCase);
         Assert.Contains(attributes, a => a.StartsWith("expires=", StringComparison.OrdinalIgnoreCase));
     }
 

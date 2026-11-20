@@ -12,7 +12,10 @@ public static class ConfigureCookieSettings
             // This lambda determines whether user consent for non-essential cookies is needed for a given request.
             //TODO need to check that.
             //options.CheckConsentNeeded = context => true;
-            options.MinimumSameSitePolicy = SameSiteMode.Strict;
+            // Lax, not Strict: Strict would withhold the basket cookie when a shopper follows a link
+            // from another site. Cookies that need Strict (sign-in, antiforgery) set it themselves.
+            // See docs/decisions/2026-11-19-cookie-samesite-policy.md.
+            options.MinimumSameSitePolicy = SameSiteMode.Lax;
         });
         services.ConfigureApplicationCookie(options =>
         {

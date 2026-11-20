@@ -40,7 +40,8 @@ public static class BasketCookie
         Expires = DateTimeOffset.UtcNow.AddYears(10),
         HttpOnly = true,
         Secure = true,
-        // The cookie policy raises this to Strict (see ConfigureCookieSettings); Lax is the floor.
+        // Lax so the basket survives a shopper following a link from another site. Strict would
+        // hide the cookie on that first request. See docs/decisions/2026-11-19-cookie-samesite-policy.md.
         SameSite = SameSiteMode.Lax,
         // The basket can't work without it, so it doesn't wait for cookie consent.
         IsEssential = true,

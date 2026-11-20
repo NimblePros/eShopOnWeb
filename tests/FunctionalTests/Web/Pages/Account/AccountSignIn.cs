@@ -89,6 +89,19 @@ public class AccountSignIn(TestApplication factory)
         Assert.Contains("samesite=strict", attributes);
     }
 
+    [Fact]
+    public async Task IssuesStrictAntiforgeryCookieOnSignInPage()
+    {
+        var response = await Client.GetAsync("/identity/account/login", TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        // The cookie policy's minimum is Lax, so Strict here comes from the antiforgery cookie's own default.
+        Assert.True(response.Headers.TryGetValues("Set-Cookie", out var setCookies));
+        var antiforgeryCookie = Assert.Single(setCookies, c => c.StartsWith(".AspNetCore.Antiforgery.", StringComparison.Ordinal));
+        var attributes = antiforgeryCookie.Split(';').Skip(1).Select(a => a.Trim().ToLowerInvariant()).ToList();
+        Assert.Contains("samesite=strict", attributes);
+    }
+
     private static bool IssuesAuthCookie(HttpResponseMessage response) =>
         response.Headers.TryGetValues("Set-Cookie", out var setCookies)
         && setCookies.Any(c => c.StartsWith($"{AuthCookieName}=", StringComparison.Ordinal));
