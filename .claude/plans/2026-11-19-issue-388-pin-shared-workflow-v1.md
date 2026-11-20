@@ -14,8 +14,8 @@ Blocked by NimblePros/NimblePros.GitHub.Workflows#6 (closed by NimblePros/Nimble
 
 ## Phase 2: Wait for the tag
 
-- [ ] The `v1.0.0` release has been published on NimblePros.GitHub.Workflows and the `v1` tag exists.
-- [ ] Mark the PR ready for review.
+- [x] The `v1.0.0` release has been published on NimblePros.GitHub.Workflows (2026-11-20T03:12Z). Its "Move Major Version Tag" run succeeded, and `v1` now points at `ca79931`, the same commit as `v1.0.0` and `main`.
+- [x] Mark the PR ready for review.
 
 ## Automated test requirements
 
