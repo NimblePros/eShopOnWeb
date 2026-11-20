@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web.Extensions;
 
@@ -10,7 +11,8 @@ namespace Microsoft.eShopWeb.Web.Pages.Manage;
 
 [Authorize]
 public class SetPasswordModel(UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager) : PageModel
+    SignInManager<ApplicationUser> signInManager,
+    IAppLogger<SetPasswordModel> logger) : PageModel
 {
     [BindProperty]
     [Required]
@@ -52,10 +54,12 @@ public class SetPasswordModel(UserManager<ApplicationUser> userManager,
         var addPasswordResult = await userManager.AddPasswordAsync(user, NewPassword!);
         if (!addPasswordResult.Succeeded)
         {
+            logger.LogWarning("Setting a password failed for user with ID {UserId}.", user.Id);
             ModelState.AddIdentityErrors(addPasswordResult);
             return Page();
         }
 
+        logger.LogInformation("User with ID {UserId} set a password.", user.Id);
         await signInManager.SignInAsync(user, isPersistent: false);
         StatusMessage = "Your password has been set.";
 

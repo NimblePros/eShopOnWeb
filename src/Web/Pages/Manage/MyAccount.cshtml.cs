@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web.Extensions;
 using Microsoft.eShopWeb.Web.Interfaces;
@@ -11,7 +12,8 @@ namespace Microsoft.eShopWeb.Web.Pages.Manage;
 
 [Authorize]
 public class MyAccountModel(UserManager<ApplicationUser> userManager,
-    IEmailVerificationService emailVerificationService) : PageModel
+    IEmailVerificationService emailVerificationService,
+    IAppLogger<MyAccountModel> logger) : PageModel
 {
     public string? Username { get; private set; }
 
@@ -52,8 +54,10 @@ public class MyAccountModel(UserManager<ApplicationUser> userManager,
             var setEmailResult = await userManager.SetEmailAsync(user, Email);
             if (!setEmailResult.Succeeded)
             {
+                logger.LogWarning("Changing the email failed for user with ID {UserId}.", user.Id);
                 throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
             }
+            logger.LogInformation("User with ID {UserId} changed their email.", user.Id);
         }
 
         if (PhoneNumber != user.PhoneNumber)
@@ -61,8 +65,10 @@ public class MyAccountModel(UserManager<ApplicationUser> userManager,
             var setPhoneResult = await userManager.SetPhoneNumberAsync(user, PhoneNumber);
             if (!setPhoneResult.Succeeded)
             {
+                logger.LogWarning("Changing the phone number failed for user with ID {UserId}.", user.Id);
                 throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
             }
+            logger.LogInformation("User with ID {UserId} changed their phone number.", user.Id);
         }
 
         StatusMessage = "Your profile has been updated";

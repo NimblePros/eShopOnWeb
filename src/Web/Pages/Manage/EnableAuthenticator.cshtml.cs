@@ -53,6 +53,7 @@ public class EnableAuthenticatorModel(UserManager<ApplicationUser> userManager,
 
         if (!is2faTokenValid)
         {
+            logger.LogWarning("User with ID {UserId} entered an invalid authenticator verification code.", user.Id);
             ModelState.AddModelError(nameof(Code), "Verification code is invalid.");
             await LoadSharedKeyAndQrCodeUriAsync(user);
             return Page();
