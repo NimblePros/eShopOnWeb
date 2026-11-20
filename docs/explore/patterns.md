@@ -38,6 +38,13 @@ Some parts of the application use the [mediator design pattern](https://deviq.co
 
 The [Repository pattern](https://deviq.com/design-patterns/repository-pattern) enables loose coupling and persistence ignorance. This pattern is seen in eShopOnWeb whenever we need to deal with something from a data store - getting items, adding items, deleting items, and updating items. As eShopOnWeb uses Entity Framework Core, that data store implementation might be a SQL Server-based database because of how it is configured currently. You could switch the underlying data store to something else - such as Postgres or even file-based. Regardless of how you store the data, the way you work with a `Basket`, `CatalogItem`, `Order`, or `CatalogBrand` remains the same.
 
+eShopOnWeb does not hand-roll its repository. It uses the [Ardalis.Specification](https://www.nuget.org/packages/Ardalis.Specification) package, plus [Ardalis.Specification.EntityFrameworkCore](https://www.nuget.org/packages/Ardalis.Specification.EntityFrameworkCore) for the EF Core implementation:
+
+* `IRepository<T>` and `IReadRepository<T>` in `src/ApplicationCore/Interfaces` are empty interfaces that inherit from the package's `IRepositoryBase<T>` and `IReadRepositoryBase<T>`. All of their methods come from the package.
+* `EfRepository<T>` in `src/Infrastructure/Data` inherits from the package's `RepositoryBase<T>` and only supplies the `CatalogContext`.
+
+The thin wrapper interfaces exist for one reason: they add a `where T : class, IAggregateRoot` constraint. That way the application can only get repositories for aggregate roots (such as `Basket`, `Order` and `CatalogItem`), not for child entities like `BasketItem` or `OrderItem`, which supports the [Aggregates](#aggregates) rules below. Having the interfaces in ApplicationCore also means application code depends on an abstraction it owns rather than directly on the package's types.
+
 ## Specification
 
 The [Specification design pattern](https://deviq.com/design-patterns/specification-pattern) encapsulates query details in separate classes as part of the domain model. This pattern can be used to solve the following problems:
@@ -51,9 +58,15 @@ A common problem in applications that leverage the repository pattern, especiall
 
 Using the Specification design pattern and a generic repository that accepts specifications as a means of describing queries typically eliminates this problem completely. In addition to resulting in less code overall, the pattern helps the data access portions of the application to better follow the [SOLID principles](https://deviq.com/principles/solid) of Single Responsibility and Open-Closed. Repositories no longer are responsible for communicating with a data technology and formulating specific kinds of queries. And the addition of new queries no longer requires modifying existing data access code, but instead can be achieved purely by adding a new specification class.
 
+eShopOnWeb's specifications live in `src/ApplicationCore/Specifications` (for example, `BasketWithItemsSpecification`). They inherit from `Specification<T>` in the [Ardalis.Specification](https://www.nuget.org/packages/Ardalis.Specification) package, and the generic repository described above evaluates them.
+
 ## Guard Clauses
 
-TBD
+[Guard clauses](https://deviq.com/design-patterns/guard-clause) check a method's inputs up front and fail fast when they are invalid, so the rest of the method doesn't have to deal with bad values. eShopOnWeb uses the [Ardalis.GuardClauses](https://www.nuget.org/packages/Ardalis.GuardClauses) package for this. Entities use it to protect their invariants; for example, `BasketItem` calls `Guard.Against.OutOfRange` to reject invalid quantities.
+
+## Other Ardalis packages
+
+The Web project also uses [Ardalis.ListStartupServices](https://www.nuget.org/packages/Ardalis.ListStartupServices) to show every registered service at `/allservices` in Development and Docker environments, which helps with troubleshooting dependency injection.
 
 ## Result
 
