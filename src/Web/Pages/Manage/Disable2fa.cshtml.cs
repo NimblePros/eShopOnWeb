@@ -32,6 +32,7 @@ public class Disable2faModel(UserManager<ApplicationUser> userManager,
         var disable2faResult = await userManager.SetTwoFactorEnabledAsync(user, false);
         if (!disable2faResult.Succeeded)
         {
+            logger.LogWarning("Disabling 2FA failed for user with ID {UserId}.", user.Id);
             throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
         }
 

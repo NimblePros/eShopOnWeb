@@ -6,6 +6,7 @@ using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.eShopWeb.Web.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.eShopWeb.FunctionalTests.Web;
 
@@ -18,6 +19,9 @@ public class TestApplication : WebApplicationFactory<IBasketViewModelService>
     public static readonly Uri HttpsBaseAddress = new("https://localhost");
 
     private readonly string _environment = "Development";
+
+    /// <summary>Every log entry the app has written, for tests that check an operation is logged.</summary>
+    public CapturingLoggerProvider Logs { get; } = new();
 
     public TestApplication()
     {
@@ -49,6 +53,11 @@ public class TestApplication : WebApplicationFactory<IBasketViewModelService>
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.UseEnvironment(_environment);
+        builder.ConfigureLogging(logging => logging
+            .AddProvider(Logs)
+            .AddFilter<CapturingLoggerProvider>("Microsoft.eShopWeb", LogLevel.Information)
+            .AddFilter<CapturingLoggerProvider>("Microsoft", LogLevel.Warning)
+            .AddFilter<CapturingLoggerProvider>("System", LogLevel.Warning));
 
         // Add mock/test services to the builder here
         builder.ConfigureServices(services =>

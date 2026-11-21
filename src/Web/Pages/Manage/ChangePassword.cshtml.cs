@@ -60,12 +60,13 @@ public class ChangePasswordModel(UserManager<ApplicationUser> userManager,
         var changePasswordResult = await userManager.ChangePasswordAsync(user, OldPassword!, NewPassword!);
         if (!changePasswordResult.Succeeded)
         {
+            logger.LogWarning("Changing the password failed for user with ID {UserId}.", user.Id);
             ModelState.AddIdentityErrors(changePasswordResult);
             return Page();
         }
 
+        logger.LogInformation("User with ID {UserId} changed their password.", user.Id);
         await signInManager.SignInAsync(user, isPersistent: false);
-        logger.LogInformation("User changed their password successfully.");
         StatusMessage = "Your password has been changed.";
 
         return RedirectToPage();
