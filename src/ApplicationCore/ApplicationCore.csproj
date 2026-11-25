@@ -10,7 +10,7 @@
 		<PackageReference Include="Ardalis.Result" />
 		<PackageReference Include="Ardalis.Specification" />
     <PackageReference Include="Mediator.Abstractions" />
-    <PackageReference Include="NimblePros.SharedKernel" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
 	</ItemGroup>
 
 	<ItemGroup>
